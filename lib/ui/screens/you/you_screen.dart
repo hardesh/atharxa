@@ -8,7 +8,10 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import 'appearance_page.dart';
+import 'body_stats_page.dart';
 import 'device_sync_page.dart';
+import 'goals_page.dart';
 
 /// A section of You: hub row + its page.
 class YouSection {
@@ -21,13 +24,13 @@ class YouSection {
 }
 
 final youSections = <YouSection>[
-  const YouSection('goals', 'Goals', Icons.flag_outlined, null),
-  const YouSection('appearance', 'Appearance', Icons.palette_outlined, null),
+  YouSection('goals', 'Goals', Icons.flag_outlined, (_) => const GoalsPage()),
+  YouSection('appearance', 'Appearance', Icons.palette_outlined, (_) => const AppearancePage()),
   const YouSection('reminders', 'Reminders', Icons.notifications_none, null),
   YouSection('sync', 'Device sync', Icons.sync, (_) => const DeviceSyncPage()),
   const YouSection('services', 'Connected services', Icons.link, null),
   const YouSection('ai', 'AI models', Icons.auto_awesome_outlined, null),
-  const YouSection('body', 'Body stats', Icons.monitor_weight_outlined, null),
+  YouSection('body', 'Body stats', Icons.monitor_weight_outlined, (_) => const BodyStatsPage()),
   const YouSection('data', 'Data and backup', Icons.backup_outlined, null),
   const YouSection('about', 'About', Icons.info_outline, null),
 ];
@@ -46,6 +49,14 @@ String? _summary(String id, WidgetRef ref) {
       final (enabled, last) = ref.watch(syncControllerProvider.select((s) => (s.enabled, s.lastSync)));
       if (!enabled) return 'Off';
       return last == null ? 'On · not paired yet' : 'On · synced ${fmtWhen(last)}';
+    case 'body':
+      final b = ref.watch(syncedSettingsProvider.select((s) => s.body));
+      if (b.heightCm == null && b.weightKg == null) return 'Height, weight, activity';
+      return [
+        if (b.heightCm != null) '${fmtInt(b.heightCm!)} cm',
+        if (b.weightKg != null) '${fmtGrams(b.weightKg!)} kg',
+        b.activity.label,
+      ].join(' · ');
     case 'about':
       return AppInfo.name;
     default:

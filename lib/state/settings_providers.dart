@@ -20,12 +20,14 @@ class SyncedSettings {
     this.goals = const Goals(),
     this.currency = 'INR',
     this.profileName = '',
+    this.body = const BodyStats(),
   });
 
   final AppPalette palette;
   final Goals goals;
   final String currency;
   final String profileName;
+  final BodyStats body;
 
   String get initial {
     final n = profileName.trim();
@@ -39,6 +41,17 @@ class SyncedSettings {
       palette: AppPalette.parse(await db.getPref('theme')),
       currency: await db.getPref('currency_default') ?? 'INR',
       profileName: await db.getPref('profile_name') ?? '',
+      body: BodyStats(
+        heightCm: double.tryParse(await db.getPref('body_height') ?? ''),
+        weightKg: double.tryParse(await db.getPref('body_weight') ?? ''),
+        birthYear: int.tryParse(await db.getPref('body_birth_year') ?? ''),
+        sex: switch (await db.getPref('body_sex')) {
+          'male' => Sex.male,
+          'female' => Sex.female,
+          _ => null,
+        },
+        activity: ActivityLevel.parse(await db.getPref('body_activity')),
+      ),
       goals: Goals(
         kcal: d(await db.getPref('goal_kcal'), g.kcal),
         waterMl: d(await db.getPref('goal_water'), g.waterMl.toDouble()).round(),
@@ -75,6 +88,15 @@ class SyncedSettingsNotifier extends Notifier<SyncedSettings> {
   Future<void> setPalette(AppPalette p) => _db.setPref('theme', p.name);
   Future<void> setCurrency(String code) => _db.setPref('currency_default', code);
   Future<void> setProfileName(String name) => _db.setPref('profile_name', name.trim());
+
+  Future<void> setBodyStats(BodyStats b) async {
+    Future<void> put(String key, Object? v) => _db.setPref(key, v == null ? '' : '$v');
+    await put('body_height', b.heightCm);
+    await put('body_weight', b.weightKg);
+    await put('body_birth_year', b.birthYear);
+    await put('body_sex', b.sex?.name);
+    await put('body_activity', b.activity.name);
+  }
 
   Future<void> setGoals(Goals g) async {
     await _db.setPref('goal_kcal', '${g.kcal}');

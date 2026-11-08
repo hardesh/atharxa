@@ -22,20 +22,26 @@ class DateSwitcher extends StatelessWidget {
             icon: const Icon(Icons.chevron_left),
             onPressed: () => onChanged(date.subtract(const Duration(days: 1))),
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.cs.onSurface),
-            onPressed: () async {
-              final d = await showDatePicker(
-                context: context,
-                initialDate: date,
-                firstDate: DateTime(2020),
-                lastDate: DateTime(2100),
-              );
-              if (d != null) onChanged(d);
-            },
-            child: Text(
-              relativeDay(date),
-              style: context.tt.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+          Flexible(
+            child: TextButton(
+              style: TextButton.styleFrom(foregroundColor: context.cs.onSurface),
+              onPressed: () async {
+                final d = await showDatePicker(
+                  context: context,
+                  initialDate: date,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (d != null) onChanged(d);
+              },
+              // Scales down rather than overflowing at large text on narrow phones.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  relativeDay(date),
+                  style: context.tt.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
+              ),
             ),
           ),
           IconButton(
@@ -69,9 +75,14 @@ class MonthSwitcher extends StatelessWidget {
             icon: const Icon(Icons.chevron_left),
             onPressed: () => onChanged(DateTime(month.year, month.month - 1)),
           ),
-          Text(
-            DateFormat('MMMM yyyy').format(month),
-            style: context.tt.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                DateFormat('MMMM yyyy').format(month),
+                style: context.tt.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+            ),
           ),
           IconButton(
             tooltip: 'Next month',

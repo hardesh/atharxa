@@ -136,3 +136,59 @@ class Goals {
   final double kcal, protein, carbs, fiber, fat;
   final int waterMl;
 }
+
+enum Sex { female, male }
+
+/// Activity level → multiplier on BMR (common TDEE factors).
+enum ActivityLevel {
+  sedentary('Sedentary', 'Little or no exercise', 1.2),
+  light('Light', 'Exercise 1–3 days a week', 1.375),
+  moderate('Moderate', 'Exercise 3–5 days a week', 1.55),
+  active('Active', 'Exercise 6–7 days a week', 1.725),
+  veryActive('Very active', 'Hard exercise or a physical job', 1.9);
+
+  const ActivityLevel(this.label, this.description, this.factor);
+  final String label, description;
+  final double factor;
+
+  static ActivityLevel parse(String? v) =>
+      ActivityLevel.values.firstWhere((a) => a.name == v, orElse: () => ActivityLevel.light);
+}
+
+/// Body stats (synced). All optional until the user fills them in.
+class BodyStats {
+  const BodyStats({this.heightCm, this.weightKg, this.birthYear, this.sex, this.activity = ActivityLevel.light});
+
+  final double? heightCm, weightKg;
+  final int? birthYear;
+  final Sex? sex;
+  final ActivityLevel activity;
+
+  bool get complete => heightCm != null && weightKg != null && birthYear != null && sex != null;
+
+  int? ageAt(DateTime now) => birthYear == null ? null : now.year - birthYear!;
+
+  /// Daily goals from Mifflin–St Jeor BMR × activity, with protein 1.6 g/kg,
+  /// fat 25 % of energy, carbs the rest, fiber 14 g per 1,000 kcal and
+  /// water 35 ml/kg. Values are rounded to friendly steps. Null until
+  /// [complete].
+  Goals? suggestGoals({DateTime? now}) {
+    if (!complete) return null;
+    final w = weightKg!, h = heightCm!, age = ageAt(now ?? DateTime.now())!;
+    final bmr = 10 * w + 6.25 * h - 5 * age + (sex == Sex.male ? 5 : -161);
+    final kcal = _round(bmr * activity.factor, 50);
+    final protein = _round(1.6 * w, 5);
+    final fat = _round(kcal * 0.25 / 9, 5);
+    final carbs = _round((kcal - protein * 4 - fat * 9) / 4, 5);
+    return Goals(
+      kcal: kcal,
+      waterMl: _round(35 * w, 250).round(),
+      protein: protein,
+      carbs: carbs,
+      fiber: _round(kcal / 1000 * 14, 1),
+      fat: fat,
+    );
+  }
+
+  static double _round(double v, double step) => (v / step).round() * step;
+}

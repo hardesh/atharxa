@@ -133,6 +133,33 @@ void main() {
         await step(tester);
       });
 
+      testWidgets('You › Goals, Appearance, Body stats · $label', (tester) async {
+        setSize(tester, size);
+        final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': scale})))!;
+        await tester.runAsync(() => seed(t));
+        await tester.pumpWidget(t.app);
+        await settle(tester);
+        for (final section in ['Goals', 'Appearance', 'Body stats']) {
+          if (find.byType(NavigationRail).evaluate().isNotEmpty) {
+            await goTo(tester, 'You');
+          } else {
+            await tester.tap(find.descendant(of: find.byType(AppTopBar), matching: find.byType(CircleAvatar)));
+            await step(tester);
+          }
+          await tester.tap(find.text(section).first);
+          await step(tester);
+          final scrollable = find.byType(Scrollable).last;
+          for (var i = 0; i < 4; i++) {
+            await tester.drag(scrollable, const Offset(0, -500), warnIfMissed: false);
+            await step(tester);
+          }
+          while (find.byType(BackButton).evaluate().isNotEmpty) {
+            await tester.pageBack();
+            await step(tester);
+          }
+        }
+      });
+
       testWidgets('You hub + device sync · $label', (tester) async {
         setSize(tester, size);
         final t = (await tester.runAsync(

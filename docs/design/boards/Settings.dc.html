@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>You — profile and settings</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2228px; height: 3040px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · You — profile and settings (tap the avatar)</p>
+<div class="ph" style="height: 2900px">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back to Today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">You</h1><button class="ib" style="width: 44px; height: 44px; border-radius: 22px; background: var(--pri); color: var(--onpri); margin-right: 4px" aria-label="Ask AI"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg></button></header>
+<div class="scr" style="gap: 8px">
+
+<section class="card row" style="gap: 14px; flex: none"><span class="av" style="width: 56px; height: 56px; border-radius: 28px; background: var(--secc); color: var(--onsecc); font-size: 22px; font-weight: 500">H</span><div style="flex: 1"><p class="t2">Harshal</p><p class="sm">Name and photo · this device: Android phone</p></div><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></section>
+<section class="card" style="padding: 0 16px; flex: none">
+<button class="li it" style="flex-direction: row; width: 100%"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">Body stats</span><span class="sm">Height, weight, activity level · suggests your goals</span></span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+<button class="li it ln" style="flex-direction: row; width: 100%"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">Data and backup</span><span class="sm">Export everything, restore from a file</span></span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+</section>
+<div class="row sb"><h2 class="sec">Goals</h2><span class="tag" style="background: var(--secc); color: var(--onsecc)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.sync}}"></path></svg>Synced between devices</span></div>
+<section class="card" style="padding: 0 16px">
+<sc-for list="{{goals}}" as="g" hint-placeholder-count="5"><button class="li it ln" style="flex-direction: row; width: 100%; border-top-color: {{g.top}}"><span class="bd" style="flex: 1">{{g.n}}</span><span class="bd num" style="color: var(--onv)">{{g.v}}</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button></sc-for>
+</section>
+
+<div class="row sb" style="margin-top: 8px"><h2 class="sec">Reminders</h2><span class="tag" style="background: var(--sc3); color: var(--onv)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.phone}}"></path></svg>This device only</span></div>
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<div class="row sb"><div><p class="t2">Water reminder</p><p class="sm">Every 2 hours, 08:00–22:00</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Water reminder"><span></span></button></div>
+<div class="row" style="flex-wrap: wrap"><span class="sm" style="width: 56px">Every</span><button class="chip sel">2 hours<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button></div>
+<div class="row"><span class="sm" style="width: 56px">Between</span><button class="chip"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.clock}}"></path></svg>08:00</button><span class="sm">and</span><button class="chip"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.clock}}"></path></svg>22:00</button></div>
+</section>
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<div class="row sb"><div><p class="t2">Calorie reminder</p><p class="sm">Nudge to log meals at set times</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Calorie reminder"><span></span></button></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{times}}" as="t" hint-placeholder-count="3"><span class="chip" style="padding-right: 4px">{{t}}<button class="ib" style="width: 24px; height: 24px" aria-label="Remove {{t}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px"><path d="{{ic.x}}"></path></svg></button></span></sc-for>
+<button class="chip" style="border-style: dashed"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add time</button>
+</div>
+</section>
+<section class="card" style="display: flex; flex-direction: column; gap: 10px">
+<div class="row sb"><div><p class="t2">Meal reminders</p><p class="sm">One nudge per meal, to help you eat enough</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Meal reminders"><span></span></button></div>
+<sc-for list="{{mealRem}}" as="m" hint-placeholder-count="4"><div class="row sb ln" style="padding-top: 8px"><span class="bd">{{m.n}}</span><div class="row" style="gap: 8px"><button class="chip"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.clock}}"></path></svg>{{m.t}}</button><button class="{{m.cls}}" role="switch" aria-checked="{{m.on}}" aria-label="{{m.n}} reminder"><span></span></button></div></div></sc-for>
+<div class="row sb ln" style="padding-top: 8px; gap: 12px"><p class="bd">Skip if that meal is already logged</p><button class="sw on" role="switch" aria-checked="true" aria-label="Skip if logged"><span></span></button></div>
+<div class="row sb" style="gap: 12px"><p class="bd">Show kcal still to eat and the planned meal</p><button class="sw on" role="switch" aria-checked="true" aria-label="Show kcal and plan"><span></span></button></div>
+</section>
+<button class="btn ou" style="align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.bell}}"></path></svg>Send test notification</button>
+
+<div class="row sb" style="margin-top: 8px"><h2 class="sec">Device sync</h2><span class="tag" style="background: var(--sc3); color: var(--onv)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.wifi}}"></path></svg>Local Wi-Fi, no cloud</span></div>
+<section class="card" style="display: flex; flex-direction: column; gap: 16px">
+<div class="row sb"><div><p class="t2">Sync with my devices</p><p class="sm">Goals, food log, meal plans, foods, transactions</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Device sync"><span></span></button></div>
+<div class="fld" style="background: var(--sc1)"><label for="dn">This device’s name</label><input id="dn" type="text" value="Android phone"></div>
+<div><div class="fld" style="background: var(--sc1)"><label for="pc">Pairing code</label><input id="pc" type="text" value="482 913" style="letter-spacing: 2px"><button class="ib" aria-label="Copy code" style="width: 32px; height: 32px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.copy}}"></path></svg></button></div><p class="hint">Must be the same on every device you sync</p></div>
+<p class="sm num">This device: <b style="color: var(--on); font-weight: 500">192.168.1.23</b> · port 47811</p>
+</section>
+<section class="card" style="padding: 8px 16px">
+<div class="row sb" style="padding-top: 4px"><h3 class="t3">On this network</h3><span class="sm row" style="gap: 4px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.wifi}}"></path></svg>Searching…</span></div>
+<sc-for list="{{devs}}" as="d" hint-placeholder-count="2">
+<div class="li ln" style="gap: 12px; align-items: flex-start"><span class="av" style="background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{d.ic}}"></path></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 4px"><span class="bd">{{d.n}}</span><span class="sm num">{{d.ip}}</span><span class="tag" style="align-self: flex-start; background: {{d.bg}}; color: {{d.fg}}">{{d.st}}</span><span class="sm" style="color: var(--err)">{{d.err}}</span></span></div>
+</sc-for>
+<button class="btn tx" style="padding: 0 4px; margin: 4px 0"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add device by IP</button>
+</section>
+<section class="card row sb" style="background: var(--pric); color: var(--onpric)">
+<div><p class="t3">Last sync today, 13:12</p><p class="bd num">Sent 4, received 12</p></div>
+<button class="btn"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg>Sync now</button>
+</section>
+
+<div class="row sb" style="margin-top: 8px"><h2 class="sec" style="margin: 0">Appearance</h2><span class="tag" style="background: var(--secc); color: var(--onsecc)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.sync}}"></path></svg>Synced between devices</span></div>
+<section class="card" style="display: flex; flex-direction: column; gap: 14px">
+<p class="t3">Theme</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="3"><button class="it" role="radio" aria-checked="{{t.on}}" style="align-items: center; gap: 6px; padding: 12px 0; border-radius: 16px; border: {{t.bd}}; background: var(--bg)"><span style="width: 44px; height: 44px; border-radius: 22px; background: {{t.sw}}"></span><span class="t3">{{t.n}}</span><span class="sm">{{t.d}}</span></button></sc-for>
+</div>
+<p class="t3">Mode</p>
+<div class="seg" style="grid-template-columns: repeat(3, minmax(0, 1fr))"><button class="on">System</button><button>Light</button><button>Dark</button></div>
+<p class="t3">Text size</p>
+<div class="row" style="flex-wrap: wrap; gap: 8px"><button class="chip">100%</button><button class="chip">115%</button><button class="chip sel">130% · default</button><button class="chip">150%</button></div>
+<p class="sm">Theme syncs to your other devices. Mode and text size stay per device; the Mac defaults to 100%.</p>
+</section>
+<h2 class="sec" style="margin-top: 8px">Connected services</h2>
+<section class="card" style="padding: 0 16px">
+<button class="li it" style="flex-direction: row; width: 100%"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">Strava</span><span class="sm">Import runs and rides, upload workouts</span></span><span class="tag" style="background: var(--okc); color: var(--ok)">Connected</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+<button class="li it ln" style="flex-direction: row; width: 100%"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">Workout tips</span><span class="sm">Exercise library offline · YouTube videos when online</span></span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+</section>
+<h2 class="sec" style="margin-top: 8px">General</h2>
+<section class="card" style="padding: 0 16px">
+<button class="li it" style="flex-direction: row; width: 100%"><span class="bd" style="flex: 1">Currency symbol</span><span class="bd" style="color: var(--onv)">₹ Indian rupee</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+<button class="li it ln" style="flex-direction: row; width: 100%"><span class="bd" style="flex: 1">Theme</span><span class="bd" style="color: var(--onv)">System</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+</section>
+<p class="sm" style="padding: 8px 4px">All data is stored on this device. No account, no cloud.</p>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Flow 7 — Add time (calorie reminder)</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back to Today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">You</h1><button class="ib" style="width: 44px; height: 44px; border-radius: 22px; background: var(--pri); color: var(--onpri); margin-right: 4px" aria-label="Ask AI"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg></button></header>
+<div class="scr">
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<div class="row sb"><div><p class="t2">Calorie reminder</p><p class="sm">Nudge to log meals at set times</p></div><span class="sw on"><span></span></span></div>
+<div class="row" style="flex-wrap: wrap"><sc-for list="{{times}}" as="t" hint-placeholder-count="3"><span class="chip">{{t}}</span></sc-for><span class="chip" style="border-style: dashed">+ Add time</span></div>
+</section>
+</div>
+<div class="scrim"></div>
+<div class="dlg" role="dialog" aria-label="Add reminder time" style="left: 28px; right: 28px; top: 210px">
+<p class="sm" style="font-weight: 500">Add reminder time</p>
+<div class="row" style="gap: 8px; align-items: flex-start">
+<div style="flex: 1"><div style="height: 80px; border-radius: 8px; background: var(--pric); color: var(--onpric); border: 2px solid var(--pri); display: flex; align-items: center; justify-content: center; font-size: 48px; line-height: 56px" class="num">21</div><p class="sm" style="margin-top: 6px">Hour</p></div>
+<div style="font-size: 48px; line-height: 80px">:</div>
+<div style="flex: 1"><div style="height: 80px; border-radius: 8px; background: var(--sc1); display: flex; align-items: center; justify-content: center; font-size: 48px; line-height: 56px" class="num">00</div><p class="sm" style="margin-top: 6px">Minute</p></div>
+</div>
+<p class="sm">24-hour clock, follows the device setting</p>
+<div class="row sb"><button class="ib" aria-label="Switch to dial"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.clock}}"></path></svg></button><div class="row" style="gap: 4px"><button class="btn tx">Cancel</button><button class="btn tx">OK</button></div></div>
+</div>
+</div>
+<p class="sm" style="width: 406px; margin-top: 16px; font-size: 13px; line-height: 18px; color: var(--cap)">Turning a reminder off keeps its times, greyed out, so switching it back on restores them. Times are sorted automatically; duplicates are rejected with “Already in the list”.</p>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · You — profile, settings, sync error state</p>
+<div class="mac" style="height: 1620px">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>You</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<dc-import name="TopBar" title="You" mode="mac" hint-size="100%,60px"></dc-import>
+<section class="card row" style="gap: 16px"><span class="av" style="width: 56px; height: 56px; border-radius: 28px; background: var(--secc); color: var(--onsecc); font-size: 22px; font-weight: 500">H</span><div style="flex: 1"><p class="t2">Harshal</p><p class="sm">This device: MacBook Air</p></div><button class="btn ou">Body stats</button><button class="btn ou">Data and backup</button><button class="btn tx">Edit profile</button></section>
+<section class="card" style="display: flex; flex-direction: column; gap: 16px">
+<div class="row sb"><h2 class="t2">Goals</h2><span class="tag" style="background: var(--secc); color: var(--onsecc)">Synced between devices</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 12px">
+<sc-for list="{{goals}}" as="g" hint-placeholder-count="5"><div class="fld" style="background: var(--sc1); padding: 0 10px"><label for="{{g.id}}">{{g.n}}</label><input id="{{g.id}}" type="text" value="{{g.num}}"><span class="sfx" style="font-size: 13px">{{g.u}}</span></div></sc-for>
+</div>
+</section>
+<section class="card" style="display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: center">
+<div><div class="row" style="gap: 10px"><h2 class="t2">Appearance</h2><span class="tag" style="background: var(--secc); color: var(--onsecc)">Theme synced between devices</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="3"><button class="it" role="radio" aria-checked="{{t.on}}" style="flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; border: {{t.bd}}; background: var(--bg)"><span style="width: 32px; height: 32px; border-radius: 16px; background: {{t.sw}}; flex: none"></span><span style="display: flex; flex-direction: column"><span class="t3">{{t.n}}</span><span class="sm">{{t.d}}</span></span></button></sc-for>
+</div></div>
+<div><p class="sm" style="margin-bottom: 8px">Mode (this Mac)</p><div class="seg" style="grid-template-columns: repeat(3, minmax(0, 1fr))"><button class="on">System</button><button>Light</button><button>Dark</button></div></div>
+</section>
+<section class="card" style="display: flex; flex-direction: column; gap: 8px">
+<div class="row sb"><h2 class="t2">Reminders</h2><span class="tag" style="background: var(--sc3); color: var(--onv)">This Mac only</span></div>
+<div class="row ln" style="padding-top: 12px; gap: 16px"><div style="flex: 1"><p class="t3">Water reminder</p><div class="row" style="margin-top: 8px"><span class="sm">Every</span><button class="chip sel">2 hours</button><span class="sm">between</span><button class="chip">08:00</button><span class="sm">and</span><button class="chip">22:00</button></div></div><button class="sw on" role="switch" aria-checked="true" aria-label="Water reminder"><span></span></button></div>
+<div class="row ln" style="padding-top: 12px; gap: 16px"><div style="flex: 1"><p class="t3">Calorie reminder</p><div class="row" style="margin-top: 8px"><sc-for list="{{times}}" as="t" hint-placeholder-count="3"><span class="chip" style="padding-right: 4px">{{t}}<button class="ib" style="width: 24px; height: 24px" aria-label="Remove {{t}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 16px; height: 16px"><path d="{{ic.x}}"></path></svg></button></span></sc-for><button class="chip" style="border-style: dashed">+ Add time</button></div></div><button class="sw" role="switch" aria-checked="false" aria-label="Calorie reminder"><span></span></button></div>
+<div class="row ln" style="padding-top: 12px; gap: 16px"><div style="flex: 1"><p class="t3">Meal reminders</p><div class="row" style="margin-top: 8px; flex-wrap: wrap"><sc-for list="{{mealRem}}" as="m" hint-placeholder-count="4"><span class="chip">{{m.n}} · {{m.t}}</span></sc-for><span class="sm">Skipped if already logged</span></div></div><button class="sw on" role="switch" aria-checked="true" aria-label="Meal reminders"><span></span></button></div>
+<div class="row" style="padding-top: 8px"><button class="btn ou"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.bell}}"></path></svg>Send test notification</button><span class="sm">Calorie reminder is off on this Mac; times are kept.</span></div>
+</section>
+<section class="card" style="display: flex; flex-direction: column; gap: 16px">
+<div class="row sb"><h2 class="t2">Device sync</h2><div class="row"><span class="sm">Local Wi-Fi, no cloud</span><button class="sw on" role="switch" aria-checked="true" aria-label="Device sync"><span></span></button></div></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 200px; gap: 12px; align-items: start">
+<div class="fld" style="background: var(--sc1)"><label for="dn2">This device’s name</label><input id="dn2" type="text" value="MacBook Air"></div>
+<div><div class="fld" style="background: var(--sc1)"><label for="pc2">Pairing code</label><input id="pc2" type="text" value="482 913" style="letter-spacing: 2px"></div><p class="hint">Same code on every device</p></div>
+<div style="padding-top: 8px"><p class="sm">This device</p><p class="bd num">192.168.1.42 : 47811</p></div>
+</div>
+<div class="ln" style="padding-top: 8px">
+<h3 class="t3" style="padding: 4px 0">On this network</h3>
+<sc-for list="{{devsMac}}" as="d" hint-placeholder-count="2">
+<div class="li" style="gap: 12px; min-height: 52px"><span class="av" style="width: 36px; height: 36px; background: var(--secc); color: var(--onsecc)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{d.ic}}"></path></svg></span><span class="bd" style="width: 200px">{{d.n}}</span><span class="sm num" style="width: 110px">{{d.ip}}</span><span class="tag" style="background: {{d.bg}}; color: {{d.fg}}">{{d.st}}</span><span class="sm" style="flex: 1; color: var(--err)">{{d.err}}</span></div>
+</sc-for>
+</div>
+<div class="ln" style="padding-top: 16px">
+<h3 class="t3" style="padding-bottom: 12px">Add device by IP</h3>
+<div class="row" style="align-items: flex-start; gap: 12px">
+<div style="flex: 1"><div class="fld e" style="background: var(--sc1)"><label for="ip">IP address</label><input id="ip" type="text" value="192.168.1.50"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--err)"><path d="{{ic.alert}}"></path></svg></div><p class="hint e">Device not reachable. 192.168.1.50 didn’t answer on port 47811 — check both devices are on the same Wi-Fi and sync is on.</p></div>
+<div class="fld" style="width: 110px; background: var(--sc1)"><label for="pt">Port</label><input id="pt" type="text" value="47811"></div>
+<button class="btn tl" style="height: 56px; border-radius: 16px">Retry</button>
+</div>
+</div>
+<div class="row sb ln" style="padding-top: 16px">
+<div><p class="t3">Last sync today, 13:12</p><p class="sm num">With Android phone · sent 12, received 4</p></div>
+<button class="btn"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg>Sync now</button>
+</div>
+</section>
+<section class="card row sb"><h2 class="t2">Currency symbol</h2><button class="chip">₹ Indian rupee (INR)<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button></section>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2228,"height":3040}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',plus:'M12 5v14M5 12h14',x:'M6 6l12 12M18 6L6 18',r:'M9 6l6 6-6 6',down:'M6 9l6 6 6-6',sync:'M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4',bell:'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',clock:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2',wifi:'M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',laptop:'M4 5h16v11H4zM2 19h20',phone:'M7 2h10v20H7zM11 18h2',tablet:'M5 3h14v18H5zM11 18h2',copy:'M8 8h12v12H8zM16 8V4H4v12h4',alert:'M12 3l10 18H2zM12 10v4M12 17.5h.01'};
+IC.run='M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1';
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const goals=[['Daily calories','2,200','kcal'],['Protein','120','g'],['Carbs','250','g'],['Fiber','30','g'],['Fat','70','g'],['Water','3,000','ml']].map(([n,num,u],i)=>({n,num,u,v:num+' '+u,id:'g'+i,top:i===0?'transparent':'var(--olv)'}));
+const ok={bg:'var(--okc)',fg:'var(--ok)'},bad={bg:'var(--errc)',fg:'var(--onerrc)'};
+const devs=[{n:'MacBook Air',ip:'192.168.1.42',ic:IC.laptop,st:'Paired · online',err:'',...ok},{n:'Tablet',ip:'192.168.1.57',ic:IC.tablet,st:'Not paired',err:'Pairing code does not match. Enter 482 913 on the tablet.',...bad}];
+const devsMac=[{n:'Android phone',ip:'192.168.1.23',ic:IC.phone,st:'Paired · online',err:'',...ok},{n:'Tablet',ip:'192.168.1.57',ic:IC.tablet,st:'Not paired',err:'Pairing code does not match',...bad}];
+const themes=[['Forest','Default','#4C662B','#CDEDA3',true],['Teal','','#00695C','#A5F2E4',false],['Ocean','','#0061A4','#D1E4FF',false]].map(([n,d,a,b,on])=>({n,d:d||' ',on:on?'true':'false',sw:'linear-gradient(135deg, '+a+' 50%, '+b+' 50%)',bd:on?'2px solid var(--pri)':'1px solid var(--olv)'}));
+const mealRem=[['Breakfast','08:30'],['Lunch','13:00'],['Snacks','16:30'],['Dinner','20:30']].map(([n,t])=>({n,t,on:'true',cls:'sw on'}));
+return {themes,mealRem,rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,goals,times:['11:00','16:30','20:00'],devs,devsMac,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===5?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

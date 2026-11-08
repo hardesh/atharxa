@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Empty states and first run</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2318px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">First run · set your goals</p>
+<div class="ph">
+<div class="scr" style="padding-top: 48px; gap: 18px">
+<div><h1 class="t0">Welcome to Atharxa</h1><p class="bd" style="color: var(--onv); margin-top: 6px">Set daily goals. Everything stays on this device — no account needed. You can change these later in You › Goals.</p></div>
+<sc-for list="{{goals}}" as="g" hint-placeholder-count="6"><div class="fld"><label for="{{g.id}}">{{g.n}}</label><input id="{{g.id}}" type="text" inputmode="decimal" value="{{g.v}}"><span class="sfx">{{g.u}}</span></div></sc-for>
+<div><p class="sm" style="margin-bottom: 8px">Currency</p><div class="row"><button class="chip sel">₹ INR</button><button class="chip">€ EUR</button><button class="chip">$ USD</button><button class="chip">Other…</button></div></div>
+<button class="btn" style="height: 48px; border-radius: 24px; margin-top: auto">Start</button>
+<button class="btn tx">Skip, use these defaults</button>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">Today · nothing logged yet</p>
+<div class="ph">
+<header class="row sb" style="height: 64px; padding: 0 8px; flex: none"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></span><span class="dt">Today, 8 Nov</span><span class="ib" style="color: var(--ol)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></span></header>
+<div class="scr">
+<section class="card" style="background: var(--pric); color: var(--onpric)"><div class="dl num">2,200</div><div class="bd">kcal left · nothing eaten yet</div></section>
+<section class="card row" style="gap: 12px; background: var(--sc2)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.plus}}"></path></svg><p class="bd">Tap + on a meal to log your first food. Search Open Food Facts or add your own.</p></section>
+<sc-for list="{{meals}}" as="m" hint-placeholder-count="4"><section class="card row sb" style="padding: 8px 8px 8px 16px"><div><h2 class="t2">{{m}}</h2><p class="sm">Nothing logged yet</p></div><button class="ib tn" aria-label="Add food to {{m}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg></button></section></sc-for>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav0}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Food picker · no saved foods</p>
+<div class="ph">
+<header class="row" style="height: 72px; padding: 8px 12px 8px 4px; flex: none"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></span><div class="row" style="flex: 1; height: 48px; border-radius: 24px; background: var(--sc3); padding: 0 16px; color: var(--onv)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.search}}"></path></svg><span class="bd">Search foods</span></div></header>
+<div class="tabs"><span class="tab on">My foods</span><span class="tab">Open Food Facts</span><span class="tab" style="color: var(--ol)">Ask AI</span></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px">
+<span class="av" style="width: 72px; height: 72px; border-radius: 36px; background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 36px; height: 36px"><path d="{{ic.search}}"></path></svg></span>
+<h2 class="t1">No saved foods yet</h2>
+<p class="bd" style="color: var(--onv)">Foods you create, or pick from Open Food Facts, are saved here and work offline.</p>
+<button class="btn tl" style="margin-top: 8px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.cloud}}"></path></svg>Search Open Food Facts</button>
+<button class="btn tx"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Create a food</button>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">Finance · no transactions this month</p>
+<div class="ph">
+<header class="row sb" style="height: 64px; padding: 0 8px; flex: none"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></span><span class="dt">November 2026</span><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></span></header>
+<div class="scr">
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><div><p class="sm">Income</p><p class="t2">₹0</p></div><div><p class="sm">Expenses</p><p class="t2">₹0</p></div><div><p class="sm">Balance</p><p class="t2">₹0</p></div></section>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px">
+<span class="av" style="width: 72px; height: 72px; border-radius: 36px; background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 36px; height: 36px"><path d="{{ic.fin}}"></path></svg></span>
+<h2 class="t1">No transactions in November</h2>
+<p class="bd" style="color: var(--onv)">Add income and expenses to see your monthly balance and where the money goes.</p>
+<button class="btn" style="margin-top: 8px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add transaction</button>
+</div>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav4}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Workout · no plans, Strava not connected</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 16px; flex: none"><h1 class="t1">Workout</h1></header>
+<div class="scr">
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px">
+<span class="av" style="width: 72px; height: 72px; border-radius: 36px; background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 36px; height: 36px"><path d="{{ic.run}}"></path></svg></span>
+<h2 class="t1">No workout plans yet</h2>
+<p class="bd" style="color: var(--onv)">Build a plan from exercises, pick the days, and start it when you train. Each exercise comes with form tips.</p>
+<button class="btn" style="margin-top: 8px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Create a plan</button>
+</div>
+<section class="card row" style="gap: 12px"><div style="flex: 1"><p class="t3">Track runs and rides?</p><p class="sm">Connect Strava to see them next to your plan.</p></div><button class="btn ou" style="height: 36px; padding: 0 14px">Connect</button></section>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav3}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+<p class="sm" style="width: 406px; margin-top: 16px; font-size: 13px; line-height: 18px; color: var(--cap)">No paired device: see Workflows › Pairing, frame ①.</p>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2318,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',plus:'M12 5v14M5 12h14',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6',back:'M19 12H5M11 6l-6 6 6 6',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',cloud:'M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+const nav=a=>NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===a?'nv on':'nv'}));
+class Component extends DCLogic {
+renderVals() {
+const goals=[['Daily calories','2,200','kcal'],['Protein','120','g'],['Carbs','250','g'],['Fiber','30','g'],['Fat','70','g'],['Water','3,000','ml']].map(([n,v,u],i)=>({n,v,u,id:'fg'+i}));
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,goals,meals:['Breakfast','Lunch','Snacks','Dinner'],nav0:nav(0),nav3:nav(3),nav4:nav(4)};
+}
+}
+</script>
+</body>
+</html>

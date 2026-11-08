@@ -1,0 +1,138 @@
+import 'package:intl/intl.dart';
+
+String dayKey(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
+DateTime parseDay(String key) => DateTime.parse(key);
+
+double? _n(Object? v) => (v as num?)?.toDouble();
+
+/// kcal + macros. Macros are nullable: `null` means unknown (e.g. missing in
+/// Open Food Facts). Sums treat unknown as "contributes nothing" but stay
+/// `null` only when every part is unknown.
+class Nutrients {
+  const Nutrients({this.kcal = 0, this.protein, this.carbs, this.fiber, this.fat});
+
+  static const zero = Nutrients(protein: 0, carbs: 0, fiber: 0, fat: 0);
+
+  final double kcal;
+  final double? protein, carbs, fiber, fat;
+
+  factory Nutrients.fromRow(Map<String, Object?> r) => Nutrients(
+    kcal: _n(r['kcal']) ?? 0,
+    protein: _n(r['protein']),
+    carbs: _n(r['carbs']),
+    fiber: _n(r['fiber']),
+    fat: _n(r['fat']),
+  );
+
+  Map<String, Object?> toRow() => {'kcal': kcal, 'protein': protein, 'carbs': carbs, 'fiber': fiber, 'fat': fat};
+
+  /// value = per100 × grams / 100 (DESIGN.md §7.1), full precision.
+  Nutrients forGrams(double grams) => scale(grams / 100);
+
+  Nutrients scale(double f) => Nutrients(
+    kcal: kcal * f,
+    protein: protein == null ? null : protein! * f,
+    carbs: carbs == null ? null : carbs! * f,
+    fiber: fiber == null ? null : fiber! * f,
+    fat: fat == null ? null : fat! * f,
+  );
+
+  static double? _add(double? a, double? b) => a == null ? b : (b == null ? a : a + b);
+
+  Nutrients operator +(Nutrients o) => Nutrients(
+    kcal: kcal + o.kcal,
+    protein: _add(protein, o.protein),
+    carbs: _add(carbs, o.carbs),
+    fiber: _add(fiber, o.fiber),
+    fat: _add(fat, o.fat),
+  );
+
+  static Nutrients sum(Iterable<Nutrients> xs) => xs.fold(zero, (a, b) => a + b);
+}
+
+/// A food with nutrition per 100 g, from My foods or a remote source.
+class FoodItem {
+  FoodItem({
+    this.id,
+    required this.name,
+    this.brand,
+    this.barcode,
+    this.servingG,
+    required this.per100g,
+    this.source = 'custom',
+  });
+
+  final String? id; // null until saved locally
+  final String name;
+  final String? brand, barcode;
+  final double? servingG;
+  final Nutrients per100g;
+  final String source; // custom | off | (later) ai
+
+  factory FoodItem.fromRow(Map<String, Object?> r) => FoodItem(
+    id: r['id'] as String,
+    name: r['name'] as String,
+    brand: r['brand'] as String?,
+    barcode: r['barcode'] as String?,
+    servingG: _n(r['serving_g']),
+    per100g: Nutrients.fromRow(r),
+    source: r['source'] as String? ?? 'custom',
+  );
+
+  Map<String, Object?> toRow() => {
+    if (id != null) 'id': id,
+    'name': name,
+    'brand': brand,
+    'barcode': barcode,
+    'serving_g': servingG,
+    'source': source,
+    ...per100g.toRow(),
+  };
+
+  String get sourceLabel => source == 'off' ? 'Open Food Facts' : 'My foods';
+}
+
+/// A row of food_logs or meal_plans: grams + a per-100 g snapshot.
+class FoodEntry {
+  FoodEntry(this.row);
+  final Map<String, Object?> row;
+
+  String get id => row['id'] as String;
+  String get name => row['name'] as String;
+  String? get brand => row['brand'] as String?;
+  Meal get meal => Meal.parse(row['meal'] as String);
+  double get grams => (row['grams'] as num).toDouble();
+  Nutrients get per100 => Nutrients.fromRow(row);
+  Nutrients get totals => per100.forGrams(grams);
+
+  /// Fields to copy when duplicating into another table/day.
+  Map<String, Object?> copyFields() =>
+      Map.of(row)..removeWhere((k, _) => const {'id', 'updated_at', 'device_id', 'deleted', 'rev'}.contains(k));
+}
+
+enum Meal {
+  breakfast('Breakfast'),
+  lunch('Lunch'),
+  snacks('Snacks'),
+  dinner('Dinner');
+
+  const Meal(this.label);
+  final String label;
+
+  static Meal parse(String v) => Meal.values.firstWhere((m) => m.name == v.toLowerCase(), orElse: () => Meal.snacks);
+}
+
+/// Daily goals (synced). Defaults from DESIGN.md §5 You › Goals; Fat = 75 g (user decision).
+class Goals {
+  const Goals({
+    this.kcal = 2200,
+    this.waterMl = 3000,
+    this.protein = 120,
+    this.carbs = 250,
+    this.fiber = 30,
+    this.fat = 75,
+  });
+
+  final double kcal, protein, carbs, fiber, fat;
+  final int waterMl;
+}

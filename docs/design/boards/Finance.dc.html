@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Finance</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2228px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Finance — after saving the expense</p>
+<div class="ph">
+<dc-import name="TopBar" title="Finance" hint-size="100%,64px"></dc-import>
+<header class="row sb" style="height: 48px; padding: 0 8px; flex: none">
+<button class="ib" aria-label="Previous month"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></button>
+<button class="dt" aria-label="Pick month">November 2026</button>
+<button class="ib" aria-label="Next month"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></button>
+</header>
+<div class="scr">
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex: none">
+<div><p class="sm">Income</p><p class="t2 num" style="color: var(--inc)">₹1,35,000</p></div>
+<div><p class="sm">Expenses</p><p class="t2 num" style="color: var(--exp)">₹45,139</p></div>
+<div><p class="sm">Balance</p><p class="t2 num">₹89,861</p></div>
+</section>
+<section class="card" style="flex: none; display: flex; flex-direction: column; gap: 10px">
+<h2 class="t3">Spending by category</h2>
+<sc-for list="{{cats5}}" as="c" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 92px minmax(0, 1fr) 76px; gap: 10px; align-items: center"><span class="bd">{{c.n}}</span><div class="bar" style="background: none"><div style="width: {{c.w}}%; background: var(--pri)"></div></div><span class="bd num" style="text-align: right">{{c.a}}</span></div>
+</sc-for>
+<p class="sm">+ Food, Health, Entertainment · ₹2,880</p>
+</section>
+<sc-for list="{{days}}" as="d" hint-placeholder-count="3">
+<section style="flex: none">
+<div class="row sb" style="padding: 8px 0 4px"><h3 class="t3" style="color: var(--onv)">{{d.d}}</h3><span class="sm num">{{d.net}}</span></div>
+<sc-for list="{{d.tx}}" as="t" hint-placeholder-count="2">
+<button class="li it" style="flex-direction: row; min-height: 56px; padding: 4px 0; gap: 14px; width: 100%">
+<span class="av" style="background: var(--secc); color: var(--onsecc); font-weight: 500">{{t.i}}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span class="bd">{{t.n}}</span><span class="sm">{{t.c}}</span></span>
+<span class="bd num" style="color: {{t.col}}; font-weight: 500">{{t.a}}</span>
+</button>
+</sc-for>
+</section>
+</sc-for>
+</div>
+<div class="snk" style="bottom: 192px"><span>Expense saved · ₹1,150 Transport</span><button class="btn tx">Undo</button></div>
+<button class="fab"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add</button>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Add transaction sheet (summary behind shows pre-save totals)</p>
+<div class="ph">
+<header class="row sb" style="height: 64px; padding: 0 8px; flex: none"><span class="ib"></span><span class="dt">November 2026</span><span class="ib"></span></header>
+<div class="scr">
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex: none">
+<div><p class="sm">Income</p><p class="t2 num" style="color: var(--inc)">₹1,35,000</p></div>
+<div><p class="sm">Expenses</p><p class="t2 num" style="color: var(--exp)">₹43,989</p></div>
+<div><p class="sm">Balance</p><p class="t2 num">₹91,011</p></div>
+</section>
+</div>
+<div class="scrim"></div>
+<div class="sheet" role="dialog" aria-label="Add transaction" style="top: 120px">
+<div class="handle"></div>
+<div class="row sb"><h2 class="t1">New transaction</h2><button class="btn tx" style="padding: 0 8px">Save</button></div>
+<div class="seg"><button class="on"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>Expense</button><button>Income</button></div>
+<div class="fld f" style="height: 64px; background: var(--sc1)"><label for="a1">Amount</label><span class="t1" style="color: var(--onv)">₹</span><input id="a1" type="text" inputmode="decimal" value="1,150" style="font-size: 24px"></div>
+<div>
+<p class="sm" style="margin-bottom: 8px">Category</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="11"><button class="{{c.cls}}">{{c.n}}</button></sc-for>
+<button class="chip" style="border-style: dashed"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Custom</button>
+</div>
+</div>
+<div class="fld" style="background: var(--sc1)"><label for="d1">Date</label><input id="d1" type="text" value="Sun, 8 Nov 2026"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.today}}"></path></svg></div>
+<div class="fld" style="background: var(--sc1)"><label for="n1">Note</label><input id="n1" type="text" value="Cab to airport"></div>
+<button class="btn" style="height: 48px; border-radius: 24px">Save expense</button>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Finance — donut breakdown, transactions by day</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Finance</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<dc-import name="TopBar" title="Finance" mode="mac" hint-size="100%,60px"></dc-import>
+<div class="row">
+<button class="ib" aria-label="Previous month"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></button>
+<button class="dt" aria-label="Pick month">November 2026<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button>
+<button class="ib" aria-label="Next month"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></button>
+<span style="flex: 1"></span>
+<button class="btn ou"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>Export</button>
+<button class="btn"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add transaction</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<section class="card"><p class="sm">Income</p><p class="t0 num" style="color: var(--inc)">₹1,35,000</p></section>
+<section class="card"><p class="sm">Expenses</p><p class="t0 num" style="color: var(--exp)">₹45,139</p></section>
+<section class="card"><p class="sm">Balance</p><p class="t0 num">₹89,861</p></section>
+</div>
+<section class="card" style="display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 32px; align-items: center">
+<div style="position: relative; width: 180px; height: 180px">
+<svg viewBox="0 0 160 160" width="180" height="180" role="img" aria-label="Spending by category: Rent 62%, Shopping 14%, Groceries 8%, Bills 5%, Other 10%"><g transform="rotate(-90 80 80)"><sc-for list="{{donut}}" as="s" hint-placeholder-count="5"><circle cx="80" cy="80" r="60" fill="none" stroke-width="22" stroke="{{s.col}}" stroke-dasharray="{{s.da}}" stroke-dashoffset="{{s.off}}"></circle></sc-for></g></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center"><span class="sm">Spent</span><span class="t2 num">₹45,139</span></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px">
+<sc-for list="{{donut}}" as="s" hint-placeholder-count="5"><div class="row"><span style="width: 12px; height: 12px; border-radius: 3px; background: {{s.col}}; flex: none"></span><span class="bd" style="flex: 1">{{s.n}}</span><span class="bd num">{{s.a}}</span><span class="sm num" style="width: 34px; text-align: right">{{s.p}}</span></div></sc-for>
+</div>
+</section>
+<section class="card" style="padding-top: 8px">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="3">
+<div class="row sb" style="padding: 10px 0 2px"><h3 class="t3" style="color: var(--onv)">{{d.d}}</h3><span class="sm num">{{d.net}}</span></div>
+<sc-for list="{{d.tx}}" as="t" hint-placeholder-count="2">
+<div class="li" style="min-height: 48px; padding: 2px 0; gap: 14px">
+<span class="av" style="width: 32px; height: 32px; background: var(--secc); color: var(--onsecc); font-size: 13px; font-weight: 500">{{t.i}}</span>
+<span class="bd" style="flex: 1">{{t.n}}</span><span class="sm" style="width: 120px">{{t.c}}</span>
+<span class="bd num" style="width: 100px; text-align: right; color: {{t.col}}; font-weight: 500">{{t.a}}</span>
+<button class="ib" aria-label="Edit {{t.n}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.edit}}"></path></svg></button>
+</div>
+</sc-for>
+</sc-for>
+</section>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2228,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',plus:'M12 5v14M5 12h14',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6',down:'M6 9l6 6 6-6',check:'M5 12l5 5 9-10',edit:'M4 20h4L19 9l-4-4L4 16zM14 6l4 4'};
+IC.run='M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1';
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+const inr=v=>'₹'+v.toLocaleString('en-IN');
+const T=(n,c,v)=>({n,c,i:c[0],a:(v>0?'+':'−')+inr(Math.abs(v)),col:v>0?'var(--inc)':'var(--on)'});
+class Component extends DCLogic {
+renderVals() {
+const days=[
+{d:'Sun, 8 Nov',net:'−₹1,770',tx:[T('Cab to airport','Transport',-1150),T('Vegetables & fruit','Groceries',-620)]},
+{d:'Sat, 7 Nov',net:'−₹1,600',tx:[T('Pharmacy','Health',-860),T('Movie tickets','Entertainment',-740)]},
+{d:'Fri, 6 Nov',net:'+₹8,501',tx:[T('Consulting project','Freelance (custom)',15000),T('Running shoes','Shopping',-6499)]},
+{d:'Wed, 4 Nov',net:'−₹1,780',tx:[T('Lunch with team','Food',-1280),T('Metro card recharge','Transport',-500)]},
+{d:'Mon, 2 Nov',net:'−₹5,490',tx:[T('Weekly groceries','Groceries',-3150),T('Electricity bill','Bills',-2340)]},
+{d:'Sun, 1 Nov',net:'+₹92,000',tx:[T('Salary','Salary',120000),T('Rent','Rent',-28000)]}];
+const cats5=[['Rent',28000],['Shopping',6499],['Groceries',3770],['Bills',2340],['Transport',1650]].map(([n,v])=>({n,a:inr(v),w:Math.round(v/28000*100)}));
+const C=2*Math.PI*60;let acc=0;
+const donut=[['Rent',28000,'#4C662B'],['Shopping',6499,'#C77700'],['Groceries',3770,'#3566BC'],['Bills',2340,'#A3C47C'],['Other (4)',4530,'#9AA3A0']].map(([n,v,col])=>{const len=v/45139*C;const s={n,col,a:inr(v),p:Math.round(v/45139*100)+'%',da:len.toFixed(1)+' '+(C-len).toFixed(1),off:(-acc).toFixed(1)};acc+=len;return s;});
+const chips=['Food','Groceries','Transport','Rent','Bills','Shopping','Health','Entertainment','Salary','Other','Freelance'].map(n=>({n,cls:n==='Transport'?'chip sel':'chip'}));
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,days,cats5,donut,chips,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===4?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

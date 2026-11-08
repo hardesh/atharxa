@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>On-device AI summaries</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2682px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Finance › “Summarize month” (Gemma 4, on device)</p>
+<div class="ph">
+<header class="row sb" style="height: 64px; padding: 0 8px; flex: none"><span class="ib"></span><span class="dt">November 2026</span><span class="ib"></span></header>
+<div class="scr">
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex: none">
+<div><p class="sm">Income</p><p class="t2 num" style="color: var(--inc)">₹1,35,000</p></div>
+<div><p class="sm">Expenses</p><p class="t2 num" style="color: var(--exp)">₹45,139</p></div>
+<div><p class="sm">Balance</p><p class="t2 num">₹89,861</p></div>
+</section>
+</div>
+<div class="scrim"></div>
+<div class="sheet" role="dialog" aria-label="Monthly summary" style="top: 150px">
+<div class="handle"></div>
+<div class="row sb"><h2 class="t1 row" style="gap: 8px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.ai}}"></path></svg>November so far</h2><span class="tag" style="background: var(--sc3); color: var(--onv)">1–8 Nov</span></div>
+<sc-for list="{{fin}}" as="t" hint-placeholder-count="4"><p class="bd" style="display: flex; gap: 8px"><span style="color: var(--pri)">•</span><span>{{t}}</span></p></sc-for>
+<div class="row" style="flex-wrap: wrap; gap: 8px"><button class="chip">Compare with October</button><button class="chip">Only discretionary</button></div>
+<section class="row" style="gap: 10px; background: var(--sc2); border-radius: 12px; padding: 10px 12px; align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.lock}}"></path></svg><p class="sm">Written by Gemma 4 on this phone. Totals are calculated by the app first, so the numbers are exact; only the wording comes from the model. Nothing is sent online.</p></section>
+<div class="row" style="justify-content: flex-end; gap: 4px"><button class="btn tx"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg>Regenerate</button><button class="btn tx">Copy</button></div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Workout › “Summarize week”</p>
+<div class="ph">
+<header class="row sb" style="height: 64px; padding: 0 8px 0 16px; flex: none"><h1 class="t1">Workout</h1><span class="dt" style="font-size: 15px">2–8 Nov</span></header>
+<div class="scr">
+<section class="card" style="display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--pri)">
+<div class="row sb"><h2 class="t2 row" style="gap: 8px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.ai}}"></path></svg>Your week</h2><button class="ib" aria-label="Regenerate summary" style="width: 32px; height: 32px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg></button></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div><p class="sm">Total time</p><p class="t2 num">3 h 14 min</p></div>
+<div><p class="sm">Sessions</p><p class="t2 num">5 / 6</p></div>
+<div><p class="sm">Distance</p><p class="t2 num">29.6 km</p></div>
+</div>
+<sc-for list="{{wk}}" as="t" hint-placeholder-count="4"><p class="bd" style="display: flex; gap: 8px"><span style="color: var(--pri)">•</span><span>{{t}}</span></p></sc-for>
+<p class="sm">Gemma 4 · on device · includes Strava imports</p>
+</section>
+<section class="card" style="background: var(--pric); color: var(--onpric); display: flex; flex-direction: column; gap: 8px">
+<p class="sm" style="color: inherit">Today · Sun 8 Nov</p>
+<h2 class="t1">Lower body A</h2>
+<button class="btn" style="height: 44px; border-radius: 22px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.play}}"></path></svg>Start workout</button>
+</section>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav3}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · You › On-device AI</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1">On-device AI</h1></header>
+<div class="scr" style="gap: 14px">
+<section class="card" style="display: flex; flex-direction: column; gap: 10px">
+<div class="row sb"><div><p class="t2">Gemma 4</p><p class="sm">Runs fully on this device</p></div><span class="tag" style="background: var(--okc); color: var(--ok)">Ready</span></div>
+<p class="sm num">Model file: [variant] · [size] GB · downloaded 2 Nov</p>
+<div class="row" style="gap: 4px"><button class="btn ou" style="height: 36px; padding: 0 14px">Check for update</button><button class="btn tx" style="color: var(--err)">Delete model</button></div>
+</section>
+<section class="card" style="padding: 4px 16px">
+<p class="t3" style="padding: 10px 0 2px">Allowed uses</p>
+<sc-for list="{{uses}}" as="u" hint-placeholder-count="5">
+<div class="li ln" style="gap: 12px"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd" style="color: {{u.col}}">{{u.n}}</span><span class="sm">{{u.d}}</span></span><button class="{{u.cls}}" role="switch" aria-checked="{{u.on}}" aria-label="{{u.n}}" disabled="{{u.dis}}"><span></span></button></div>
+</sc-for>
+</section>
+<section class="card" style="padding: 4px 16px">
+<div class="li" style="gap: 12px"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">Download on Wi-Fi only</span><span class="sm">Large file, one-time download</span></span><button class="sw on" role="switch" aria-checked="true" aria-label="Download on Wi-Fi only"><span></span></button></div>
+<div class="li ln" style="gap: 12px"><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">Only while charging</span><span class="sm">For long summaries on battery</span></span><button class="sw" role="switch" aria-checked="false" aria-label="Only while charging"><span></span></button></div>
+</section>
+<p class="sm">Each device keeps its own model; it is never synced.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Insights card on Finance — one-tap summaries (chat: see Assistant board)</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Finance</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav4}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<div class="row"><span class="dt">November 2026</span><span style="flex: 1"></span><button class="btn tl"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ai}}"></path></svg>Summarize month</button></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<section class="card"><p class="sm">Income</p><p class="t0 num" style="color: var(--inc)">₹1,35,000</p></section>
+<section class="card"><p class="sm">Expenses</p><p class="t0 num" style="color: var(--exp)">₹45,139</p></section>
+<section class="card"><p class="sm">Balance</p><p class="t0 num">₹89,861</p></section>
+</div>
+<section class="card" style="display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--pri)">
+<div class="row sb"><h2 class="t2 row" style="gap: 8px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.ai}}"></path></svg>Insights · November so far</h2><span class="sm">Gemma 4 on this Mac · 4 s</span></div>
+<sc-for list="{{fin}}" as="t" hint-placeholder-count="4"><p class="bd" style="display: flex; gap: 8px"><span style="color: var(--pri)">•</span><span>{{t}}</span></p></sc-for>
+<div class="ln" style="padding-top: 12px"><p class="sm" style="margin-bottom: 8px">Ask a set question</p>
+<div class="row" style="flex-wrap: wrap; gap: 8px"><sc-for list="{{asks}}" as="a" hint-placeholder-count="5"><button class="chip">{{a}}</button></sc-for></div></div>
+</section>
+<section class="card" style="display: flex; gap: 12px; align-items: flex-start; background: var(--sc2)">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.info}}"></path></svg>
+<div><p class="t3">How the numbers stay exact</p><p class="sm" style="margin-top: 4px">The app computes totals in SQL and passes a small JSON summary to the model; the model only writes the wording. Summary buttons use fixed prompts. For open questions, use the Assistant chat, which reads data through the same tools and respects You › AI models › What the assistant can read.</p></div>
+</section>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2682,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',sync:'M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4',lock:'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',back:'M19 12H5M11 6l-6 6 6 6',play:'M7 4l13 8-13 8z',info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 7.5h.01'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+const nav=a=>NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===a?'nv on':'nv'}));
+class Component extends DCLogic {
+renderVals() {
+const fin=['You spent ₹45,139 and kept ₹89,861 of ₹1,35,000 income — about 67% so far.','Rent is 62% of spending (₹28,000). Everything else adds up to ₹17,139.','Biggest one-off purchase: running shoes, ₹6,499 on 6 Nov.','Groceries ₹3,770 over 2 trips; transport ₹1,650, mostly the airport cab.'];
+const wk=['Strength: 2 sessions, 1 h 20 min (Upper A, Upper B).','Running: 11.2 km in 1 h 2 min, average 5:33 /km.','Cycling: 18.4 km in 52 min on Saturday.','Lower body A is still planned for today.'];
+const uses=[['Monthly expense summary','Finance › Summarize month',true],['Workout time summary','Workout › Summarize week',true],['Nutrition week summary','Today › week view',false],['Assistant chat','Sparkle button · free-form questions',true],['Ask AI food search','Coming soon',null],['Workout tip summaries','Coming soon',null]].map(([n,d,s])=>({n,d,on:s?'true':'false',dis:s===null,cls:s?'sw on':'sw',col:s===null?'var(--ol)':'var(--on)'}));
+const asks=['Summarize month','Where did spending grow?','Top 3 categories','Workout time this month','Water and calories this week'];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,fin,wk,uses,asks,nav3:nav(3),nav4:nav(4)};
+}
+}
+</script>
+</body>
+</html>

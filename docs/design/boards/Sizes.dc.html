@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone size and font scaling</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2000px; height: 1100px; gap: 48px">
+
+<sc-for list="{{phones}}" as="p" hint-placeholder-count="3">
+<div class="{{p.fs}}">
+<p class="cap" style="font-size: 15px; line-height: 28px">{{p.cap}}</p>
+<div class="ph" style="width: {{p.w}}px; height: {{p.h}}px">
+<dc-import name="TopBar" title="Today" hint-size="100%,64px"></dc-import>
+<header class="row" style="height: 48px; padding: 0 8px; flex: none; gap: 0"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></span><span class="dt">Today, 8 Nov</span><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></span></header>
+<div class="scr">
+<section class="card" style="background: var(--pric); color: var(--onpric); display: flex; flex-direction: column; gap: 12px; flex: none">
+<div class="row sb" style="align-items: flex-end; flex-wrap: wrap; gap: 4px 12px"><div><div class="dl num">702</div><div class="bd">kcal left</div></div><div class="bd num">1,498 of 2,200</div></div>
+<sc-if value="{{p.wide}}" hint-placeholder-val="{{true}}">
+<div class="mg" style="grid-template-columns: 56px minmax(0, 1fr) auto">
+<sc-for list="{{mac}}" as="m" hint-placeholder-count="3"><span class="t3">{{m.n}}</span><div class="bar" style="background: var(--trk)"><div style="width: {{m.w}}%; background: {{m.c}}"></div></div><span class="bd num" style="text-align: right">{{m.v}}</span></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{p.stack}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{mac}}" as="m" hint-placeholder-count="3"><div><div class="row sb"><span class="t3">{{m.n}}</span><span class="bd num">{{m.v}}</span></div><div class="bar" style="background: var(--trk); margin-top: 4px"><div style="width: {{m.w}}%; background: {{m.c}}"></div></div></div></sc-for>
+</div>
+</sc-if>
+</section>
+<section class="card row" style="gap: 12px; flex-wrap: wrap; flex: none"><span class="t3" style="flex: 1">Water 1,250 / 3,000 ml</span><button class="chip">+250 ml</button><button class="chip">+500 ml</button></section>
+<section class="card" style="padding: 8px 12px 4px 16px; flex: none">
+<div class="row sb"><h2 class="t2">Lunch plan</h2><span class="bd num" style="color: var(--onv)">780 kcal</span></div>
+<sc-if value="{{p.wide}}" hint-placeholder-val="{{true}}">
+<div class="pr sm" style="padding: 6px 0; border-bottom: 1px solid var(--olv)"><span>Component</span><span>kcal</span><span style="font-size: 10px">Protein</span><span style="font-size: 10px">Carbs</span><span style="font-size: 10px">Fiber</span></div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="4"><div class="pr num" style="padding: 6px 0; border-bottom: 1px solid var(--olv)"><span style="display: flex; flex-direction: column"><span class="bd" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.n}}</span><span class="sm">{{r.g}} g</span></span><span class="bd">{{r.k}}</span><span class="bd">{{r.p}}</span><span class="bd">{{r.c}}</span><span class="bd">{{r.f}}</span></div></sc-for>
+</sc-if>
+<sc-if value="{{p.stack}}" hint-placeholder-val="{{false}}">
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="4"><div style="padding: 8px 0; border-top: 1px solid var(--olv)"><div class="row sb"><span class="bd">{{r.n}}</span><span class="bd num">{{r.g}} g</span></div><p class="sm num">{{r.k}} kcal · Protein {{r.p}} g · Carbs {{r.c}} g · Fiber {{r.f}} g</p></div></sc-for>
+</sc-if>
+</section>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+</sc-for>
+
+<div style="width: 470px; display: flex; flex-direction: column; gap: 16px; padding-top: 44px">
+<h2 class="t1" style="color: var(--cap)">Layout rules</h2>
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="6"><div class="card" style="background: var(--bg)"><p class="t3">{{r.t}}</p><p class="bd" style="color: var(--onv); margin-top: 4px">{{r.d}}</p></div></sc-for>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2000,"height":1100}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const phones=[
+{cap:'① 360 dp · Display size “Large” · 130% text (default)',w:376,h:796,fs:'',wide:false,stack:true},
+{cap:'② ~412 dp · Pixel 9a / Pixel 10 · 130% text (default)',w:428,h:931,fs:'',wide:false,stack:true},
+{cap:'③ ~412 dp · text set to 100% → compact table',w:428,h:931,fs:'fs10',wide:true,stack:false}];
+const mac=[{n:'Protein',w:55,c:'var(--pro)',v:'65.9 / 120 g'},{n:'Carbs',w:75,c:'var(--carb)',v:'186.9 / 250 g'},{n:'Fiber',w:98,c:'var(--fib)',v:'29.5 / 30 g'},{n:'Fat',w:77,c:'var(--fat)',v:'53.7 / 70 g'}];
+const rows=[{n:'Roti',g:'80',k:'240',p:'8.0',c:'36.8',f:'4.0'},{n:'Dal tadka',g:'250',k:'300',p:'15.0',c:'37.5',f:'10.0'},{n:'Mixed veg sabzi',g:'200',k:'180',p:'5.0',c:'18.0',f:'7.0'},{n:'Curd',g:'100',k:'60',p:'3.1',c:'4.7',f:'0.0'}];
+const rules=[
+{t:'Design width: 360–412 dp, drawn at 390',d:'All other boards use a 390 dp screen at 130% text, between the two cases here. Nothing uses fixed widths except icon buttons.'},
+{t:'Default text size on phones: 130%',d:'Body 14 → 18 sp, labels 12 → 15.6 sp. Headings grow less (×1.15), like Android 14’s nonlinear scaling. You › Appearance › Text size: 100 / 115 / 130 / 150%, per device; it multiplies the system font size, capped at 2×.'},
+{t:'Switch layouts on text scale, not on device',d:'Flutter: when the effective scale is above ~1.2 (the default), or width < 360 dp, macro rows and plan tables use the stacked form (①②). At 100% the compact 5-column table returns (③).'},
+{t:'Numbers never truncate; names may',d:'Food names ellipsize in tables; kcal and macro values always show in full. Tabular figures keep columns aligned.'},
+{t:'Wrap, don’t squeeze',d:'Card headers and chip rows use Wrap, so “702 kcal left” and its goal line wrap onto two lines instead of overlapping.'},
+{t:'Bottom bar: 5 tabs fit at 360 dp',d:'Each destination gets ≥ 72 dp; labels render at 15.6 sp by default (“Meal plan” is the longest and still fits).'},
+{t:'≥ 600 dp (foldables, tablets, small Mac window)',d:'Switch to the NavigationRail layout used on macOS; content column caps at 760 dp.'}];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,phones,mac,rows,rules,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===0?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

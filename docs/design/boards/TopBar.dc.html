@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Top app bar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 100%; font-family: Roboto, system-ui, sans-serif; color: var(--on)">
+<sc-if value="{{isPhone}}" hint-placeholder-val="{{true}}">
+<header class="row" style="height: 64px; padding: 0 12px 0 16px; gap: 10px">
+<h1 class="t1" style="flex: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{title}}</h1>
+<button class="ib" style="width: 44px; height: 44px; border-radius: 22px; background: var(--pri); color: var(--onpri)" aria-label="Ask Atharxa"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg></button>
+<button class="av" style="width: 40px; height: 40px; border: 0; background: var(--secc); color: var(--onsecc); font: 500 16px Roboto, system-ui, sans-serif; cursor: pointer" aria-label="You: profile and settings">H</button>
+</header>
+</sc-if>
+<sc-if value="{{isMac}}" hint-placeholder-val="{{false}}">
+<header class="row" style="height: 64px; gap: 12px; margin-bottom: 4px">
+<h1 class="t0" style="flex: 1; font-weight: 500; white-space: nowrap">{{title}}</h1>
+<button class="btn" style="height: 44px; border-radius: 22px; padding: 0 18px 0 14px; gap: 10px" aria-label="Ask Atharxa (Command K)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg>Ask Atharxa<span style="font-size: 12px; opacity: .75; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.18)">⌘K</span></button>
+<button class="av" style="width: 40px; height: 40px; border: 0; background: var(--secc); color: var(--onsecc); font: 500 16px Roboto, system-ui, sans-serif; cursor: pointer; position: relative" aria-label="You · synced 13:12">H<span style="position: absolute; right: -1px; bottom: -1px; width: 12px; height: 12px; border-radius: 6px; background: var(--ok); border: 2px solid var(--bg)"></span></button>
+</header>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"title":{"editor":null,"default":"Today"},"mode":{"editor":"enum","options":["phone","mac"],"default":"phone"},"$preview":{"width":390,"height":64}}'>
+class Component extends DCLogic {
+renderVals() {
+const mode=this.props.mode ?? 'phone';
+return {title:this.props.title ?? 'Today',isPhone:mode==='phone',isMac:mode==='mac'};
+}
+}
+</script>
+</body>
+</html>

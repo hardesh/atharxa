@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>You — profile and settings pages</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 3590px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">① You — hub (tap your avatar)</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 12px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">You</h1><button class="ib" style="width: 44px; height: 44px; border-radius: 22px; background: var(--pri); color: var(--onpri)" aria-label="Ask AI"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ai}}"></path></svg></button></header>
+<div class="scr" style="gap: 12px">
+<section class="card row" style="gap: 14px; flex: none"><span class="av" style="width: 56px; height: 56px; border-radius: 28px; background: var(--secc); color: var(--onsecc); font-size: 22px; font-weight: 500">H</span><div style="flex: 1"><p class="t2">Harshal</p><p class="sm">Profile and body stats</p></div><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></section>
+<section class="card" style="padding: 0 12px; flex: none">
+<sc-for list="{{hub}}" as="h" hint-placeholder-count="8">
+<button class="li it" style="flex-direction: row; width: 100%; gap: 14px; min-height: 64px; border-top: 1px solid {{h.top}}"><span class="av" style="width: 36px; height: 36px; background: var(--sc3); color: var(--onv)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{h.d}}"></path></svg></span><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span class="bd">{{h.n}}</span><span class="sm" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{h.s}}</span></span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></button>
+</sc-for>
+</section>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">② Goals</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 12px 0 4px; flex: none"><button class="ib" aria-label="Back to You"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">Goals</h1><button class="btn tx">Save</button></header>
+<div class="scr" style="gap: 20px; padding-top: 12px">
+<span class="tag" style="align-self: flex-start; background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.sync}}"></path></svg>Synced between devices</span>
+<div class="g2" style="gap: 20px 12px">
+<sc-for list="{{goals}}" as="g" hint-placeholder-count="6"><div class="fld"><label for="{{g.id}}">{{g.n}}</label><input id="{{g.id}}" type="text" inputmode="decimal" value="{{g.v}}"><span class="sfx">{{g.u}}</span></div></sc-for>
+</div>
+<section class="card row" style="gap: 12px; align-items: flex-start"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.ai}}"></path></svg><div style="flex: 1"><p class="t3">Suggest from body stats</p><p class="sm">Uses height, weight and activity level from your profile</p></div></section>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">③ Appearance</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 12px 0 4px; flex: none"><button class="ib" aria-label="Back to You"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">Appearance</h1></header>
+<div class="scr" style="gap: 16px; padding-top: 12px">
+<div class="row sb"><p class="t3">Theme</p><span class="sm">Synced between devices</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="3"><button class="it" role="radio" aria-checked="{{t.on}}" style="align-items: center; gap: 6px; padding: 12px 0; border-radius: 16px; border: {{t.bd}}; background: var(--bg)"><span style="width: 44px; height: 44px; border-radius: 22px; background: {{t.sw}}"></span><span class="t3">{{t.n}}</span><span class="sm">{{t.d}}</span></button></sc-for>
+</div>
+<p class="t3" style="margin-top: 8px">Mode</p>
+<div class="seg" style="grid-template-columns: repeat(3, minmax(0, 1fr))"><button class="on">System</button><button>Light</button><button>Dark</button></div>
+<p class="t3" style="margin-top: 8px">Text size</p>
+<div class="row" style="flex-wrap: wrap; gap: 8px"><button class="chip">100%</button><button class="chip">115%</button><button class="chip sel">130% · default</button><button class="chip">150%</button></div>
+<p class="sm">Mode and text size apply to this device only.</p>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">④ Reminders</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 12px 0 4px; flex: none"><button class="ib" aria-label="Back to You"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">Reminders</h1></header>
+<div class="scr" style="gap: 12px; padding-top: 8px">
+<p class="sm">On this device only</p>
+<section class="card" style="display: flex; flex-direction: column; gap: 6px; flex: none">
+<div class="row sb"><p class="t2">Meals</p><button class="sw on" role="switch" aria-checked="true" aria-label="Meal reminders"><span></span></button></div>
+<sc-for list="{{mealRem}}" as="m" hint-placeholder-count="4"><div class="row sb ln" style="padding-top: 6px"><span class="bd">{{m.n}}</span><button class="chip">{{m.t}}</button></div></sc-for>
+<p class="sm" style="padding-top: 4px">Skipped if that meal is already logged</p>
+</section>
+<section class="card row sb" style="flex: none"><div><p class="t2">Water</p><p class="sm">Every 2 h · 08:00–22:00</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Water reminder"><span></span></button></section>
+<section class="card row sb" style="flex: none"><div><p class="t2">Calorie check-in</p><p class="sm">11:00 · 16:30 · 20:00</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Calorie check-in"><span></span></button></section>
+<button class="btn ou" style="align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.bell}}"></path></svg>Send test notification</button>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">⑤ Device sync</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 12px 0 4px; flex: none"><button class="ib" aria-label="Back to You"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1" style="flex: 1; font-weight: 500">Device sync</h1><button class="sw on" role="switch" aria-checked="true" aria-label="Device sync"><span></span></button></header>
+<div class="scr" style="gap: 16px; padding-top: 8px">
+<p class="sm">Local Wi-Fi only · no cloud</p>
+<section class="card" style="background: var(--pric); color: var(--onpric); display: flex; flex-direction: column; gap: 10px; flex: none">
+<p class="t3">Last sync today, 13:12</p><p class="bd num">Sent 4, received 12</p>
+<button class="btn" style="align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg>Sync now</button>
+</section>
+<section class="card" style="padding: 4px 16px; flex: none">
+<div class="li" style="gap: 12px"><span class="av" style="background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.laptop}}"></path></svg></span><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">MacBook Air</span><span class="sm num">192.168.1.42</span></span><span class="tag" style="background: var(--okc); color: var(--ok)">Online</span></div>
+</section>
+<section class="card" style="padding: 0 16px; flex: none">
+<div class="li row sb" style="min-height: 56px"><span class="bd">This device’s name</span><span class="bd" style="color: var(--onv)">Android phone</span></div>
+<div class="li row sb ln" style="min-height: 56px"><span class="bd">Pairing code</span><span class="bd num" style="color: var(--onv); letter-spacing: 1px">482 913</span></div>
+<div class="li row sb ln" style="min-height: 56px"><span class="bd">Add device by IP</span><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.r}}"></path></svg></div>
+</section>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · You — two-pane: sections left, page right</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>You</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<div style="width: 280px; flex: none; border-right: 1px solid var(--olv); padding: 20px 12px; display: flex; flex-direction: column; gap: 2px">
+<div class="row" style="gap: 12px; padding: 0 8px 16px"><span class="av" style="width: 44px; height: 44px; background: var(--secc); color: var(--onsecc); font-size: 18px; font-weight: 500">H</span><div><p class="t3">Harshal</p><p class="sm">MacBook Air</p></div></div>
+<sc-for list="{{hubMac}}" as="h" hint-placeholder-count="8"><button class="it" style="flex-direction: row; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: {{h.bg}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{h.d}}"></path></svg><span class="bd">{{h.n}}</span></button></sc-for>
+</div>
+<main class="mc"><div class="col" style="max-width: 620px">
+<dc-import name="TopBar" title="Reminders" mode="mac" hint-size="100%,60px"></dc-import>
+<p class="sm" style="margin-top: -8px">On this Mac only</p>
+<section class="card" style="display: flex; flex-direction: column; gap: 8px">
+<div class="row sb"><p class="t2">Meals</p><button class="sw on" role="switch" aria-checked="true" aria-label="Meal reminders"><span></span></button></div>
+<div class="row" style="flex-wrap: wrap; gap: 8px"><sc-for list="{{mealRem}}" as="m" hint-placeholder-count="4"><button class="chip">{{m.n}} · {{m.t}}</button></sc-for></div>
+<p class="sm">Skipped if that meal is already logged · shows kcal still to eat</p>
+</section>
+<section class="card row sb"><div><p class="t2">Water</p><p class="sm">Every 2 h · 08:00–22:00</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Water reminder"><span></span></button></section>
+<section class="card row sb"><div><p class="t2">Calorie check-in</p><p class="sm">11:00 · 16:30 · 20:00 · times kept while off</p></div><button class="sw" role="switch" aria-checked="false" aria-label="Calorie check-in"><span></span></button></section>
+<button class="btn ou" style="align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.bell}}"></path></svg>Send test notification</button>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":3590,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',you:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',back:'M19 12H5M11 6l-6 6 6 6',r:'M9 6l6 6-6 6',sync:'M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4',bell:'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4',laptop:'M4 5h16v11H4zM2 19h20',target:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',palette:'M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8zM7.5 11h.01M10 7h.01M15 7h.01',link:'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',chip:'M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4',dl:'M12 4v11M7 10l5 5 5-5M5 20h14',info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 7.5h.01',body:'M12 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM6 8h12M12 8v7M9 22l3-7 3 7'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];
+class Component extends DCLogic {
+renderVals() {
+const H=[['Goals','target','2,200 kcal · Protein 120 g · Carbs 250 g · Fiber 30 g · Fat 70 g · 3,000 ml'],['Appearance','palette','Forest · System · text 130%'],['Reminders','bell','4 meal reminders · water every 2 h'],['Device sync','sync','Paired with MacBook Air · 13:12'],['Connected services','link','Strava connected'],['AI models','chip','Gemma 4 on this phone'],['Data and backup','dl','Export everything, restore'],['About','info','Atharxa 1.0 · licences']];
+const hub=H.map(([n,k,s],i)=>({n,s,d:IC[k],top:i===0?'transparent':'var(--olv)'}));
+const hubMac=[['Profile','body'],...H.map(([n,k])=>[n,k])].map(([n,k])=>({n,d:IC[k],bg:n==='Reminders'?'var(--secc)':'transparent'}));
+const goals=[['Calories','2,200','kcal'],['Water','3,000','ml'],['Protein','120','g'],['Carbs','250','g'],['Fiber','30','g'],['Fat','70','g']].map(([n,v,u],i)=>({n,v,u,id:'yg'+i}));
+const themes=[['Forest','Default','#4C662B','#CDEDA3',true],['Teal','','#00695C','#A5F2E4',false],['Ocean','','#0061A4','#D1E4FF',false]].map(([n,d,a,b,on])=>({n,d:d||' ',on:on?'true':'false',sw:'linear-gradient(135deg, '+a+' 50%, '+b+' 50%)',bd:on?'2px solid var(--pri)':'1px solid var(--olv)'}));
+const mealRem=[['Breakfast','08:30'],['Lunch','13:00'],['Snacks','16:30'],['Dinner','20:30']].map(([n,t])=>({n,t}));
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,hub,hubMac,goals,themes,mealRem,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===5?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

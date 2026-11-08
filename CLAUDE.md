@@ -27,6 +27,10 @@ The app's name may change, so **don't build the product name into code identifie
   - The database file name (`lib/data/db.dart`), plus the mDNS service type `AppInfo.syncServiceType` together with its copy in `NSBonjourServices` in `macos/Runner/Info.plist`
   - App icons (`assets/icon/`)
 
+## Principle: no hand-written native code
+- `macos/Runner/*.swift` and the Android `MainActivity` stay exactly as Flutter generates them. Platform features come from plugins, or from `nativeapi_flutter` (Dart FFI covering windows, tray, menus and login items), or from config (`Info.plist`, entitlements, `AndroidManifest.xml`, Gradle).
+- If something truly can't be done without native code, ask the user first.
+
 ## Architecture
 - **State: Riverpod 3** (`flutter_riverpod`, no code generation). Don't add new `ChangeNotifier`s, `InheritedWidget`s or hand-rolled reload widgets.
   - `lib/state/core_providers.dart`: `dbProvider`, `prefsProvider` and the service providers, overridden in `main.dart` (`appOverrides`). Also `tableVersionProvider(table)`, which ticks whenever a table changes, locally or through sync. Data providers call `ref.watchTables([...])` to re-query.
@@ -54,11 +58,12 @@ The app's name may change, so **don't build the product name into code identifie
   - `lib/ui/shell.dart` is the responsive shell: `NavigationBar` under 600 dp, `NavigationRail` (with You) at 600 dp and up.
   - The theme is in `lib/ui/theme/`. Colour schemes are explicit, from DESIGN.md §3.1 (never `fromSeed`). Semantic colours are a `ThemeExtension` (`context.sem`).
   - Text size uses the app-level `AppTextScaler`.
-  - The macOS title bar is transparent; `AppChrome` adds the top inset.
+  - macOS: `lib/state/desktop_controller.dart` uses `nativeapi_flutter` to hide the title bar, set the minimum window size, hide the window on close while sync is on, add the menu bar item and handle open at login. App Nap is off through `NSAppSleepDisabled` in `Info.plist`. `AppChrome` adds the top inset for the window buttons.
 
 ## Workflow
 - Branches: `main` (stable) ← `dev/v1` (integration) ← `feat/*`.
 - **Work one feature at a time. Don't push or open PRs until the user asks.** Never merge without being asked.
+- **For now, keep all work on the current branch (`feat/sync`).** Don't create new branches until the user asks.
 - Before committing: `dart format lib test` (page width 120), then `flutter analyze` (must be clean) and `flutter test`.
 - Render tests in `test/screens/` produce PNGs in `test/screens/goldens/` at phone size (412 dp, 130 % text) and Mac size (1200 px). Refresh them with `flutter test --update-goldens test/screens` and compare against the boards.
 - Use the latest stable versions of packages and tools.

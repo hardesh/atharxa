@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../state/desktop_controller.dart';
 import '../../../state/sync_controller.dart';
 import '../../../sync/discovery.dart';
 import '../../../sync/peers.dart';
@@ -249,6 +250,7 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
             ],
           ),
         ),
+        const _ThisMacSection(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
@@ -484,4 +486,38 @@ class _Section extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// macOS: keep syncing with the window closed.
+class _ThisMacSection extends ConsumerWidget {
+  const _ThisMacSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final d = ref.watch(desktopControllerProvider);
+    if (!d.supported) return const SizedBox.shrink();
+    final ctl = ref.read(desktopControllerProvider.notifier);
+    return _Section(
+      title: 'On this Mac',
+      child: Column(
+        children: [
+          if (d.launchAtLoginSupported)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Open at login'),
+              subtitle: const Text('Starts quietly so your phone can sync any time'),
+              value: d.launchAtLogin,
+              onChanged: ctl.setLaunchAtLogin,
+            ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Show in menu bar'),
+            subtitle: const Text('Sync status, Sync now and Quit — closing the window keeps syncing'),
+            value: d.menuBar,
+            onChanged: ctl.setMenuBar,
+          ),
+        ],
+      ),
+    );
+  }
 }

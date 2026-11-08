@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 /// ≥ 600 dp → rail layout (foldables, tablets, Mac window). DESIGN.md §2.
 const wideBreakpoint = 600.0;
 
+/// Content column max width (DESIGN.md §2), excluding side padding.
+const contentMaxWidth = 760.0;
+
 extension LayoutContext on BuildContext {
   bool get isWide => MediaQuery.sizeOf(this).width >= wideBreakpoint;
   double get screenPad => isWide ? 32 : 16;
@@ -24,7 +27,7 @@ class PageBody extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 760),
+        constraints: BoxConstraints(maxWidth: contentMaxWidth + 2 * context.screenPad),
         child: ListView.separated(
           controller: controller,
           padding: EdgeInsets.fromLTRB(context.screenPad, 4, context.screenPad, bottomPadding),

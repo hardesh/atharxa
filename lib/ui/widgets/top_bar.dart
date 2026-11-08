@@ -25,89 +25,95 @@ class AtharxaTopBar extends StatelessWidget implements PreferredSizeWidget {
     final sync = AppScope.of(context).sync;
     return SafeArea(
       bottom: false,
-      child: SizedBox(
-        height: 64,
-        child: Padding(
-          padding: EdgeInsets.only(left: wide ? 32 : 16, right: wide ? 32 : 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: (wide ? context.tt.headlineMedium : context.tt.titleLarge)?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              ...actions,
-              const SizedBox(width: 6),
-              if (wide)
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 44),
-                    padding: const EdgeInsets.fromLTRB(14, 0, 18, 0),
-                  ),
-                  onPressed: () => showAssistantComingSoon(context),
-                  icon: const Icon(Icons.auto_awesome, size: 20),
-                  label: const Text('Ask Atharxa  ⌘K'),
-                )
-              else
-                Semantics(
-                  label: 'Ask Atharxa',
-                  button: true,
-                  child: IconButton.filled(
-                    style: IconButton.styleFrom(
-                      fixedSize: const Size(44, 44),
-                      backgroundColor: cs.primary,
-                      foregroundColor: cs.onPrimary,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: wide ? contentMaxWidth + 64 : double.infinity),
+          child: SizedBox(
+            height: 64,
+            child: Padding(
+              padding: EdgeInsets.only(left: wide ? 32 : 16, right: wide ? 32 : 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: (wide ? context.tt.headlineMedium : context.tt.titleLarge)?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    onPressed: () => showAssistantComingSoon(context),
-                    icon: const Icon(Icons.auto_awesome, size: 22),
                   ),
-                ),
-              const SizedBox(width: 10),
-              ListenableBuilder(
-                listenable: Listenable.merge([settings, sync]),
-                builder: (context, _) => Semantics(
-                  label: 'You: profile and settings',
-                  button: true,
-                  child: InkResponse(
-                    onTap: onOpenYou,
-                    radius: 24,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: cs.secondaryContainer,
-                          foregroundColor: cs.onSecondaryContainer,
-                          child: Text(
-                            settings.initial,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                          ),
+                  ...actions,
+                  const SizedBox(width: 6),
+                  if (wide)
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 44),
+                        padding: const EdgeInsets.fromLTRB(14, 0, 18, 0),
+                      ),
+                      onPressed: () => showAssistantComingSoon(context),
+                      icon: const Icon(Icons.auto_awesome, size: 20),
+                      label: const Text('Ask Atharxa  ⌘K'),
+                    )
+                  else
+                    Semantics(
+                      label: 'Ask Atharxa',
+                      button: true,
+                      child: IconButton.filled(
+                        style: IconButton.styleFrom(
+                          fixedSize: const Size(44, 44),
+                          backgroundColor: cs.primary,
+                          foregroundColor: cs.onPrimary,
                         ),
-                        if (wide && sync.running)
-                          Positioned(
-                            right: -1,
-                            bottom: -1,
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: context.sem.success,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: cs.surface, width: 2),
+                        onPressed: () => showAssistantComingSoon(context),
+                        icon: const Icon(Icons.auto_awesome, size: 22),
+                      ),
+                    ),
+                  const SizedBox(width: 10),
+                  ListenableBuilder(
+                    listenable: Listenable.merge([settings, sync]),
+                    builder: (context, _) => Semantics(
+                      label: 'You: profile and settings',
+                      button: true,
+                      child: InkResponse(
+                        onTap: onOpenYou,
+                        radius: 24,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: cs.secondaryContainer,
+                              foregroundColor: cs.onSecondaryContainer,
+                              child: Text(
+                                settings.initial,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                               ),
                             ),
-                          ),
-                      ],
+                            if (wide && sync.running)
+                              Positioned(
+                                right: -1,
+                                bottom: -1,
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: context.sem.success,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: cs.surface, width: 2),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

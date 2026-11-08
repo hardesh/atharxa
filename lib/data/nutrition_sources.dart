@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'db.dart';
+import 'food_repo.dart';
 import 'models.dart';
 
 /// Anything that can answer "what's the nutrition of X?".
@@ -26,20 +27,11 @@ class LocalFoodsSource implements NutritionSource {
   bool get needsNetwork => false;
 
   @override
-  Future<List<FoodItem>> search(String query) async {
-    final rows = await db.query(
-      'foods',
-      where: query.trim().isEmpty ? null : 'name LIKE ? OR brand LIKE ?',
-      args: query.trim().isEmpty ? null : ['%$query%', '%$query%'],
-      orderBy: 'name COLLATE NOCASE',
-      limit: 200,
-    );
-    return rows.map(FoodItem.fromRow).toList();
-  }
+  Future<List<FoodItem>> search(String query) => FoodRepo(db).myFoods(query);
 }
 
 class OpenFoodFactsSource implements NutritionSource {
-  static const _ua = 'SuperApp/0.1 (personal nutrition tracker)';
+  static const _ua = 'Atharxa/1.0 (personal nutrition tracker)';
 
   @override
   String get name => 'Open Food Facts';
@@ -58,7 +50,7 @@ class OpenFoodFactsSource implements NutritionSource {
       'fields': 'code,product_name,brands,nutriments,serving_quantity',
     });
     final res = await http.get(uri, headers: {'User-Agent': _ua}).timeout(const Duration(seconds: 20));
-    if (res.statusCode != 200) throw Exception('Open Food Facts returned ${res.statusCode}');
+    if (res.statusCode != 200) throw OnlineSearchException('Open Food Facts is not responding (${res.statusCode}).');
     final products = (jsonDecode(res.body)['products'] as List?) ?? [];
     return products.map((p) => _parse(p as Map<String, dynamic>)).whereType<FoodItem>().toList();
   }
@@ -92,15 +84,27 @@ class OpenFoodFactsSource implements NutritionSource {
       name: name,
       brand: (p['brands'] as String?)?.split(',').first.trim(),
       barcode: p['code'] as String?,
-      servingG: (p['serving_quantity'] is num) ? (p['serving_quantity'] as num).toDouble() : null,
+      servingG: switch (p['serving_quantity']) {
+        final num v when v > 0 => v.toDouble(),
+        final String v => double.tryParse(v),
+        _ => null,
+      },
       source: 'off',
       per100g: Nutrients(
         kcal: kcal,
-        protein: num_('proteins_100g') ?? 0,
-        carbs: num_('carbohydrates_100g') ?? 0,
-        fiber: num_('fiber_100g') ?? 0,
-        fat: num_('fat_100g') ?? 0,
+        // Missing nutrients stay null (unknown), never 0 (DESIGN.md §7.4).
+        protein: num_('proteins_100g'),
+        carbs: num_('carbohydrates_100g'),
+        fiber: num_('fiber_100g'),
+        fat: num_('fat_100g'),
       ),
     );
   }
+}
+
+class OnlineSearchException implements Exception {
+  OnlineSearchException(this.message);
+  final String message;
+  @override
+  String toString() => message;
 }

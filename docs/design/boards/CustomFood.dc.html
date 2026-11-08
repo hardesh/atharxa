@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Custom food form</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 1776px; height: 1000px">
+
+<div>
+<p class="cap">Android · New food (from picker › New food)</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none">
+<button class="ib" aria-label="Discard"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button>
+<h1 class="t1" style="flex: 1; padding-left: 4px">New food</h1>
+<button class="btn tx">Save</button>
+</header>
+<form style="flex: 1; display: flex; flex-direction: column; gap: 20px; padding: 16px 16px 0">
+<div class="fld"><label for="n1">Name *</label><input id="n1" type="text" value="Poha"></div>
+<div class="fld"><label for="b1">Brand / note</label><input id="b1" type="text" value="Homemade, with peanuts"></div>
+<div>
+<div class="fld"><label for="s1">Typical serving</label><input id="s1" type="text" inputmode="decimal" value="180"><span class="sfx">g</span></div>
+<p class="hint">Adds a “1 serving (180 g)” chip in the portion dialog</p>
+</div>
+<h2 class="sec">Nutrition per 100 g</h2>
+<div>
+<div class="fld"><label for="k1">Energy *</label><input id="k1" type="text" inputmode="decimal" value="158"><span class="sfx">kcal</span></div>
+<p class="hint">Required</p>
+</div>
+<div class="g2" style="gap: 20px 12px">
+<div class="fld"><label for="p1">Protein</label><input id="p1" type="text" inputmode="decimal" value="3.1"><span class="sfx">g</span></div>
+<div class="fld"><label for="c1">Carbs</label><input id="c1" type="text" inputmode="decimal" value="26.0"><span class="sfx">g</span></div>
+<div class="fld"><label for="f1">Fiber</label><input id="f1" type="text" inputmode="decimal" value="1.8"><span class="sfx">g</span></div>
+<div class="fld f"><label for="t1">Fat</label><input id="t1" type="text" inputmode="decimal" value="4.6"><span class="sfx">g</span></div>
+</div>
+<div style="margin-top: auto; padding: 16px 0 24px; display: flex; flex-direction: column; gap: 8px">
+<button class="btn" type="button" style="width: 100%; height: 48px; border-radius: 24px">Save and add to Breakfast</button>
+<button class="btn tx" type="button" style="width: 100%">Save to My foods only</button>
+</div>
+</form>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Edit food dialog (from My foods › edit), with delete</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Add food</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col" style="gap: 12px">
+<div class="row"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></span><h1 class="t1">Add to Lunch</h1></div>
+<div class="tabs" style="grid-template-columns: repeat(3, minmax(0, 200px))"><span class="tab on">My foods</span><span class="tab">Open Food Facts</span><span class="tab" style="color: var(--ol)">Ask AI</span></div>
+<sc-for list="{{rows}}" as="f" hint-placeholder-count="6"><div class="li ln" style="min-height: 64px"><span style="width: 220px; display: flex; flex-direction: column; gap: 2px"><span class="t3">{{f.n}}</span><span class="sm">{{f.b}}</span></span><span class="bd num">{{f.v}}</span></div></sc-for>
+</div></main>
+</div>
+<div class="scrim"></div>
+<div class="dlg" role="dialog" aria-label="Edit food" style="left: 330px; top: 92px; width: 560px">
+<h2 class="t1">Edit food</h2>
+<div class="g2" style="gap: 20px 12px">
+<div class="fld s2"><label for="n2">Name *</label><input id="n2" type="text" value="Paneer bhurji"></div>
+<div class="fld s2"><label for="b2">Brand / note</label><input id="b2" type="text" value="Homemade"></div>
+<div class="fld s2"><label for="s2">Typical serving</label><input id="s2" type="text" value="150"><span class="sfx">g</span></div>
+</div>
+<h3 class="sec" style="margin: 0">Nutrition per 100 g</h3>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px">
+<div class="fld s2 f" style="padding: 0 8px"><label for="k2">kcal *</label><input id="k2" type="text" value="220"></div>
+<div class="fld s2" style="padding: 0 8px"><label for="p2">Protein g</label><input id="p2" type="text" value="13.0"></div>
+<div class="fld s2" style="padding: 0 8px"><label for="c2">Carbs g</label><input id="c2" type="text" value="5.0"></div>
+<div class="fld s2" style="padding: 0 8px"><label for="f2">Fiber g</label><input id="f2" type="text" value="1.0"></div>
+<div class="fld s2" style="padding: 0 8px"><label for="t2">Fat g</label><input id="t2" type="text" value="16.0"></div>
+</div>
+<p class="sm">Changing values updates future logs only. 6 past log entries keep the values they were logged with.</p>
+<div class="row" style="margin-top: 8px">
+<button class="btn dg"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.trash}}"></path></svg>Delete</button>
+<span style="flex: 1"></span>
+<button class="btn tx">Cancel</button>
+<button class="btn">Save</button>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1776,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',x:'M6 6l12 12M18 6L6 18',back:'M19 12H5M11 6l-6 6 6 6',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'};
+IC.run='M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1';
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const rows=[
+{n:'Paneer bhurji',b:'Homemade',v:'220 kcal · Protein 13.0 g · Carbs 5.0 g · Fiber 1.0 g · Fat 16.0 g'},
+{n:'Roti',b:'Homemade, whole wheat',v:'300 kcal · Protein 10.0 g · Carbs 46.0 g · Fiber 5.0 g · Fat 8.0 g'},
+{n:'Dal tadka',b:'Homemade',v:'120 kcal · Protein 6.0 g · Carbs 15.0 g · Fiber 4.0 g · Fat 4.0 g'},
+{n:'Roasted chana',b:'Loose',v:'370 kcal · Protein 20.0 g · Carbs 58.0 g · Fiber 17.0 g · Fat 5.0 g'},
+{n:'Masala chai',b:'Homemade, with milk',v:'60 kcal · Protein 2.0 g · Carbs 8.0 g · Fiber 0.0 g · Fat 2.0 g'},
+{n:'Rolled oats',b:'Generic',v:'379 kcal · Protein 13.2 g · Carbs 67.7 g · Fiber 10.1 g · Fat 6.5 g'},
+{n:'Toned milk',b:'Generic',v:'58 kcal · Protein 3.1 g · Carbs 4.7 g · Fiber 0.0 g · Fat 3.0 g'},
+{n:'Banana',b:'Generic',v:'89 kcal · Protein 1.1 g · Carbs 22.8 g · Fiber 2.6 g · Fat 0.3 g'}];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,rows,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===0?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

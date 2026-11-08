@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Color palette options</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2772px; height: 1180px">
+<div class="grp">
+<sc-for list="{{pals}}" as="p" hint-placeholder-count="6">
+<div class="{{p.cls}}" style="background: transparent">
+<p class="cap" style="color: var(--cap)">{{p.no}} · {{p.name}}</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px; flex: none; gap: 0"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></span><span class="dt">Today, 8 Nov</span><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></span></header>
+<div class="scr">
+<section class="card" style="background: var(--pric); color: var(--onpric); display: flex; flex-direction: column; gap: 12px">
+<div class="row sb" style="align-items: flex-end"><div><div class="dl num">702</div><div class="bd">kcal left</div></div><div class="bd num" style="text-align: right">1,498 eaten<br>of 2,200 goal</div></div>
+<div class="mg">
+<span class="t3">Protein</span><div class="bar" style="background: var(--trk)"><div style="width: 55%; background: var(--pro)"></div></div><span class="bd num" style="text-align: right">65.9 / 120 g</span>
+<span class="t3">Carbs</span><div class="bar" style="background: var(--trk)"><div style="width: 75%; background: var(--carb)"></div></div><span class="bd num" style="text-align: right">186.9 / 250 g</span>
+<span class="t3">Fiber</span><div class="bar" style="background: var(--trk)"><div style="width: 98%; background: var(--fib)"></div></div><span class="bd num" style="text-align: right">29.5 / 30 g</span>
+<span class="t3">Fat</span><div class="bar" style="background: var(--trk)"><div style="width: 77%; background: var(--fat)"></div></div><span class="bd num" style="text-align: right">53.7 / 70 g</span>
+</div>
+</section>
+<section class="card row" style="gap: 12px"><span class="av" style="background: var(--watc); color: var(--wat)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.water}}"></path></svg></span><div style="flex: 1; display: flex; flex-direction: column; gap: 6px"><div class="row sb"><span class="t3">Water</span><span class="bd num">1,250 / 3,000 ml</span></div><div class="bar" style="flex: none"><div style="width: 42%; background: var(--wat)"></div></div></div></section>
+<section class="card" style="padding: 8px 8px 8px 16px">
+<div class="row sb"><div class="row" style="gap: 12px"><h2 class="t2">Lunch</h2><span class="bd num" style="color: var(--onv)">810 kcal</span></div><span class="ib tn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg></span></div>
+<div class="ln" style="padding: 8px 0"><p class="bd">Paneer bhurji · 150 g</p><p class="sm num">330 kcal · Protein 19.5 g · Carbs 7.5 g · Fiber 1.5 g · Fat 24.0 g</p></div>
+<div class="ln" style="padding: 8px 0"><p class="bd">Roti · 80 g</p><p class="sm num">240 kcal · Protein 8.0 g · Carbs 36.8 g · Fiber 4.0 g · Fat 6.4 g</p></div>
+</section>
+<div class="row" style="gap: 8px"><span class="btn">Start workout</span><span class="btn tl">+250 ml</span><span class="chip sel">Transport</span></div>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><span class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</span></sc-for></nav>
+</div>
+<div style="width: 406px; margin-top: 16px; display: flex; flex-direction: column; gap: 10px">
+<div class="row" style="gap: 6px"><span style="width: 48px; height: 32px; border-radius: 8px; background: var(--pri)"></span><span style="width: 48px; height: 32px; border-radius: 8px; background: var(--pric)"></span><span style="width: 48px; height: 32px; border-radius: 8px; background: var(--secc)"></span><span style="width: 48px; height: 32px; border-radius: 8px; background: var(--bg); border: 1px solid var(--olv)"></span><span style="width: 48px; height: 32px; border-radius: 8px; background: var(--sc3)"></span></div>
+<p class="sm num" style="color: var(--cap); font-size: 13px">{{p.hex}}</p>
+<p class="bd" style="color: var(--cap)">{{p.why}}</p>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2772,"height":1180}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',plus:'M12 5v14M5 12h14',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const dark=this.props.dark ?? false;
+const P=[
+['teal','A','Teal · built-in','Primary #00695C · container #A5F2E4','Calm and clinical; reads as health. Safe, but close to many fitness apps.'],
+['indigo','B','Indigo','Primary #4355B9 · container #DEE0FF','Focused and techy; good fit for an AI-assistant identity. Neutral across food, money and training.'],
+['saffron','C','Saffron','Primary #9A4600 · container #FFDBC8','Warm and Indian; energetic. Works for food; needs care so expense red and primary don’t blur.'],
+['forest','D','Forest · built-in, first-run default','Primary #4C662B · container #CDEDA3','Natural, wellness-leaning. Very easy on the eyes in dark mode.'],
+['ocean','E','Ocean · built-in','Primary #0061A4 · container #D1E4FF','Trustworthy, finance-app feel. Water switches to cyan so it stays distinct from primary.'],
+['plum','F','Plum','Primary #8B418F · container #FFD6FA','Distinctive and personal; least “stock”. Bolder brand, less neutral for finance.']];
+const pals=P.map(([k,no,name,hex,why])=>({no,name,hex,why,cls:'th pal-'+k+(dark?' dark':'')}));
+return {rootCls:'th board'+(dark?' dark':''),ic:IC,pals,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===0?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

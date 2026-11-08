@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workout planning and Strava</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2228px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Workout tab — week plan + Strava</p>
+<div class="ph">
+<dc-import name="TopBar" title="Workout" hint-size="100%,64px"></dc-import>
+<header class="row sb" style="height: 44px; padding: 0 8px 0 16px; flex: none"><span class="t3" style="color: var(--onv)">This week</span><button class="dt" style="font-size: 15px" aria-label="Pick week">2–8 Nov<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button></header>
+<div class="scr">
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; flex: none">
+<sc-for list="{{week}}" as="d" hint-placeholder-count="7"><button class="it" style="align-items: center; padding: 8px 0; border-radius: 12px; background: {{d.bg}}; gap: 4px"><span class="sm" style="color: inherit">{{d.l}}</span><span class="av" style="width: 28px; height: 28px; background: {{d.dot}}; color: {{d.fg}}; font-size: 12px; font-weight: 700">{{d.mk}}</span></button></sc-for>
+</div>
+<section class="card" style="background: var(--pric); color: var(--onpric); display: flex; flex-direction: column; gap: 10px; flex: none">
+<p class="sm" style="color: inherit">Today · Sun 8 Nov</p>
+<h2 class="t1">Lower body A</h2>
+<p class="bd">6 exercises · 18 sets · about 45 min</p>
+<div class="row" style="gap: 8px; margin-top: 4px">
+<button class="btn" style="flex: 1; height: 48px; border-radius: 24px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.play}}"></path></svg>Start workout</button>
+<button class="ib" style="color: inherit" aria-label="Edit plan"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.edit}}"></path></svg></button>
+</div>
+</section>
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex: none">
+<div><p class="sm">Sessions</p><p class="t2 num">5 / 6</p></div>
+<div><p class="sm">Run</p><p class="t2 num">11.2 km</p></div>
+<div><p class="sm">Ride</p><p class="t2 num">18.4 km</p></div>
+</section>
+<section style="flex: none">
+<div class="row sb" style="padding: 4px 0"><h2 class="t3">From Strava</h2><span class="sm row" style="gap: 4px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.sync}}"></path></svg>Imported 07:12</span></div>
+<sc-for list="{{strava}}" as="a" hint-placeholder-count="3"><div class="li ln" style="gap: 14px"><span class="av" style="background: var(--sc3); color: var(--on)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{a.ic}}"></path></svg></span><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">{{a.n}}</span><span class="sm num">{{a.d}}</span></span><span class="bd num" style="font-weight: 500">{{a.km}}</span></div></sc-for>
+</section>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Edit plan — exercises, sets, rest, schedule</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Discard"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button><h1 class="t1" style="flex: 1; padding-left: 4px">Edit plan</h1><button class="btn tx">Save</button></header>
+<div class="scr" style="gap: 14px; padding-top: 12px">
+<div class="fld"><label for="pn">Plan name</label><input id="pn" type="text" value="Lower body A"></div>
+<div><p class="sm" style="margin-bottom: 8px">Repeats on</p>
+<div class="row" style="gap: 6px"><sc-for list="{{days}}" as="d" hint-placeholder-count="7"><button class="{{d.cls}}" style="width: 42px; padding: 0; justify-content: center" aria-label="{{d.full}}">{{d.l}}</button></sc-for></div></div>
+<div class="row sb"><h2 class="sec" style="margin: 0">Exercises</h2><span class="sm">Drag to reorder</span></div>
+<section class="card" style="padding: 0 4px 0 8px">
+<sc-for list="{{ex}}" as="e" hint-placeholder-count="6">
+<div class="li" style="gap: 8px; min-height: 60px; border-top: 1px solid {{e.top}}">
+<svg class="i s" viewBox="0 0 24 24" aria-label="Drag handle" role="img" style="color: var(--ol)"><path d="{{ic.grip}}"></path></svg>
+<button class="it"><span class="bd">{{e.n}}</span><span class="sm num">{{e.s}}</span></button>
+<span class="tag" style="background: var(--sc3); color: var(--onv)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.video}}"></path></svg>{{e.tips}}</span>
+</div>
+</sc-for>
+</section>
+<button class="btn tl" style="align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add exercise</button>
+<p class="sm">About 45 min · rest timers start automatically between sets</p>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Workout — plans, week and Strava connection</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Workout</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<dc-import name="TopBar" title="Workout" mode="mac" hint-size="100%,60px"></dc-import>
+<div class="row" style="justify-content: flex-end; margin-top: -8px"><button class="btn tl"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>New plan</button></div>
+<div class="g2" style="grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr)">
+<section class="card" style="display: flex; flex-direction: column; gap: 4px">
+<div class="row sb"><h2 class="t2">This week · 2–8 Nov</h2><span class="sm num">5 of 6 done</span></div>
+<sc-for list="{{week}}" as="d" hint-placeholder-count="7"><div class="li ln" style="min-height: 44px; padding: 4px 0; gap: 12px"><span class="sm" style="width: 32px">{{d.l}}</span><span class="bd" style="flex: 1">{{d.n}}</span><span class="tag" style="background: {{d.tbg}}; color: {{d.tfg}}">{{d.st}}</span></div></sc-for>
+<button class="btn" style="margin-top: 10px; align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.play}}"></path></svg>Start Lower body A</button>
+</section>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<section class="card" style="display: flex; flex-direction: column; gap: 10px">
+<div class="row sb"><h2 class="t2">Strava</h2><span class="tag" style="background: var(--okc); color: var(--ok)">Connected</span></div>
+<p class="sm">Signed in as [your Strava name] · imported today 07:12</p>
+<div class="row sb"><span class="bd">Import my activities</span><button class="sw on" role="switch" aria-checked="true" aria-label="Import activities"><span></span></button></div>
+<div class="row sb"><span class="bd">Upload finished workouts</span><button class="sw on" role="switch" aria-checked="true" aria-label="Upload workouts"><span></span></button></div>
+<div class="row" style="gap: 4px"><button class="btn ou" style="height: 36px; padding: 0 14px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg>Import now</button><button class="btn tx" style="color: var(--err)">Disconnect</button></div>
+</section>
+<section class="card" style="padding-top: 8px">
+<h2 class="t3" style="padding: 4px 0">Recent from Strava</h2>
+<sc-for list="{{strava}}" as="a" hint-placeholder-count="3"><div class="li ln" style="min-height: 48px; gap: 12px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{a.ic}}"></path></svg><span style="flex: 1; display: flex; flex-direction: column"><span class="bd">{{a.n}}</span><span class="sm num">{{a.d}}</span></span><span class="bd num">{{a.km}}</span></div></sc-for>
+</section>
+</div>
+</div>
+<section class="card">
+<h2 class="t2" style="padding-bottom: 8px">Plans</h2>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="4"><button class="it" style="background: var(--bg); border: 1px solid var(--olv); border-radius: 12px; padding: 12px"><span class="t3">{{p.n}}</span><span class="sm">{{p.d}}</span></button></sc-for>
+</div>
+</section>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2228,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',bike:'M6 18a3 3 0 1 0 0-.01M18 18a3 3 0 1 0 0-.01M6 18l4-8h5l3 8M10 10l-1-3H7M15 10l1-3h2',plus:'M12 5v14M5 12h14',x:'M6 6l12 12M18 6L6 18',down:'M6 9l6 6 6-6',play:'M7 4l13 8-13 8z',edit:'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',sync:'M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4',grip:'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',video:'M3 6h13v12H3zM16 10l5-3v10l-5-3'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const W=[['Mon','Upper body A','done'],['Tue','Run 5.2 km · Strava','done'],['Wed','Rest','rest'],['Thu','Upper body B','done'],['Fri','Run 6.0 km · Strava','done'],['Sat','Ride 18.4 km · Strava','done'],['Sun','Lower body A','today']];
+const week=W.map(([l,n,s])=>({l,n,mk:s==='done'?'✓':s==='rest'?'–':'•',bg:s==='today'?'var(--secc)':'transparent',dot:s==='done'?'var(--pri)':s==='today'?'var(--bg)':'var(--sc3)',fg:s==='done'?'var(--onpri)':'var(--onv)',st:s==='done'?'Done':s==='rest'?'Rest':'Today',tbg:s==='done'?'var(--okc)':s==='today'?'var(--pric)':'var(--sc3)',tfg:s==='done'?'var(--ok)':s==='today'?'var(--onpric)':'var(--onv)'}));
+const strava=[{n:'Afternoon Ride',d:'Sat 7 Nov · 52:10',km:'18.4 km',ic:IC.bike},{n:'Evening Run',d:'Fri 6 Nov · 33:24 · 5:34 /km',km:'6.0 km',ic:IC.run},{n:'Morning Run',d:'Tue 3 Nov · 28:40 · 5:31 /km',km:'5.2 km',ic:IC.run}];
+const ex=[['Goblet squat','3 × 10 · 16 kg · rest 90 s','3'],['Romanian deadlift','3 × 10 · 30 kg · rest 90 s','3'],['Walking lunge','3 × 12 each leg · 8 kg · rest 60 s','2'],['Glute bridge','3 × 15 · 20 kg · rest 60 s','2'],['Calf raise','3 × 15 · bodyweight · rest 45 s','1'],['Plank','3 × 45 s · rest 45 s','2']].map(([n,s,t],i)=>({n,s,tips:t+' tips',top:i===0?'transparent':'var(--olv)'}));
+const days=[['M','Monday'],['T','Tuesday'],['W','Wednesday'],['T','Thursday'],['F','Friday'],['S','Saturday'],['S','Sunday']].map(([l,full],i)=>({l,full,cls:i===6?'chip sel':'chip'}));
+const plans=[{n:'Upper body A',d:'Mon · 7 exercises'},{n:'Upper body B',d:'Thu · 6 exercises'},{n:'Lower body A',d:'Sun · 6 exercises'},{n:'Easy run 5 km',d:'Tue, Fri · logged via Strava'}];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,week,strava,ex,days,plans,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===3?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

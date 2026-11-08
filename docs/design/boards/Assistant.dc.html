@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Assistant chat and local models</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2228px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Assistant chat (sparkle button in every top bar)</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1" style="flex: 1; padding-left: 4px">Atharxa</h1><button class="chip">Gemma 4<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button></header>
+<div class="scr" style="gap: 14px; padding-top: 8px">
+<div style="align-self: flex-end; max-width: 80%; background: var(--pri); color: var(--onpri); border-radius: 20px 20px 4px 20px; padding: 10px 14px" class="bd">How much did I spend on food and groceries this month?</div>
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 92%">
+<span class="tag" style="align-self: flex-start; background: var(--sc3); color: var(--onv)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.db}}"></path></svg>Read transactions · Nov 2026 · 3 matches</span>
+<p class="bd">₹5,050 so far in November: groceries ₹3,770 over 2 trips, and eating out ₹1,280 (lunch with team on 4 Nov).</p>
+</div>
+<div style="align-self: flex-end; max-width: 80%; background: var(--pri); color: var(--onpri); border-radius: 20px 20px 4px 20px; padding: 10px 14px" class="bd">Suggest a high-protein dinner under 700 kcal from my foods</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="tag" style="align-self: flex-start; background: var(--sc3); color: var(--onv)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.db}}"></path></svg>Read My foods · today’s log</span>
+<section class="card" style="padding: 12px 14px">
+<sc-for list="{{dinner}}" as="d" hint-placeholder-count="3"><div class="row sb" style="padding: 4px 0"><span class="bd">{{d.n}}</span><span class="sm num">{{d.v}}</span></div></sc-for>
+<div class="row sb ln" style="padding-top: 8px; margin-top: 4px"><span class="t3">Total</span><span class="t3 num">630 kcal · protein 30.6 g</span></div>
+</section>
+<p class="bd">Leaves 72 kcal of today’s budget and brings protein to 96.5 / 120 g.</p>
+<div class="row" style="gap: 8px"><button class="btn" style="height: 36px; padding: 0 16px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Add to Dinner</button><button class="btn ou" style="height: 36px; padding: 0 16px">Try another</button></div>
+</div>
+</div>
+<div style="flex: none; padding: 8px 12px 12px; background: var(--bg); display: flex; flex-direction: column; gap: 8px">
+<div class="row" style="gap: 8px; overflow: hidden"><button class="chip">Summarize my week</button><button class="chip">Workout time this month</button></div>
+<div class="row" style="height: 56px; border-radius: 28px; background: var(--sc3); padding: 0 6px 0 18px">
+<label for="msg" style="position: absolute; left: -9999px">Message</label>
+<input id="msg" type="text" placeholder="Ask Atharxa about food, water, workouts, money" style="flex: 1; min-width: 0; border: 0; background: none; outline: none; font: 400 16px/24px Roboto, system-ui, sans-serif; color: var(--on)">
+<button class="ib" aria-label="Voice input"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.mic}}"></path></svg></button>
+<button class="ib" style="background: var(--pri); color: var(--onpri)" aria-label="Send"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.send}}"></path></svg></button>
+</div>
+<p class="sm" style="text-align: center">Runs on this phone, offline. Numbers come from your data; wording can be wrong.</p>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · You › AI models — swap models as they improve</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1">AI models</h1></header>
+<div class="scr" style="gap: 12px">
+<section class="card row" style="gap: 12px; background: var(--sc2)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.chip}}"></path></svg><div><p class="t3">This phone</p><p class="sm num">[RAM] GB RAM · [chipset] · [free] GB free</p></div></section>
+<h2 class="sec" style="margin: 4px 0 0">Installed</h2>
+<section class="card" style="padding: 4px 16px">
+<div class="li" style="gap: 12px"><span class="av" style="background: var(--pri); color: var(--onpri)"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg></span><span style="flex: 1; display: flex; flex-direction: column"><span class="t3">Gemma 4 · [variant]</span><span class="sm num">[size] GB · default for chat and summaries</span></span><button class="ib" aria-label="Model options"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="{{ic.more}}"></path></svg></button></div>
+</section>
+<h2 class="sec" style="margin: 4px 0 0">Available</h2>
+<section class="card" style="padding: 4px 16px">
+<sc-for list="{{avail}}" as="m" hint-placeholder-count="3">
+<div class="li" style="gap: 12px; border-top: 1px solid {{m.top}}; align-items: flex-start"><span style="flex: 1; display: flex; flex-direction: column; gap: 4px"><span class="t3" style="color: {{m.col}}">{{m.n}}</span><span class="sm num">{{m.d}}</span><span class="tag" style="align-self: flex-start; background: {{m.tbg}}; color: {{m.tfg}}">{{m.st}}</span></span><button class="{{m.bcls}}" style="height: 36px; padding: 0 14px" disabled="{{m.dis}}">{{m.b}}</button></div>
+</sc-for>
+</section>
+<button class="btn tx" style="align-self: flex-start; padding: 0 4px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>Import a model file</button>
+<h2 class="sec" style="margin: 4px 0 0">What the assistant can read</h2>
+<section class="card" style="padding: 4px 16px">
+<sc-for list="{{scopes}}" as="s" hint-placeholder-count="4"><div class="li" style="gap: 12px; min-height: 48px; border-top: 1px solid {{s.top}}"><span class="bd" style="flex: 1">{{s.n}}</span><button class="{{s.cls}}" role="switch" aria-checked="{{s.on}}" aria-label="{{s.n}}"><span></span></button></div></sc-for>
+</section>
+<p class="sm">Models are not synced; each device downloads the ones it can run. Chat history can sync with your Mac.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Assistant page with model picker open</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Atharxa</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main">
+<button class="ib" style="width: 56px; height: 56px; border-radius: 16px; background: var(--pric); color: var(--onpric); margin-bottom: 8px" aria-label="Assistant (⌘K)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ai}}"></path></svg></button>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<div style="width: 240px; flex: none; border-right: 1px solid var(--olv); padding: 16px 12px; display: flex; flex-direction: column; gap: 4px">
+<button class="btn tl" style="margin-bottom: 12px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>New chat</button>
+<sc-for list="{{chats}}" as="c" hint-placeholder-count="5"><button class="it" style="padding: 10px 12px; border-radius: 12px; background: {{c.bg}}"><span class="bd" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.t}}</span><span class="sm">{{c.d}}</span></button></sc-for>
+</div>
+<main class="mc"><div class="col" style="position: relative">
+<div class="row sb"><h1 class="t1">Food and dinner ideas</h1>
+<button class="chip sel">Gemma 4 · [variant] on this Mac<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.up}}"></path></svg></button></div>
+<div role="listbox" aria-label="Model" style="position: absolute; right: 0; top: 44px; width: 380px; background: var(--sc2); border-radius: 12px; padding: 8px 0; box-shadow: 0 8px 24px rgba(0,0,0,.2); z-index: 3">
+<sc-for list="{{macModels}}" as="m" hint-placeholder-count="3"><div role="option" aria-selected="{{m.sel}}" class="li" style="padding: 8px 16px; gap: 12px; min-height: 60px; background: {{m.bg}}"><span style="flex: 1; display: flex; flex-direction: column"><span class="t3" style="color: {{m.col}}">{{m.n}}</span><span class="sm">{{m.d}}</span></span><span class="sm">{{m.r}}</span></div></sc-for>
+<div class="ln" style="padding: 8px 16px 0"><button class="btn tx" style="padding: 0">Manage models…</button></div>
+</div>
+<div style="align-self: flex-end; max-width: 70%; background: var(--pri); color: var(--onpri); border-radius: 20px 20px 4px 20px; padding: 10px 14px; margin-top: 260px" class="bd">Suggest a high-protein dinner under 700 kcal from my foods</div>
+<div style="display: flex; flex-direction: column; gap: 8px; max-width: 560px">
+<span class="tag" style="align-self: flex-start; background: var(--sc3); color: var(--onv)">Read My foods · today’s log</span>
+<section class="card"><sc-for list="{{dinner}}" as="d" hint-placeholder-count="3"><div class="row sb" style="padding: 4px 0"><span class="bd">{{d.n}}</span><span class="sm num">{{d.v}}</span></div></sc-for><div class="row sb ln" style="padding-top: 8px; margin-top: 4px"><span class="t3">Total</span><span class="t3 num">630 kcal · protein 30.6 g</span></div></section>
+<div class="row" style="gap: 8px"><button class="btn" style="height: 36px; padding: 0 16px">Add to Dinner</button><button class="btn ou" style="height: 36px; padding: 0 16px">Try another</button></div>
+</div>
+<div class="row" style="margin-top: auto; height: 56px; border-radius: 28px; background: var(--sc3); padding: 0 6px 0 20px">
+<label for="msg2" style="position: absolute; left: -9999px">Message</label>
+<input id="msg2" type="text" placeholder="Ask Atharxa · ⌘K" style="flex: 1; min-width: 0; border: 0; background: none; outline: none; font: 400 16px/24px Roboto, system-ui, sans-serif; color: var(--on)">
+<button class="ib" style="background: var(--pri); color: var(--onpri)" aria-label="Send"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.send}}"></path></svg></button>
+</div>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2228,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',back:'M19 12H5M11 6l-6 6 6 6',down:'M6 9l6 6 6-6',up:'M6 15l6-6 6 6',plus:'M12 5v14M5 12h14',check:'M5 12l5 5 9-10',more:'M12 5h.01M12 12h.01M12 19h.01',send:'M4 12l16-8-6 16-2-6z',mic:'M9 5a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0zM5 11a7 7 0 0 0 14 0M12 18v3',db:'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',chip:'M7 7h10v10H7zM10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const dinner=[{n:'Paneer bhurji · 150 g',v:'330 kcal · protein 19.5 g'},{n:'Roti · 80 g',v:'240 kcal · protein 8.0 g'},{n:'Curd · 100 g',v:'60 kcal · protein 3.1 g'}];
+const ok={tbg:'var(--okc)',tfg:'var(--ok)'},no={tbg:'var(--sc3)',tfg:'var(--onv)'};
+const avail=[{n:'Gemma 4 · [smaller variant]',d:'[size] GB · faster, shorter answers',st:'Fits this phone',b:'Download',bcls:'btn tl',dis:false,col:'var(--on)',...ok},{n:'[Future model]',d:'[size] GB · added from the model catalog',st:'Fits this phone',b:'Download',bcls:'btn tl',dis:false,col:'var(--on)',...ok},{n:'Gemma 4 · [larger variant]',d:'Needs about [n] GB RAM',st:'Runs on your Mac only',b:'Download',bcls:'btn ou',dis:true,col:'var(--onv)',...no}].map((m,i)=>({...m,top:i===0?'transparent':'var(--olv)'}));
+const scopes=[['Food log and water',true],['Workouts and Strava',true],['Finance transactions',true],['Transaction notes text',false]].map(([n,on],i)=>({n,on:on?'true':'false',cls:on?'sw on':'sw',top:i===0?'transparent':'var(--olv)'}));
+const chats=[{t:'Food and dinner ideas',d:'Today',bg:'var(--secc)'},{t:'November spending',d:'Today',bg:'transparent'},{t:'Running pace this month',d:'Fri',bg:'transparent'},{t:'Weekly summary',d:'Mon',bg:'transparent'}];
+const macModels=[{n:'Gemma 4 · [variant]',d:'Default · installed',r:'✓',sel:'true',bg:'var(--secc)',col:'var(--on)'},{n:'Gemma 4 · [larger variant]',d:'Installed · Mac only, slower, better answers',r:'',sel:'false',bg:'transparent',col:'var(--on)'},{n:'[Future model]',d:'Not installed · download in Manage models',r:'',sel:'false',bg:'transparent',col:'var(--onv)'}];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,dinner,avail,scopes,chats,macModels,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:'nv'}))};
+}
+}
+</script>
+</body>
+</html>

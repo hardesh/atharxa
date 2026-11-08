@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Export expenses</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2228px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Finance › ⋮ menu</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 4px 0 8px; flex: none; gap: 0"><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></span><span class="dt">November 2026</span><span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></span><span style="flex: 1"></span><button class="ib" style="background: var(--sc3)" aria-label="More options"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="{{ic.more}}"></path></svg></button></header>
+<div class="scr">
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px"><div><p class="sm">Income</p><p class="t2 num" style="color: var(--inc)">₹1,35,000</p></div><div><p class="sm">Expenses</p><p class="t2 num" style="color: var(--exp)">₹45,139</p></div><div><p class="sm">Balance</p><p class="t2 num">₹89,861</p></div></section>
+<section class="card" style="height: 220px"><p class="t3">Spending by category</p></section>
+</div>
+<div role="menu" style="position: absolute; right: 8px; top: 60px; width: 240px; background: var(--sc2); border-radius: 4px; padding: 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,.22)">
+<sc-for list="{{menu}}" as="m" hint-placeholder-count="3"><button role="menuitem" class="li" style="width: 100%; background: {{m.bg}}; border: 0; padding: 0 16px; min-height: 48px; font: 400 14px Roboto, system-ui, sans-serif; color: var(--on); gap: 12px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{m.d}}"></path></svg>{{m.l}}</button></sc-for>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Export sheet → Android share sheet or Downloads</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px; flex: none"><span class="dt">November 2026</span></header>
+<div class="scrim"></div>
+<div class="sheet" role="dialog" aria-label="Export transactions" style="top: 100px">
+<div class="handle"></div>
+<h2 class="t1">Export transactions</h2>
+<div><p class="sm" style="margin-bottom: 8px">Format</p><div class="seg"><button><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.file}}"></path></svg>CSV</button><button class="on"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>Excel (.xlsx)</button></div></div>
+<div><p class="sm" style="margin-bottom: 8px">Range</p><div class="row" style="flex-wrap: wrap; gap: 8px"><button class="chip sel">November 2026</button><button class="chip">Last 3 months</button><button class="chip">This year</button><button class="chip">Custom…</button></div></div>
+<div><p class="sm" style="margin-bottom: 8px">Include</p><div class="row" style="flex-wrap: wrap; gap: 8px"><button class="chip sel">Expenses</button><button class="chip sel">Income</button><button class="chip sel">Notes</button></div></div>
+<div class="row sb"><div><p class="bd">Add “By category” and “Summary” sheets</p><p class="sm">Excel only</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Add summary sheets"><span></span></button></div>
+<div class="row sb"><div><p class="bd">Expenses as negative amounts</p><p class="sm">Handy for SUM() in spreadsheets</p></div><button class="sw" role="switch" aria-checked="false" aria-label="Expenses as negative amounts"><span></span></button></div>
+<p class="sm num">12 transactions · file: transactions-2026-11.xlsx</p>
+<div class="row" style="gap: 8px"><button class="btn ou" style="flex: 1">Save to Downloads</button><button class="btn" style="flex: 1"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.share}}"></path></svg>Share…</button></div>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Export dialog with preview → native Save panel</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Finance</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<div class="row"><span class="dt">November 2026</span><span style="flex: 1"></span><button class="btn ou"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.dl}}"></path></svg>Export</button><button class="btn">Add transaction</button></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px"><section class="card"><p class="sm">Income</p><p class="t0 num">₹1,35,000</p></section><section class="card"><p class="sm">Expenses</p><p class="t0 num">₹45,139</p></section><section class="card"><p class="sm">Balance</p><p class="t0 num">₹89,861</p></section></div>
+</div></main>
+</div>
+<div class="scrim"></div>
+<div class="dlg" role="dialog" aria-label="Export transactions" style="left: 220px; right: 120px; top: 80px">
+<div class="row sb"><h2 class="t1">Export transactions</h2><span class="sm num">12 rows · 1–30 Nov 2026</span></div>
+<div style="display: grid; grid-template-columns: 200px 1fr 1fr; gap: 16px; align-items: end">
+<div><p class="sm" style="margin-bottom: 8px">Format</p><div class="seg"><button class="on">CSV</button><button>Excel</button></div></div>
+<div class="fld s2"><label for="rg">Range</label><input id="rg" type="text" value="November 2026"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></div>
+<div class="fld s2"><label for="fn">File name</label><input id="fn" type="text" value="transactions-2026-11.csv"></div>
+</div>
+<div class="row" style="gap: 8px"><button class="chip sel">Expenses</button><button class="chip sel">Income</button><button class="chip sel">Notes</button><span class="sm" style="margin-left: 8px">UTF-8 with BOM so Excel shows ₹ correctly</span></div>
+<div style="background: var(--bg); border-radius: 12px; padding: 12px 14px; font: 13px/20px ui-monospace, Menlo, monospace; color: var(--on); overflow: hidden">
+<sc-for list="{{csv}}" as="c" hint-placeholder-count="6"><div style="white-space: nowrap">{{c}}</div></sc-for>
+<div style="color: var(--onv)">… 6 more rows</div>
+</div>
+<div class="row" style="justify-content: flex-end; gap: 4px"><button class="btn tx">Cancel</button><button class="btn">Save…</button></div>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2228,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6',down:'M6 9l6 6 6-6',more:'M12 5h.01M12 12h.01M12 19h.01',check:'M5 12l5 5 9-10',file:'M6 3h8l4 4v14H6zM14 3v4h4',share:'M18 8a3 3 0 1 0 0-.01M6 12a3 3 0 1 0 0-.01M18 16a3 3 0 1 0 0-.01M8.6 13.5l6.8 3.9M15.4 6.6l-6.8 3.9',dl:'M12 4v11M7 10l5 5 5-5M5 20h14',tag:'M3 12V4h8l9 9-8 8z',ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const menu=[{l:'Export as CSV / Excel…',d:IC.dl,bg:'var(--sc3)'},{l:'Summarize month',d:IC.ai,bg:'transparent'},{l:'Manage categories',d:IC.tag,bg:'transparent'}];
+const csv=['date,type,category,amount,currency,note','2026-11-01,Income,Salary,120000.00,INR,Salary','2026-11-01,Expense,Rent,28000.00,INR,Rent','2026-11-02,Expense,Groceries,3150.00,INR,Weekly groceries','2026-11-02,Expense,Bills,2340.00,INR,Electricity bill','2026-11-04,Expense,Food,1280.00,INR,Lunch with team'];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,menu,csv,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===4?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meal plan</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 1776px; height: 1460px">
+
+<div>
+<p class="cap">Android · Meal plan — stacked rows at 130% text, swipe to remove</p>
+<div class="ph">
+<dc-import name="TopBar" title="Meal plan" hint-size="100%,64px"></dc-import>
+<header class="row sb" style="height: 48px; padding: 0 8px; flex: none">
+<button class="ib" aria-label="Previous day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></button>
+<button class="dt" aria-label="Pick date">Tomorrow, 9 Nov</button>
+<button class="ib" aria-label="Next day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></button>
+</header>
+<div class="scr">
+<section class="card" style="display: flex; flex-direction: column; gap: 10px; flex: none">
+<div class="row sb" style="align-items: flex-start">
+<div><p class="sm">Planned</p><div class="row" style="align-items: baseline; gap: 6px"><span class="t0 num">1,841</span><span class="bd" style="color: var(--onv)">/ 2,200 kcal</span></div></div>
+<button class="ib" aria-label="Plan options"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="{{ic.more}}"></path></svg></button>
+</div>
+<div class="mg">
+<span class="t3">Protein</span><div class="bar"><div style="width: 89%; background: var(--pro)"></div></div><span class="bd num" style="text-align: right">106.2 / 120 g</span>
+<span class="t3">Carbs</span><div class="bar"><div style="width: 99%; background: var(--carb)"></div></div><span class="bd num" style="text-align: right">246.5 / 250 g</span>
+<span class="t3">Fiber</span><div class="bar"><div style="width: 100%; background: var(--fib)"></div></div><span class="bd num" style="text-align: right">43.7 / 30 g</span>
+</div>
+</section>
+<sc-for list="{{phone}}" as="m" hint-placeholder-count="4">
+<section class="card" style="padding: 8px 12px 4px 16px; flex: none">
+<div class="row sb">
+<div class="row" style="gap: 10px"><h2 class="t2">{{m.n}}</h2><span class="bd num" style="color: var(--onv)">{{m.k}} kcal</span></div>
+<div class="row" style="gap: 2px"><button class="btn tx" style="height: 36px; padding: 0 10px">Log</button><button class="ib tn" aria-label="Add to {{m.n}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg></button></div>
+</div>
+<sc-for list="{{m.rows}}" as="r" hint-placeholder-count="3">
+<div style="position: relative; border-bottom: 1px solid var(--olv); overflow: hidden">
+<sc-if value="{{r.swiped}}" hint-placeholder-val="{{false}}"><div class="row" style="position: absolute; inset: 0; justify-content: flex-end; padding-right: 20px; background: var(--err); color: var(--bg); font-size: 14px; font-weight: 500"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.trash}}"></path></svg>Remove</div></sc-if>
+<div style="padding: 8px 0; background: var(--sc1); position: relative; transform: {{r.tx}}">
+<div class="row sb"><span class="bd">{{r.n}}</span><span class="bd num">{{r.g}} g</span></div>
+<p class="sm num">{{r.k}} kcal · Protein {{r.p}} g · Carbs {{r.c}} g · Fiber {{r.f}} g</p>
+</div>
+</div>
+</sc-for>
+<div style="padding: 8px 0"><p class="t3 num">Total · {{m.k}} kcal</p><p class="sm num">Protein {{m.p}} g · Carbs {{m.c}} g · Fiber {{m.f}} g</p></div>
+</section>
+</sc-for>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+<p class="sm" style="width: 406px; margin-top: 16px; font-size: 13px; line-height: 18px; color: var(--cap)">Why this pattern: at the default 130% text size each component takes two lines (name and grams, then kcal, protein, carbs and fiber with units), so nothing truncates or scrolls sideways. If text is set to 100%, the compact 5-column table returns (see Phone sizes). Remove = swipe left (Dismissible) with an Undo snackbar; long-press offers Edit grams / Remove.</p>
+</div>
+
+<div>
+<p class="cap">macOS · Meal plan — full table, plan menu open</p>
+<div class="mac" style="height: 1320px">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Meal plan</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<dc-import name="TopBar" title="Meal plan" mode="mac" hint-size="100%,60px"></dc-import>
+<div class="row">
+<button class="ib" aria-label="Previous day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></button>
+<button class="dt" aria-label="Pick date">Tomorrow, Mon 9 Nov<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button>
+<button class="ib" aria-label="Next day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></button>
+</div>
+<section class="card" style="display: grid; grid-template-columns: 200px minmax(0, 1fr) 40px; gap: 24px; align-items: center; position: relative">
+<div><p class="sm">Planned total</p><div class="t0 num">1,841</div><p class="bd" style="color: var(--onv)">of 2,200 kcal · 359 under</p></div>
+<div class="mg">
+<span class="t3">Protein</span><div class="bar"><div style="width: 89%; background: var(--pro)"></div></div><span class="bd num" style="text-align: right">106.2 / 120 g</span>
+<span class="t3">Carbs</span><div class="bar"><div style="width: 99%; background: var(--carb)"></div></div><span class="bd num" style="text-align: right">246.5 / 250 g</span>
+<span class="t3">Fiber</span><div class="bar"><div style="width: 100%; background: var(--fib)"></div></div><span class="bd num" style="text-align: right">43.7 / 30 g</span>
+</div>
+<button class="ib" aria-label="Plan options" style="align-self: start; background: var(--sc3)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width: 3"><path d="{{ic.more}}"></path></svg></button>
+<div role="menu" style="position: absolute; right: 16px; top: 60px; width: 280px; background: var(--sc2); border-radius: 4px; padding: 8px 0; box-shadow: 0 6px 20px rgba(0,0,0,.2); z-index: 3">
+<button role="menuitem" class="li" style="width: 100%; background: none; border: 0; padding: 0 16px; min-height: 48px; font: 400 14px Roboto, system-ui, sans-serif; color: var(--on); gap: 12px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>Log whole day</button>
+<button role="menuitem" class="li" style="width: 100%; background: none; border: 0; padding: 0 16px; min-height: 48px; font: 400 14px Roboto, system-ui, sans-serif; color: var(--on); gap: 12px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.copy}}"></path></svg>Copy plan from another day…</button>
+<button role="menuitem" class="li" style="width: 100%; background: none; border: 0; padding: 0 16px; min-height: 48px; font: 400 14px Roboto, system-ui, sans-serif; color: var(--on); gap: 12px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.trash}}"></path></svg>Clear plan</button>
+</div>
+</section>
+<sc-for list="{{meals}}" as="m" hint-placeholder-count="4">
+<section class="card" style="padding: 8px 12px 8px 16px">
+<div class="row sb">
+<div class="row" style="gap: 12px"><h2 class="t2">{{m.n}}</h2><span class="bd num" style="color: var(--onv)">{{m.k}} kcal</span></div>
+<div class="row" style="gap: 4px"><button class="btn ou" style="height: 36px; padding: 0 16px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>Log</button><button class="ib tn" aria-label="Add to {{m.n}}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg></button></div>
+</div>
+<table class="tbl">
+<thead><tr><th>Component</th><th>g</th><th>kcal</th><th>Protein</th><th>Carbs</th><th>Fiber</th><th style="width: 40px"><span style="position: absolute; left: -9999px">Remove</span></th></tr></thead>
+<tbody>
+<sc-for list="{{m.rows}}" as="r" hint-placeholder-count="3">
+<tr><td>{{r.n}}</td><td>{{r.g}}</td><td>{{r.k}}</td><td>{{r.p}}</td><td>{{r.c}}</td><td>{{r.f}}</td><td style="padding: 0"><button class="ib" style="width: 32px; height: 32px" aria-label="Remove {{r.n}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button></td></tr>
+</sc-for>
+</tbody>
+<tfoot><tr><td>Total</td><td></td><td>{{m.k}}</td><td>{{m.p}}</td><td>{{m.c}}</td><td>{{m.f}}</td><td></td></tr></tfoot>
+</table>
+</section>
+</sc-for>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1776,"height":1460}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',plus:'M12 5v14M5 12h14',x:'M6 6l12 12M18 6L6 18',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6',down:'M6 9l6 6 6-6',more:'M12 5h.01M12 12h.01M12 19h.01',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',check:'M5 12l5 5 9-10',copy:'M8 8h12v12H8zM16 8V4H4v12h4'};
+IC.run='M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1';
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+const R=(n,g,k,p,c,f,sw)=>({n,g,k,p,c,f,swiped:!!sw,tx:sw?'translateX(-96px)':'none'});
+class Component extends DCLogic {
+renderVals() {
+const meals=[
+{n:'Breakfast',k:'450',p:'15.4',c:'77.4',f:'9.2',rows:[R('Rolled oats','60','227','7.9','40.6','6.1'),R('Toned milk','200','116','6.2','9.4','0.0'),R('Banana','120','107','1.3','27.4','3.1')]},
+{n:'Lunch',k:'780',p:'31.1',c:'97.0',f:'21.0',rows:[R('Roti','80','240','8.0','36.8','4.0'),R('Dal tadka','250','300','15.0','37.5','10.0'),R('Mixed veg sabzi','200','180','5.0','18.0','7.0'),R('Curd','100','60','3.1','4.7','0.0')]},
+{n:'Snacks',k:'215',p:'6.6',c:'45.0',f:'9.9',rows:[R('Roasted chana','30','111','6.0','17.4','5.1'),R('Apple','200','104','0.6','27.6','4.8')]},
+{n:'Dinner',k:'396',p:'53.1',c:'27.1',f:'3.6',rows:[R('Grilled chicken','160','264','49.6','0.0','0.0'),R('Brown rice, cooked','100','112','2.3','23.5','1.8'),R('Salad','100','20','1.2','3.6','1.8')]}];
+const phone=meals.map(m=>({...m,rows:m.n==='Lunch'?m.rows.map((r,i)=>i===3?R(r.n,r.g,r.k,r.p,r.c,r.f,true):r):m.rows}));
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,meals,phone,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===1?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

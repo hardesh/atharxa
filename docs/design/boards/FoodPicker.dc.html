@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Food picker and portion dialog</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2228px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Food picker — Online tab (decluttered)</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 16px 0 4px; flex: none">
+<button class="ib" aria-label="Back to Today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button>
+<h1 class="t1" style="flex: 1; font-weight: 500">Add to Lunch</h1>
+</header>
+<div style="padding: 4px 16px 12px; flex: none">
+<div class="row" style="height: 52px; border-radius: 26px; background: var(--sc3); padding: 0 4px 0 16px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.search}}"></path></svg>
+<label for="q1" style="position: absolute; left: -9999px">Search foods</label>
+<input id="q1" type="text" value="oats" style="flex: 1; min-width: 0; border: 0; background: none; outline: none; font: 400 20px/28px Roboto, system-ui, sans-serif; color: var(--on)">
+<button class="ib" aria-label="Clear search"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button>
+</div>
+</div>
+<div class="tabs">
+<button class="tab">My foods</button>
+<button class="tab on">Online</button>
+<button class="tab" disabled>Ask AI</button>
+</div>
+<p class="sm" style="padding: 12px 16px 4px; text-align: right">kcal per 100 g</p>
+<div class="lst" style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<sc-for list="{{off}}" as="f" hint-placeholder-count="5">
+<button class="li it" style="flex-direction: row; gap: 16px; min-height: 72px; flex: none; border-bottom: 1px solid var(--olv)">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span class="t3" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.n}}</span><span class="sm" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.b}}</span></span>
+<span class="t3 num">{{f.k}}</span>
+</button>
+</sc-for>
+</div>
+<button class="fab"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>New food</button>
+</div>
+<p class="sm" style="width: 406px; margin-top: 16px; font-size: 13px; line-height: 18px; color: var(--cap)">Decluttered: one title (“Add to Lunch”), one search field, plain tab labels, two lines per result with kcal on the right. Protein, carbs, fiber and fat per 100 g appear in the portion dialog the moment you tap. The Online tab caches picked foods to My foods automatically.</p>
+</div>
+
+<div>
+<p class="cap">Android · Portion dialog (tap a result)</p>
+<div class="ph">
+<header class="row" style="height: 72px; padding: 8px 12px 8px 4px; flex: none">
+<span class="ib"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></span>
+<div class="row" style="flex: 1; height: 48px; border-radius: 24px; background: var(--sc3); padding: 0 16px"><span class="bd">oats</span></div>
+</header>
+<div class="tabs" style="margin-top: 8px"><span class="tab">My foods</span><span class="tab on">Online</span><span class="tab" style="color: var(--ol)">Ask AI</span></div>
+<div class="lst" style="padding: 0 16px">
+<sc-for list="{{off}}" as="f" hint-placeholder-count="5"><div class="li ln" style="min-height: 76px; flex-direction: column; align-items: flex-start; gap: 2px; justify-content: center"><span class="t3">{{f.n}}</span><span class="sm">{{f.b}}</span></div></sc-for>
+</div>
+<div class="scrim"></div>
+<div class="dlg" role="dialog" aria-label="Add Rolled Oats" style="left: 20px; right: 20px; top: 150px">
+<div>
+<h2 class="t1">Rolled Oats</h2>
+<p class="sm" style="margin-top: 4px">Sunvalley Foods · Open Food Facts</p>
+</div>
+<div>
+<div class="fld f s2"><label for="g1">Grams</label><input id="g1" type="text" inputmode="decimal" value="50"><span class="sfx">g</span></div>
+</div>
+<div class="row">
+<button class="chip">1 serving (40 g)</button>
+<button class="chip">100 g</button>
+</div>
+<p class="sm">Per 100 g: 389 kcal · Protein 13.0 g · Carbs 66.0 g · Fiber 10.0 g · Fat 7.0 g</p>
+<div class="card" style="background: var(--bg); padding: 14px 16px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; text-align: center">
+<div><div class="t2 num">195</div><div class="sm">kcal</div></div>
+<div><div class="t2 num">6.5</div><div class="sm">Protein</div></div>
+<div><div class="t2 num">33.0</div><div class="sm">Carbs</div></div>
+<div><div class="t2 num">5.0</div><div class="sm">Fiber</div></div>
+<div><div class="t2 num">3.5</div><div class="sm">Fat</div></div>
+</div>
+<div class="row sb">
+<span class="bd" style="color: var(--onv)">Meal</span>
+<button class="chip sel">Lunch<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button>
+</div>
+<div class="row" style="justify-content: flex-end; gap: 4px">
+<button class="btn tx">Cancel</button>
+<button class="btn">Add to Lunch</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Food picker — My foods tab (offline)</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Add food</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col" style="gap: 12px">
+<div class="row">
+<button class="ib" aria-label="Back to Today"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button>
+<h1 class="t1" style="flex: 1">Add to Lunch <span class="bd" style="color: var(--onv)">· Today, 8 Nov</span></h1>
+<button class="btn tl"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg>New food</button>
+</div>
+<div class="row" style="height: 48px; border-radius: 24px; background: var(--sc3); padding: 0 16px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.search}}"></path></svg>
+<label for="q2" style="position: absolute; left: -9999px">Search foods</label>
+<input id="q2" type="text" placeholder="Search my foods" style="flex: 1; min-width: 0; border: 0; background: none; outline: none; font: 400 16px/24px Roboto, system-ui, sans-serif; color: var(--on)">
+<span class="sm">⌘F</span>
+</div>
+<div class="tabs" style="grid-template-columns: repeat(3, minmax(0, 200px))">
+<button class="tab on">My foods</button>
+<button class="tab"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.cloud}}"></path></svg>Open Food Facts</button>
+<button class="tab" disabled><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ai}}"></path></svg>Ask AI <span class="soon">Coming soon</span></button>
+</div>
+<div class="row" style="padding: 8px 0 6px; border-bottom: 1px solid var(--olv); gap: 0">
+<span class="sm" style="flex: 1">Recently used · 8 foods</span>
+<span class="sm" style="width: 72px; text-align: right">kcal</span>
+<span class="sm" style="width: 56px; text-align: right">Protein</span>
+<span class="sm" style="width: 56px; text-align: right">Carbs</span>
+<span class="sm" style="width: 56px; text-align: right">Fiber</span>
+<span class="sm" style="width: 56px; text-align: right">Fat</span>
+<span style="width: 48px"></span>
+</div>
+<p class="sm" style="text-align: right; padding-right: 48px; margin-top: -4px">per 100 g</p>
+<div class="lst">
+<sc-for list="{{mine}}" as="f" hint-placeholder-count="8">
+<div class="row" style="min-height: 60px; gap: 0; border-bottom: 1px solid var(--olv)">
+<button class="it" style="flex-direction: row; align-items: center; gap: 0">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span class="t3">{{f.n}}</span><span class="sm">{{f.b2}}</span></span>
+<span class="t3 num" style="width: 72px; text-align: right">{{f.k}}</span>
+<span class="bd num" style="width: 56px; text-align: right; color: var(--onv)">{{f.p}}</span>
+<span class="bd num" style="width: 56px; text-align: right; color: var(--onv)">{{f.c}}</span>
+<span class="bd num" style="width: 56px; text-align: right; color: var(--onv)">{{f.fib}}</span>
+<span class="bd num" style="width: 56px; text-align: right; color: var(--onv)">{{f.fat}}</span>
+</button>
+<button class="ib" style="margin-left: 8px" aria-label="Edit {{f.n}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.edit}}"></path></svg></button>
+</div>
+</sc-for>
+</div>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2228,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',plus:'M12 5v14M5 12h14',x:'M6 6l12 12M18 6L6 18',back:'M19 12H5M11 6l-6 6 6 6',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',cloud:'M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z',ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',edit:'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',down:'M6 9l6 6 6-6'};
+IC.run='M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1';
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const off=[
+{n:'Rolled Oats',k:'389',b:'Sunvalley Foods',v:'389 kcal · Protein 13.0 g · Carbs 66.0 g · Fiber 10.0 g · Fat 7.0 g'},
+{n:'Instant Oats, Masala',k:'395',b:'Kheti Organics',v:'395 kcal · Protein 10.5 g · Carbs 64.0 g · Fiber 8.2 g · Fat 9.8 g'},
+{n:'Steel-cut Oats',k:'375',b:'Bluehill Mills',v:'375 kcal · Protein 12.5 g · Carbs 64.0 g · Fiber 10.6 g · Fat 6.9 g'},
+{n:'Oats & Honey Granola',k:'450',b:'Bluehill Mills',v:'450 kcal · Protein 9.0 g · Carbs 68.0 g · Fiber 6.5 g · Fat 15.0 g'},
+{n:'Oat Bran',k:'246',b:'Sunvalley Foods',v:'246 kcal · Protein 17.3 g · Carbs 66.2 g · Fiber 15.4 g · Fat 7.0 g'},
+{n:'Oat Drink, Unsweetened',k:'46',b:'Calm Cow',v:'46 kcal · Protein 0.8 g · Carbs 6.5 g · Fiber 0.8 g · Fat 1.5 g'}];
+const mine=[
+{n:'Paneer bhurji',b:'Homemade',v:'220 kcal · Protein 13.0 g · Carbs 5.0 g · Fiber 1.0 g · Fat 16.0 g',s:'serving 150 g'},
+{n:'Roti',b:'Homemade, whole wheat',v:'300 kcal · Protein 10.0 g · Carbs 46.0 g · Fiber 5.0 g · Fat 8.0 g',s:'serving 40 g'},
+{n:'Dal tadka',b:'Homemade',v:'120 kcal · Protein 6.0 g · Carbs 15.0 g · Fiber 4.0 g · Fat 4.0 g',s:'serving 200 g'},
+{n:'Roasted chana',b:'Loose',v:'370 kcal · Protein 20.0 g · Carbs 58.0 g · Fiber 17.0 g · Fat 5.0 g',s:'—'},
+{n:'Masala chai',b:'Homemade, with milk',v:'60 kcal · Protein 2.0 g · Carbs 8.0 g · Fiber 0.0 g · Fat 2.0 g',s:'serving 150 g'},
+{n:'Rolled oats',b:'Generic',v:'379 kcal · Protein 13.2 g · Carbs 67.7 g · Fiber 10.1 g · Fat 6.5 g',s:'serving 40 g'},
+{n:'Toned milk',b:'Generic',v:'58 kcal · Protein 3.1 g · Carbs 4.7 g · Fiber 0.0 g · Fat 3.0 g',s:'serving 200 g'},
+{n:'Banana',b:'Generic',v:'89 kcal · Protein 1.1 g · Carbs 22.8 g · Fiber 2.6 g · Fat 0.3 g',s:'serving 120 g'}];
+const mine2=mine.map(f=>{const m=f.v.match(/[\d.]+/g);return {...f,k:m[0],p:m[1],c:m[2],fib:m[3],fat:m[4],b2:f.s==='—'?f.b:f.b+' · '+f.s};});
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,off,mine:mine2,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===0?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

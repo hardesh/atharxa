@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workflow map</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 1776px; height: 1580px; flex-direction: column; gap: 36px">
+<div>
+<h1 class="t0">Workflows, step by step</h1>
+<p class="bd" style="color: var(--cap); margin-top: 4px">Each step names the board that draws it. Taps from Today: food = 2 (+ → result) + grams; water = 1 (chip).</p>
+</div>
+<sc-for list="{{flows}}" as="f" hint-placeholder-count="7">
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div class="row" style="gap: 12px"><span class="av" style="width: 32px; height: 32px; background: var(--pri); color: var(--onpri); font-weight: 700; font-size: 15px">{{f.no}}</span><h2 class="t2" style="font-size: 18px">{{f.t}}</h2></div>
+<div class="row" style="gap: 0; align-items: stretch">
+<sc-for list="{{f.steps}}" as="s" hint-placeholder-count="5">
+<sc-if value="{{s.arrow}}" hint-placeholder-val="{{false}}"><div class="row" style="width: 36px; justify-content: center; color: var(--ol)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M14 7l5 5-5 5"></path></svg></div></sc-if>
+<div style="width: 304px; background: var(--bg); border: 1px solid var(--olv); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<p class="t3">{{s.t}}</p>
+<p class="sm" style="flex: 1">{{s.d}}</p>
+<span class="tag" style="align-self: flex-start; background: var(--secc); color: var(--onsecc)">{{s.b}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1776,"height":1580}}'>
+const F=(no,t,steps)=>({no,t,steps:steps.map(([t,d,b],i)=>({t,d,b,arrow:i>0}))});
+class Component extends DCLogic {
+renderVals() {
+const flows=[
+F('1','Log a food from Open Food Facts',[
+['Tap + on Lunch','Today. Opens the picker with “Adding to Lunch”.','1 · Today'],
+['Search “oats”','Open Food Facts tab; results show a cloud icon and per-100 g values.','2 · Food picker'],
+['Pick Rolled Oats','Portion dialog: type 50 g or tap “1 serving (40 g)”. Preview: 195 kcal.','2 · Portion dialog'],
+['Add to Lunch','Food is cached in My foods so it works offline next time.','2 · Portion dialog'],
+['Back on Today','Lunch 1,005 kcal, 507 kcal left. Snackbar: “Added · Undo”.','1 · Today']]),
+F('2','Create a custom food and log it',[
+['Tap + on Breakfast','Search “poha” finds nothing in My foods.','2 · Food picker'],
+['New food','Name, brand/note, serving 180 g, per-100 g values. kcal is required.','2b · Custom food'],
+['Save and add to Breakfast','Portion dialog opens prefilled with the 180 g serving.','2 · Portion dialog'],
+['Logged','Breakfast +284 kcal. Edit or delete later from My foods.','1 · Today'],
+['Edit later','My foods › pencil. Past log entries keep their values.','2b · Custom food']]),
+F('3','Plan tomorrow, then log the plan',[
+['Meal plan opens on tomorrow','Date switcher defaults to Mon, 9 Nov.','3 · Meal plan'],
+['Add components','+ on each meal uses the same picker and portion dialog.','2 · Food picker'],
+['Check totals','Planned 1,841 / 2,200 kcal; goal bars for P, C, Fib.','3 · Meal plan'],
+['Next day: Log','Log on one meal, or ⋮ › Log whole day. Copies items into Today.','3 · Meal plan'],
+['Today updated','Meal card shows the logged items; logging the same meal twice asks first.','1 · Today']]),
+F('4','Quick-add water: from Today and from a notification',[
+['Today: +250 chip','One tap. 1,250 → 1,500 ml; snackbar Undo.','1 · Today'],
+['Reminder fires','Every 2 h, 08:00–22:00, on this device.','Flow 4 · Notification'],
+['Tap “+250 ml” action','Logged in the background without opening the app.','Flow 4 · Notification'],
+['Notification updates','“Added 250 ml · 1,500 / 3,000 ml”, then auto-dismisses.','Flow 4 · Notification'],
+['Water tab','The entry shows its source: “Notification”.','4 · Water']]),
+F('5','Add an expense and see the month update',[
+['Finance: Add','FAB on phone, “Add transaction” button on Mac.','5 · Finance'],
+['Fill the sheet','Expense · ₹1,150 · Transport · Sun 8 Nov · “Cab to airport”.','5 · Add sheet'],
+['Save','Expenses ₹43,989 → ₹45,139; balance ₹91,011 → ₹89,861.','5 · Finance'],
+['Breakdown updates','Transport ₹500 → ₹1,650 in the category chart.','5 · Finance'],
+['Undo or edit','Snackbar Undo; tap the row later to edit or delete.','5 · Finance']]),
+F('6','First-time pairing, phone ↔ Mac, ending in a first sync',[
+['Phone: turn sync on','Name the device; a pairing code is generated (482 913).','Flow 6 · Pairing'],
+['Mac: enter the same code','Both devices discover each other on the Wi-Fi.','Flow 6 · Pairing'],
+['Mismatch case','Wrong code shows “Pairing code does not match”.','Flow 6 · Pairing'],
+['Fallback: add by IP','If discovery fails; unreachable IP shows a clear error.','6 · You (Mac)'],
+['Paired, first sync','“Sent 38, received 126”. Later syncs are incremental.','Flow 6 · Pairing']]),
+F('7','Turn reminders on and off, and set their times',[
+['You › Reminders','Per-device. Water: switch, every N hours, start and end hour.','6 · You'],
+['Calorie times','Remove a time with its ✕; “Add time” opens a time input.','6 · You'],
+['Add 21:00','Times sort automatically; duplicates are rejected.','6 · Add time'],
+['Send test notification','Fires immediately so permission problems show up now.','6 · You'],
+['Switch off','Times are kept (greyed) and come back when switched on.','6 · You (Mac)'] ]),
+F('8','Plan a workout, start it, follow the tips, sync to Strava',[
+['Create or edit a plan','Exercises with sets × reps × kg and rest; pick the days it repeats.','7 · Workout'],
+['Start workout','From the Today card on the Workout tab (or the Mac “Start” button).','7 · Workout'],
+['Follow along','Log reps and kg per set; the rest timer starts on its own.','7b · Session'],
+['Read tips, watch videos','Text cues from the exercise library (offline) plus YouTube results (online).','7b · Session'],
+['Finish and save','Summary, notes, “Upload to Strava”; Strava runs and rides import automatically.','7b · Session']])];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),flows};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Water</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 1776px; height: 1000px">
+
+<div>
+<p class="cap">Android · Water (dark theme)</p>
+<div class="ph">
+<dc-import name="TopBar" title="Water" hint-size="100%,64px"></dc-import>
+<header class="row sb" style="height: 48px; padding: 0 8px; flex: none">
+<button class="ib" aria-label="Previous day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></button>
+<button class="dt" aria-label="Pick date">Today, 8 Nov</button>
+<button class="ib" aria-label="Next day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></button>
+</header>
+<div class="scr" style="gap: 16px">
+<div style="position: relative; width: 200px; height: 200px; margin: 0 auto; flex: none">
+<svg viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="1,250 of 3,000 ml, 42 percent"><circle cx="100" cy="100" r="88" fill="none" stroke-width="16" style="stroke: var(--sc3)"></circle><circle cx="100" cy="100" r="88" fill="none" stroke-width="16" stroke-linecap="round" stroke-dasharray="232 553" transform="rotate(-90 100 100)" style="stroke: var(--wat)"></circle></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center"><span class="t0 num">1,250</span><span class="bd" style="color: var(--onv)">of 3,000 ml</span><span class="sm" style="margin-top: 4px">1,750 to go</span></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; flex: none">
+<sc-for list="{{quick}}" as="q" hint-placeholder-count="4"><button class="{{q.cls}}" style="height: 56px; padding: 0; border-radius: 16px; flex-direction: column; gap: 0; font-size: 15px">{{q.l}}<span style="font-size: 11px; font-weight: 400; opacity: .8">{{q.u}}</span></button></sc-for>
+</div>
+<section class="card" style="flex: none; padding: 12px 16px">
+<div class="row sb"><h2 class="t3">Last 7 days</h2><span class="sm">Goal met 4 of 7</span></div>
+<div style="position: relative; height: 150px; margin-top: 12px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: end">
+<div style="position: absolute; left: 0; right: 0; bottom: 120px; border-top: 1px dashed var(--ol)"></div>
+<sc-for list="{{week}}" as="d" hint-placeholder-count="7"><div style="height: {{d.h}}px; border-radius: 6px 6px 2px 2px; background: {{d.bg}}; border: {{d.bd}}"></div></sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; text-align: center; margin-top: 6px"><sc-for list="{{week}}" as="d" hint-placeholder-count="7"><span class="sm">{{d.mk}}{{d.l}}</span></sc-for></div>
+</section>
+<section style="flex: none">
+<h2 class="t3" style="padding: 0 0 4px">Today’s entries</h2>
+<sc-for list="{{entries}}" as="e" hint-placeholder-count="4"><div class="row ln" style="height: 48px"><span class="bd num" style="width: 56px; color: var(--onv)">{{e.t}}</span><span class="bd num" style="flex: 1">{{e.v}}</span><button class="ib" aria-label="Remove {{e.v}} at {{e.t}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button></div></sc-for>
+</section>
+</div>
+<nav class="nav" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · Water (dark theme)</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Water</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<dc-import name="TopBar" title="Water" mode="mac" hint-size="100%,60px"></dc-import>
+<div class="row">
+<button class="ib" aria-label="Previous day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.l}}"></path></svg></button>
+<button class="dt" aria-label="Pick date">Today, 8 Nov<svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.down}}"></path></svg></button>
+<button class="ib" aria-label="Next day"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.r}}"></path></svg></button>
+</div>
+<div class="g2" style="grid-template-columns: 300px minmax(0, 1fr); align-items: stretch">
+<section class="card" style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 24px 16px">
+<div style="position: relative; width: 220px; height: 220px">
+<svg viewBox="0 0 200 200" width="220" height="220" role="img" aria-label="1,250 of 3,000 ml, 42 percent"><circle cx="100" cy="100" r="88" fill="none" stroke-width="16" style="stroke: var(--sc3)"></circle><circle cx="100" cy="100" r="88" fill="none" stroke-width="16" stroke-linecap="round" stroke-dasharray="232 553" transform="rotate(-90 100 100)" style="stroke: var(--wat)"></circle></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center"><span class="t0 num">1,250</span><span class="bd" style="color: var(--onv)">of 3,000 ml</span><span class="sm" style="margin-top: 4px">1,750 to go</span></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%">
+<sc-for list="{{quick}}" as="q" hint-placeholder-count="4"><button class="{{q.cls}}" style="height: 48px; padding: 0; border-radius: 14px">{{q.l}} {{q.u}}</button></sc-for>
+</div>
+</section>
+<section class="card" style="display: flex; flex-direction: column">
+<div class="row sb"><h2 class="t2">Last 7 days</h2><span class="sm">Goal met 4 of 7 · dashed line = 3,000 ml</span></div>
+<div style="position: relative; height: 180px; margin-top: 20px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 16px; align-items: end">
+<div style="position: absolute; left: 0; right: 0; bottom: 154px; border-top: 1px dashed var(--ol)"></div>
+<sc-for list="{{week}}" as="d" hint-placeholder-count="7"><div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><span class="sm num">{{d.v}}</span><div style="width: 100%; height: {{d.h2}}px; border-radius: 6px 6px 2px 2px; background: {{d.bg}}; border: {{d.bd}}"></div></div></sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 16px; text-align: center; margin-top: 8px"><sc-for list="{{week}}" as="d" hint-placeholder-count="7"><span class="sm">{{d.mk}}{{d.l}}</span></sc-for></div>
+<div class="row" style="gap: 16px; margin-top: auto; padding-top: 16px"><span class="row sm"><span style="width: 12px; height: 12px; border-radius: 3px; background: var(--wat)"></span>Goal met</span><span class="row sm"><span style="width: 12px; height: 12px; border-radius: 3px; background: var(--watc)"></span>Below goal</span></div>
+</section>
+</div>
+<section class="card">
+<h2 class="t2" style="padding-bottom: 4px">Today’s entries</h2>
+<sc-for list="{{entries}}" as="e" hint-placeholder-count="4"><div class="row ln" style="height: 48px"><span class="bd num" style="width: 64px; color: var(--onv)">{{e.t}}</span><span class="bd num" style="flex: 1">{{e.v}}</span><span class="sm" style="margin-right: 8px">{{e.src}}</span><button class="ib" aria-label="Remove {{e.v}} at {{e.t}}"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button></div></sc-for>
+</section>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":true},"$preview":{"width":1776,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',x:'M6 6l12 12M18 6L6 18',l:'M15 6l-6 6 6 6',r:'M9 6l6 6-6 6',down:'M6 9l6 6 6-6'};
+IC.run='M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1';
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const days=[['Mon',3100],['Tue',2750],['Wed',3250],['Thu',3000],['Fri',2400],['Sat',3500],['Sun',1250]];
+const week=days.map(([l,v],i)=>{const met=v>=3000,today=i===6;return {l,v:v.toLocaleString('en-IN'),h:Math.round(v/3500*140),h2:Math.round(v/3500*180),mk:met?'✓ ':'',bg:met?'var(--wat)':'var(--watc)',bd:today?'2px solid var(--wat)':'0'};});
+const quick=[['+250','ml'],['+500','ml'],['+750','ml'],['Custom','…']].map(([l,u],i)=>({l,u,cls:i===3?'btn ou':'btn tl'}));
+const entries=[{t:'13:05',v:'250 ml',src:'Notification'},{t:'11:30',v:'250 ml',src:'Today card'},{t:'09:15',v:'500 ml',src:'Water tab'},{t:'07:40',v:'250 ml',src:'Today card'}];
+return {rootCls:'th board'+((this.props.dark ?? true)?' dark':''),ic:IC,week,quick,entries,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===2?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Workout session with tips</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 2682px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">Android · Start workout → live session with tips</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 12px 0 4px; flex: none"><button class="ib" aria-label="End workout"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button><h1 class="t2" style="flex: 1; padding-left: 4px">Lower body A</h1><span class="t2 num" style="color: var(--pri); margin-right: 4px">18:42</span><button class="ib tn" aria-label="Ask AI about this exercise"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg></button></header>
+<div style="padding: 0 16px; flex: none"><div class="row sb" style="padding-bottom: 6px"><span class="sm">Exercise 1 of 6</span><span class="sm num">1 of 18 sets done</span></div><div class="bar" style="flex: none; height: 4px"><div style="width: 6%; background: var(--pri)"></div></div></div>
+<div class="scr" style="padding-top: 16px">
+<div><h2 class="t0">Goblet squat</h2><p class="bd" style="color: var(--onv)">Set 2 of 3 · target 10 reps · 16 kg</p></div>
+<div class="g2" style="gap: 12px">
+<div class="card" style="padding: 10px; text-align: center"><p class="sm">Reps</p><div class="row sb"><button class="ib tn" aria-label="Fewer reps"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.minus}}"></path></svg></button><span class="t0 num">10</span><button class="ib tn" aria-label="More reps"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg></button></div></div>
+<div class="card" style="padding: 10px; text-align: center"><p class="sm">kg</p><div class="row sb"><button class="ib tn" aria-label="Less weight"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.minus}}"></path></svg></button><span class="t0 num">16</span><button class="ib tn" aria-label="More weight"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.plus}}"></path></svg></button></div></div>
+</div>
+<button class="btn" style="height: 52px; border-radius: 26px; flex: none"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>Complete set · then rest 90 s</button>
+<div class="row" style="gap: 6px; flex: none"><span class="tag" style="background: var(--okc); color: var(--ok)">Set 1 · 10 × 16 kg ✓</span><span class="tag" style="background: var(--pric); color: var(--onpric)">Set 2 · now</span><span class="tag" style="background: var(--sc3); color: var(--onv)">Set 3</span></div>
+<section class="card" style="display: flex; flex-direction: column; gap: 10px; flex: none">
+<div class="row sb"><h3 class="t3 row" style="gap: 6px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.bulb}}"></path></svg>Form tips</h3><button class="ib" aria-label="Collapse tips" style="width: 32px; height: 32px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.up}}"></path></svg></button></div>
+<sc-for list="{{tips}}" as="t" hint-placeholder-count="3"><p class="bd" style="display: flex; gap: 8px"><span style="color: var(--pri)">•</span>{{t}}</p></sc-for>
+<a class="row it" href="#" style="flex-direction: row; gap: 12px; text-decoration: none; background: var(--bg); border-radius: 12px; padding: 8px">
+<span style="width: 96px; height: 54px; border-radius: 8px; background: var(--sc3); display: flex; align-items: center; justify-content: center; flex: none; color: var(--onv)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.play}}"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="t3">{{vids.0.t}}</span><span class="sm">{{vids.0.m}}</span></span>
+</a>
+</section>
+<p class="sm" style="flex: none">Next: Romanian deadlift · 3 × 10 · 30 kg</p>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Workout complete → save, upload to Strava</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Close"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.x}}"></path></svg></button><h1 class="t1" style="flex: 1; padding-left: 4px">Workout complete</h1></header>
+<div class="scr" style="gap: 16px">
+<section class="card" style="background: var(--pric); color: var(--onpric)">
+<p class="t2">Lower body A</p><p class="sm" style="color: inherit">Sun 8 Nov · 17:10–17:56</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px">
+<div><p class="sm" style="color: inherit">Duration</p><p class="t1 num">46:12</p></div>
+<div><p class="sm" style="color: inherit">Sets</p><p class="t1 num">18 / 18</p></div>
+<div><p class="sm" style="color: inherit">Volume</p><p class="t1 num">2,856 kg</p></div>
+<div><p class="sm" style="color: inherit">Energy (estimate)</p><p class="t1 num">≈ 260 kcal</p></div>
+</div>
+</section>
+<div><p class="sm" style="margin-bottom: 8px">How did it feel?</p><div class="row"><button class="chip">Easy</button><button class="chip sel">Good</button><button class="chip">Hard</button></div></div>
+<div class="fld"><label for="wn">Notes</label><input id="wn" type="text" value="RDL felt easy, try 32.5 kg next time"></div>
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<div class="row sb"><div><p class="t3">Upload to Strava</p><p class="sm">As “Weight training”, private by default</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Upload to Strava"><span></span></button></div>
+<div class="row sb"><div><p class="t3">Add 260 kcal to Today</p><p class="sm">Raises today’s calorie budget</p></div><button class="sw" role="switch" aria-checked="false" aria-label="Add burned kcal to Today"><span></span></button></div>
+</section>
+<button class="btn" style="height: 48px; border-radius: 24px">Save workout</button>
+<p class="sm">Next time the plan suggests RDL at 32.5 kg, based on your note.</p>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">Android · Connect Strava (You › Connected services)</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1">Strava</h1></header>
+<div class="scr" style="gap: 16px">
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 24px 8px 8px">
+<span class="av" style="width: 72px; height: 72px; border-radius: 36px; background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 36px; height: 36px"><path d="{{ic.run}}"></path></svg></span>
+<h2 class="t1">Connect your Strava account</h2>
+<p class="bd" style="color: var(--onv)">See runs and rides next to your plan, and upload workouts you finish here.</p>
+</div>
+<section class="card" style="display: flex; flex-direction: column; gap: 10px">
+<p class="t3">This app will ask Strava for</p>
+<p class="bd row" style="gap: 10px; align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.check}}"></path></svg>Read your activities, including private ones</p>
+<p class="bd row" style="gap: 10px; align-items: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.check}}"></path></svg>Upload activities you finish in this app</p>
+</section>
+<section class="card" style="display: flex; gap: 12px; background: var(--sc2)">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.info}}"></path></svg>
+<p class="sm">This is the only feature that needs the internet and an account. Sign-in happens on Strava’s own page in your browser. The access token is stored only on this device, and you can disconnect at any time.</p>
+</section>
+<button class="btn" style="height: 48px; border-radius: 24px; margin-top: auto">Connect with Strava</button>
+<button class="btn tx">Not now</button>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · live session — tips panel with videos</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>Lower body A · 18:42</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<div class="row sb"><div><p class="sm">Exercise 1 of 6 · 1 of 18 sets done</p><h1 class="t0">Goblet squat</h1></div><div class="row" style="gap: 8px"><button class="btn tl"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.ai}}"></path></svg>Ask about this exercise</button><button class="btn ou">End workout</button></div></div>
+<div class="g2" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr)">
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<p class="bd" style="color: var(--onv)">Set 2 of 3 · target 10 reps · 16 kg</p>
+<table class="tbl"><thead><tr><th>Set</th><th>Reps</th><th>kg</th><th>Status</th></tr></thead><tbody>
+<tr><td>1</td><td>10</td><td>16</td><td style="color: var(--ok)">Done</td></tr>
+<tr style="background: var(--pric); color: var(--onpric)"><td style="padding-left: 6px">2</td><td>10</td><td>16</td><td>Now</td></tr>
+<tr><td>3</td><td>10</td><td>16</td><td>—</td></tr>
+</tbody></table>
+<button class="btn" style="height: 48px; border-radius: 24px"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg>Complete set</button>
+<div class="row sb" style="background: var(--bg); border-radius: 12px; padding: 10px 14px"><span class="bd">Rest after set</span><span class="t2 num">1:30</span></div>
+<div class="ln" style="padding-top: 12px"><p class="sm">Up next</p>
+<sc-for list="{{next}}" as="x" hint-placeholder-count="3"><p class="bd" style="padding: 4px 0">{{x}}</p></sc-for></div>
+</section>
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<h2 class="t2 row" style="gap: 8px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--pri)"><path d="{{ic.bulb}}"></path></svg>Form tips</h2>
+<sc-for list="{{tips}}" as="t" hint-placeholder-count="3"><p class="bd" style="display: flex; gap: 8px"><span style="color: var(--pri)">•</span>{{t}}</p></sc-for>
+<p class="bd" style="display: flex; gap: 8px; color: var(--err)"><span>!</span>Common mistake: knees caving in on the way up.</p>
+<div class="row sb ln" style="padding-top: 12px"><h3 class="t3">Videos</h3><span class="tag" style="background: var(--sc3); color: var(--onv)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="{{ic.cloud}}"></path></svg>YouTube search · online</span></div>
+<sc-for list="{{vids}}" as="v" hint-placeholder-count="3">
+<a class="row it" href="#" style="flex-direction: row; gap: 12px; text-decoration: none">
+<span style="width: 120px; height: 68px; border-radius: 8px; background: var(--sc3); display: flex; align-items: center; justify-content: center; flex: none; color: var(--onv); position: relative"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.play}}"></path></svg><span style="position: absolute; right: 4px; bottom: 4px; font-size: 11px; background: rgba(0,0,0,.7); color: #fff; padding: 0 4px; border-radius: 3px">{{v.len}}</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="t3">{{v.t}}</span><span class="sm">{{v.c}}</span></span>
+</a>
+</sc-for>
+<p class="sm">Video titles are sample placeholders. Thumbnails and titles come from the YouTube search for “goblet squat form”; tapping opens the YouTube app or browser at the video.</p>
+</section>
+</div>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":2682,"height":1000}}'>
+const IC={ai:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',plus:'M12 5v14M5 12h14',minus:'M5 12h14',x:'M6 6l12 12M18 6L6 18',back:'M19 12H5M11 6l-6 6 6 6',check:'M5 12l5 5 9-10',play:'M7 4l13 8-13 8z',up:'M6 15l6-6 6 6',bulb:'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z',info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 7.5h.01',cloud:'M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+const tips=['Hold the weight at your chest, elbows pointing down.','Sit down between your hips; knees track over your toes.','Keep your chest up and heels down; drive up through mid-foot.'];
+const vids=[{t:'[Video title] Goblet squat form breakdown',c:'[Channel] · YouTube',len:'6:12',m:'[Channel] · YouTube · 6:12'},{t:'[Video title] 3 goblet squat mistakes',c:'[Channel] · YouTube',len:'4:05',m:''},{t:'[Video title] Squat mobility warm-up',c:'[Channel] · YouTube',len:'8:40',m:''}];
+const next=['Romanian deadlift · 3 × 10 · 30 kg','Walking lunge · 3 × 12 each leg · 8 kg','Glute bridge · 3 × 15 · 20 kg'];
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,tips,vids,next,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===3?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>First-time pairing and first sync</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./m3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{rootCls}}" style="width: 3136px; height: 1000px">
+
+<div class="grp">
+<div>
+<p class="cap">① Phone · sync is off</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1">Device sync</h1></header>
+<div class="scr" style="gap: 16px">
+<section class="card row sb"><div><p class="t2">Sync with my devices</p><p class="sm">Off</p></div><button class="sw" role="switch" aria-checked="false" aria-label="Device sync"><span></span></button></section>
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 40px 16px">
+<span class="av" style="width: 72px; height: 72px; border-radius: 36px; background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 36px; height: 36px"><path d="{{ic.wifi}}"></path></svg></span>
+<h2 class="t1">No paired devices</h2>
+<p class="bd" style="color: var(--onv)">Sync goals, food log, meal plans, foods and transactions with your Mac over your home Wi-Fi. Nothing leaves your network.</p>
+<button class="btn" style="margin-top: 8px">Turn on sync</button>
+</div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">② Phone · name, code, discovery</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1">Device sync</h1></header>
+<div class="scr" style="gap: 16px">
+<section class="card row sb"><div><p class="t2">Sync with my devices</p><p class="sm">On · 192.168.1.23 : 47811</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Device sync"><span></span></button></section>
+<div class="fld"><label for="a1">This device’s name</label><input id="a1" type="text" value="Android phone"></div>
+<div><div class="fld f"><label for="a2">Pairing code</label><input id="a2" type="text" value="482 913" style="letter-spacing: 2px"><button class="btn tx" style="padding: 0 8px">New code</button></div><p class="hint">Enter this same code on your Mac</p></div>
+<section class="card" style="padding: 8px 16px">
+<div class="row sb"><h3 class="t3">On this network</h3><span class="sm">Searching…</span></div>
+<div class="li ln" style="gap: 12px"><span class="av" style="background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.laptop}}"></path></svg></span><span style="flex: 1"><span class="bd" style="display: block">MacBook Air</span><span class="sm num">192.168.1.42 · ready to pair</span></span><button class="btn tl" style="height: 36px; padding: 0 16px">Pair</button></div>
+</section>
+<button class="btn tx" style="align-self: flex-start; padding: 0 4px">Not listed? Add device by IP</button>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">③ Phone · codes don’t match</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><span class="ib"></span><h1 class="t1">Device sync</h1></header>
+<div class="scr" style="gap: 16px">
+<section class="card" style="padding: 8px 16px; margin-top: 200px">
+<div class="li" style="gap: 12px"><span class="av" style="background: var(--errc); color: var(--onerrc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.laptop}}"></path></svg></span><span style="flex: 1"><span class="bd" style="display: block">MacBook Air</span><span class="tag" style="background: var(--errc); color: var(--onerrc)">Code mismatch</span></span></div>
+</section>
+</div>
+<div class="scrim"></div>
+<div class="dlg" role="alertdialog" aria-label="Pairing code does not match" style="left: 24px; right: 24px; top: 200px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--err); align-self: center"><path d="{{ic.alert}}"></path></svg>
+<h2 class="t1" style="text-align: center">Pairing code does not match</h2>
+<p class="bd" style="color: var(--onv)">MacBook Air is using a different code. Open You › Device sync on the Mac and enter <b style="color: var(--on)">482 913</b>, then tap Try again.</p>
+<div class="row" style="justify-content: flex-end; gap: 4px"><button class="btn tx">Change my code</button><button class="btn tx">Try again</button></div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">④ Phone · paired, first sync done</p>
+<div class="ph">
+<header class="row" style="height: 64px; padding: 0 8px 0 4px; flex: none"><button class="ib" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.back}}"></path></svg></button><h1 class="t1">Device sync</h1></header>
+<div class="scr" style="gap: 16px">
+<section class="card row sb"><div><p class="t2">Sync with my devices</p><p class="sm">On · code 482 913</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Device sync"><span></span></button></section>
+<section class="card" style="padding: 8px 16px">
+<h3 class="t3" style="padding-top: 4px">Paired devices</h3>
+<div class="li ln" style="gap: 12px"><span class="av" style="background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.laptop}}"></path></svg></span><span style="flex: 1"><span class="bd" style="display: block">MacBook Air</span><span class="sm num">192.168.1.42</span></span><span class="tag" style="background: var(--okc); color: var(--ok)">Online</span></div>
+</section>
+<section class="card" style="background: var(--pric); color: var(--onpric); display: flex; flex-direction: column; gap: 10px">
+<div class="row sb"><p class="t3">First sync complete</p><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.check}}"></path></svg></div>
+<p class="bd num">Sent 38, received 126 · just now</p>
+<p class="sm" style="color: inherit">Goals now match on both devices. Reminders stay per device.</p>
+<button class="btn" style="align-self: flex-start"><svg class="i s" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.sync}}"></path></svg>Sync now</button>
+</section>
+</div>
+<div class="snk" style="bottom: 40px"><span>Synced with MacBook Air</span><button class="btn tx">Details</button></div>
+</div>
+</div>
+</div>
+
+<div>
+<p class="cap">macOS · entering the code, then the first sync running</p>
+<div class="mac">
+<div class="tb"><span class="dot" style="background: #FF5F57"></span><span class="dot" style="background: #FEBC2E"></span><span class="dot" style="background: #28C840"></span><b>You</b></div>
+<div class="mb">
+<nav class="rail" aria-label="Main"><sc-for list="{{nav}}" as="n" hint-placeholder-count="6"><button class="{{n.cls}}"><span class="pill"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"></path></svg></span>{{n.l}}</button></sc-for></nav>
+<main class="mc"><div class="col">
+<h1 class="t0" style="padding-top: 8px">Device sync</h1>
+<section class="card" style="display: flex; flex-direction: column; gap: 16px">
+<div class="row sb"><div><p class="t2">Sync with my devices</p><p class="sm">On · 192.168.1.42 : 47811</p></div><button class="sw on" role="switch" aria-checked="true" aria-label="Device sync"><span></span></button></div>
+<div class="g2">
+<div class="fld" style="background: var(--sc1)"><label for="m1">This device’s name</label><input id="m1" type="text" value="MacBook Air"></div>
+<div><div class="fld f" style="background: var(--sc1)"><label for="m2">Pairing code</label><input id="m2" type="text" value="482 913" style="letter-spacing: 2px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--ok)"><path d="{{ic.check}}"></path></svg></div><p class="hint">Matches Android phone</p></div>
+</div>
+</section>
+<section class="card" style="display: flex; flex-direction: column; gap: 12px">
+<h2 class="t2">Paired devices</h2>
+<div class="li ln" style="gap: 12px"><span class="av" style="background: var(--secc); color: var(--onsecc)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ic.phone}}"></path></svg></span><span style="flex: 1"><span class="bd" style="display: block">Android phone</span><span class="sm num">192.168.1.23 · paired just now</span></span><span class="tag" style="background: var(--okc); color: var(--ok)">Online</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div class="row sb"><p class="t3">First sync in progress…</p><p class="sm num">received 84 of 126</p></div>
+<div class="bar" style="flex: none"><div style="width: 67%; background: var(--pri)"></div></div>
+<p class="sm">Food log, foods, meal plans, water, transactions and goals. Newest edit wins when the same entry changed on both devices.</p>
+</div>
+</section>
+<section class="card" style="display: flex; gap: 12px; align-items: flex-start; background: var(--sc2)">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--onv)"><path d="{{ic.info}}"></path></svg>
+<div><p class="t3">Error states shown in this section</p><p class="sm" style="margin-top: 4px">“Pairing code does not match” · “Device not reachable (192.168.1.50:47811)” · “Sync interrupted — 84 of 126 received, will resume” · “Sync is off on the other device”.</p></div>
+</section>
+</div></main>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":3136,"height":1000}}'>
+const IC={today:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',plan:'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',water:'M12 3c3.5 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 2.5-6.5 6-11z',fin:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4v4M16 13.5h2',set:'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4',run:'M13 3.5a1.5 1.5 0 1 0 .01 0M7 21l3.5-6.5 3 2.5V21M5 12.5l3-3.5 4.5.5 2.5 3.5 3.5 1',back:'M19 12H5M11 6l-6 6 6 6',wifi:'M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',laptop:'M4 5h16v11H4zM2 19h20',phone:'M7 2h10v20H7zM11 18h2',alert:'M12 3l10 18H2zM12 10v4M12 17.5h.01',check:'M5 12l5 5 9-10',sync:'M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4',info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v5M12 7.5h.01'};
+const NAV=[['Today','today'],['Meal plan','plan'],['Water','water'],['Workout','run'],['Finance','fin'],['You','you']];IC.you='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0';
+class Component extends DCLogic {
+renderVals() {
+return {rootCls:'th board'+((this.props.dark ?? false)?' dark':''),ic:IC,nav:NAV.map(([l,k],i)=>({l,d:IC[k],cls:i===5?'nv on':'nv'}))};
+}
+}
+</script>
+</body>
+</html>

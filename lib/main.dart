@@ -8,6 +8,7 @@ import 'data/db.dart';
 import 'services/notification_service.dart';
 import 'state/core_providers.dart';
 import 'state/desktop_controller.dart';
+import 'state/reminders_controller.dart';
 import 'state/settings_providers.dart';
 import 'state/sync_controller.dart';
 import 'ui/shell.dart';
@@ -19,16 +20,20 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final db = await AppDb.open();
-  final notifications = NotificationService(prefs);
+  final notifications = NotificationService();
   final container = ProviderContainer(
     overrides: await appOverrides(db: db, prefs: prefs, notifications: notifications),
   );
   // Wi-Fi sync lives for the app's lifetime and starts itself when enabled.
   container.read(syncControllerProvider);
   container.read(desktopControllerProvider); // macOS: menu bar, keep awake (no-op elsewhere)
+  container.read(remindersProvider);
+  // Tapping a meal reminder / "Add lunch" opens the food picker for that meal.
+  notifications.onOpen = (r) => container.read(pendingMealProvider.notifier).request(NotificationService.mealOf(r));
   runApp(UncontrolledProviderScope(container: container, child: const App()));
   // Non-critical startup work runs after the first frame.
   await notifications.init();
+  await container.read(remindersProvider.notifier).reschedule();
 }
 
 /// Injects the async-created singletons, plus synced settings preloaded so

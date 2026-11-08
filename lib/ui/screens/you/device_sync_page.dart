@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,6 +228,14 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (Platform.isAndroid)
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Keep syncing while locked'),
+                  subtitle: const Text('Shows a quiet "Wi-Fi sync is on" notification; uses a little more battery'),
+                  value: ref.watch(syncControllerProvider.select((s) => s.whileLocked)),
+                  onChanged: _ctl.setWhileLocked,
+                ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Sync automatically'),

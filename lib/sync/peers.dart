@@ -69,6 +69,11 @@ class SyncPrefs {
   Future<void> setDeviceName(String v) => prefs.setString(_name, v.trim());
 
   bool get autoSync => prefs.getBool(_auto) ?? true;
+
+  /// Android: keep the app running (ongoing notification) so sync also works
+  /// while the phone is locked.
+  bool get whileLocked => prefs.getBool('sync_while_locked') ?? true;
+  Future<void> setWhileLocked(bool v) => prefs.setBool('sync_while_locked', v);
   Future<void> setAutoSync(bool v) => prefs.setBool(_auto, v);
 
   /// Periodic sync interval while the app runs: 1, 5 or 15 minutes.

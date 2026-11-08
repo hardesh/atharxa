@@ -28,6 +28,7 @@ class SyncState {
     required this.code,
     required this.autoSync,
     required this.intervalMin,
+    this.whileLocked = true,
     this.listening = false,
     this.address,
     this.paired = const [],
@@ -40,6 +41,9 @@ class SyncState {
   });
 
   final bool enabled, autoSync, listening, busy;
+
+  /// Android: keep syncing while the phone is locked (foreground service).
+  final bool whileLocked;
 
   /// A network search for other devices is running.
   final bool scanning;
@@ -72,6 +76,7 @@ class SyncState {
     String? code,
     bool? autoSync,
     int? intervalMin,
+    bool? whileLocked,
     bool? listening,
     String? address,
     List<PairedPeer>? paired,
@@ -89,6 +94,7 @@ class SyncState {
     code: code ?? this.code,
     autoSync: autoSync ?? this.autoSync,
     intervalMin: intervalMin ?? this.intervalMin,
+    whileLocked: whileLocked ?? this.whileLocked,
     listening: listening ?? this.listening,
     address: address ?? this.address,
     paired: paired ?? this.paired,
@@ -131,6 +137,7 @@ class SyncController extends Notifier<SyncState> {
       code: _prefs.code,
       autoSync: _prefs.autoSync,
       intervalMin: _prefs.intervalMin,
+      whileLocked: _prefs.whileLocked,
       paired: _prefs.peers,
     );
     if (s.enabled && s.codeValid) Future.microtask(_start);
@@ -171,6 +178,12 @@ class SyncController extends Notifier<SyncState> {
   Future<void> setAutoSync(bool on) async {
     await _prefs.setAutoSync(on);
     state = state.copyWith(autoSync: on);
+    await _restart();
+  }
+
+  Future<void> setWhileLocked(bool on) async {
+    await _prefs.setWhileLocked(on);
+    state = state.copyWith(whileLocked: on);
     await _restart();
   }
 
@@ -268,6 +281,10 @@ class SyncController extends Notifier<SyncState> {
     }
     unawaited(scan(const Duration(seconds: 10)));
 
+    if (Platform.isAndroid && state.whileLocked) {
+      await ref.read(notificationServiceProvider).startSyncService();
+    }
+
     if (state.autoSync) {
       _localSub = db.localChanges.listen((_) {
         _pending = true;
@@ -338,6 +355,7 @@ class SyncController extends Notifier<SyncState> {
     _discovery = null;
     await _server?.close(force: true);
     _server = null;
+    if (Platform.isAndroid) await ref.read(notificationServiceProvider).stopSyncService();
     if (ref.mounted) state = state.copyWith(listening: false, scanning: false, discovered: const {});
   }
 

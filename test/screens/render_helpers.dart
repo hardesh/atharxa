@@ -38,7 +38,7 @@ Future<TestApp> buildTestApp({Map<String, Object> prefs = const {}, List<Overrid
   SharedPreferences.setMockInitialValues({'text_scale': 1.0, ...prefs});
   final sp = await SharedPreferences.getInstance();
   final db = await openTestDb();
-  final base = await appOverrides(db: db, prefs: sp, notifications: NotificationService(sp));
+  final base = await appOverrides(db: db, prefs: sp, notifications: NotificationService());
   return TestApp(db, ProviderScope(overrides: [...base, ...overrides], child: const App()));
 }
 

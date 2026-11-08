@@ -41,7 +41,12 @@ The app's name may change, so **don't build the product name into code identifie
   - `lib/state/data_providers.dart`: per-screen `FutureProvider.family`s keyed by day key, plus `AsyncBody`.
   - Callbacks without a `ref` can use `context.db` / `context.readProvider(...)` for imperative reads only.
   - `lib/state/sync_controller.dart` (`syncControllerProvider`): Wi-Fi sync state and actions.
-  - `NotificationService` is still a plain class. It becomes a notifier in the reminders feature.
+  - `lib/state/reminders_controller.dart` (`remindersProvider`): reminder settings stored per device. It re-plans notifications about 1 s after any food, water, plan or goal change, and on app resume.
+- **Reminders** (`lib/services/`):
+  - `reminder_plan.dart`: pure planning of one-shot notifications for the next 7 days. Logged meals are skipped, water stops once the goal is met, and today's text uses live numbers.
+  - `notification_service.dart`: wraps flutter_local_notifications.
+    - Action buttons (+250 ml, Log or Add meal, Snooze) run in a background isolate when the app isn't open (`notificationActionInBackground`).
+    - It also runs the Android foreground service for "Keep syncing while locked".
 - **Data**: SQLite through `sqflite` (`lib/data/db.dart`).
   - Every synced table has `id` (a UUID), `updated_at` (a hybrid logical clock), `device_id`, `deleted` (a tombstone) and `rev` (a local change counter).
   - Always write through `AppDb.save` and `AppDb.delete`, never with raw SQL writes, so that sync sees the change.

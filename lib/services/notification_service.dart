@@ -1,62 +1,123 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show DartPluginRegistrant;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Daily repeating local reminders. Settings are per-device (not synced),
-/// so you can e.g. keep water reminders on the phone and off on the Mac.
-class NotificationService extends ChangeNotifier {
-  NotificationService(this.prefs);
+import '../app_info.dart';
+import '../data/db.dart';
+import '../data/food_repo.dart';
+import '../data/models.dart';
+import '../data/water_repo.dart';
+import '../state/settings_providers.dart';
+import 'reminder_plan.dart';
 
-  final SharedPreferences prefs;
-  final _plugin = FlutterLocalNotificationsPlugin();
+/// Local notifications: reminders (DESIGN.md §5 Notifications, §7.3) and the
+/// Android foreground service that keeps Wi-Fi sync alive while locked.
+///
+/// Reminders are one-shot notifications recomputed by `RemindersController`
+/// whenever food or water changes. Action buttons (+250 ml, Log lunch,
+/// Snooze) run without opening the app: in a background isolate when the app
+/// isn't running ([notificationActionInBackground]).
+class NotificationService {
+  final plugin = FlutterLocalNotificationsPlugin();
+  bool _ready = false;
 
-  static const _waterBase = 100, _calorieBase = 200;
+  /// Called for taps and foreground-visible actions (e.g. "Add lunch").
+  void Function(NotificationResponse)? onOpen;
 
-  bool get waterEnabled => prefs.getBool('notif_water') ?? false;
-  int get waterIntervalH => prefs.getInt('notif_water_interval') ?? 2;
-  int get waterStartH => prefs.getInt('notif_water_start') ?? 8;
-  int get waterEndH => prefs.getInt('notif_water_end') ?? 21;
+  // Reminder ids live in [_firstId, _lastId] (see planReminders).
+  static const _firstId = 1000, _lastId = 1799, _testId = 1, _syncServiceId = 2;
 
-  bool get calorieEnabled => prefs.getBool('notif_cal') ?? false;
-  List<TimeOfDay> get calorieTimes => (prefs.getStringList('notif_cal_times') ?? ['11:00', '16:30', '20:00']).map((s) {
-    final p = s.split(':');
-    return TimeOfDay(hour: int.parse(p[0]), minute: int.parse(p[1]));
-  }).toList()..sort((a, b) => (a.hour * 60 + a.minute) - (b.hour * 60 + b.minute));
+  static const _actWater = 'water_250', _actLogMeal = 'meal_log', _actAddMeal = 'meal_add', _actSnooze = 'snooze';
+  static const _catWater = 'water', _catMealLog = 'meal_log', _catMealAdd = 'meal_add', _catCheckin = 'checkin';
 
-  Future<void> init() async {
-    tzdata.initializeTimeZones();
-    try {
-      final info = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(info.identifier));
-    } catch (_) {}
-    const darwin = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
-    await _plugin.initialize(
-      settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        macOS: darwin,
+  bool get ready => _ready;
+
+  Future<void>? _init;
+
+  /// Safe to call more than once (sync may start before `main` calls it).
+  Future<void> init() => _init ??= _initOnce();
+
+  Future<void> _initOnce() async {
+    await initTimeZone();
+    await plugin.initialize(
+      settings: InitializationSettings(
+        android: const AndroidInitializationSettings('@mipmap/ic_launcher'),
+        macOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+          notificationCategories: [
+            DarwinNotificationCategory(
+              _catWater,
+              actions: [
+                DarwinNotificationAction.plain(_actWater, '+250 ml'),
+                DarwinNotificationAction.plain(_actSnooze, 'Snooze 15 min'),
+              ],
+            ),
+            DarwinNotificationCategory(
+              _catMealLog,
+              actions: [
+                DarwinNotificationAction.plain(_actLogMeal, 'Log planned meal'),
+                DarwinNotificationAction.plain(_actSnooze, 'Snooze 15 min'),
+              ],
+            ),
+            DarwinNotificationCategory(
+              _catMealAdd,
+              actions: [
+                DarwinNotificationAction.plain(
+                  _actAddMeal,
+                  'Add food',
+                  options: {DarwinNotificationActionOption.foreground},
+                ),
+                DarwinNotificationAction.plain(_actSnooze, 'Snooze 15 min'),
+              ],
+            ),
+            const DarwinNotificationCategory(_catCheckin),
+          ],
+        ),
       ),
+      onDidReceiveNotificationResponse: _onResponse,
+      onDidReceiveBackgroundNotificationResponse: notificationActionInBackground,
     );
-    await reschedule();
+    _ready = true;
+    // Launched by tapping a notification while the app wasn't running.
+    final launch = await plugin.getNotificationAppLaunchDetails();
+    final r = launch?.notificationResponse;
+    if (launch?.didNotificationLaunchApp == true && r != null) onOpen?.call(r);
   }
 
-  Future<bool> _requestPermission() async {
+  static Future<void> initTimeZone() async {
+    tzdata.initializeTimeZones();
+    try {
+      tz.setLocalLocation(tz.getLocation((await FlutterTimezone.getLocalTimezone()).identifier));
+    } catch (_) {}
+  }
+
+  Future<void> _onResponse(NotificationResponse r) async {
+    // Actions that work in the background are handled the same way when the
+    // app is running; everything else (taps, "Add food") opens the app.
+    if (r.actionId == _actWater || r.actionId == _actLogMeal || r.actionId == _actSnooze) {
+      await handleReminderAction(r, plugin: plugin);
+    } else {
+      onOpen?.call(r);
+    }
+  }
+
+  Future<bool> requestPermission() async {
     if (Platform.isAndroid) {
-      return await _plugin
+      return await plugin
               .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
               ?.requestNotificationsPermission() ??
           false;
     }
     if (Platform.isMacOS) {
-      return await _plugin
+      return await plugin
               .resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()
               ?.requestPermissions(alert: true, sound: true) ??
           false;
@@ -64,96 +125,198 @@ class NotificationService extends ChangeNotifier {
     return true;
   }
 
-  Future<void> update({
-    bool? waterEnabled,
-    int? waterIntervalH,
-    int? waterStartH,
-    int? waterEndH,
-    bool? calorieEnabled,
-    List<TimeOfDay>? calorieTimes,
-  }) async {
-    if ((waterEnabled ?? false) || (calorieEnabled ?? false)) await _requestPermission();
-    if (waterEnabled != null) await prefs.setBool('notif_water', waterEnabled);
-    if (waterIntervalH != null) await prefs.setInt('notif_water_interval', waterIntervalH);
-    if (waterStartH != null) await prefs.setInt('notif_water_start', waterStartH);
-    if (waterEndH != null) await prefs.setInt('notif_water_end', waterEndH);
-    if (calorieEnabled != null) await prefs.setBool('notif_cal', calorieEnabled);
-    if (calorieTimes != null) {
-      await prefs.setStringList('notif_cal_times', calorieTimes.map((t) => '${t.hour}:${t.minute}').toList());
+  /// Replaces all scheduled reminders with [reminders].
+  Future<void> schedule(List<PlannedReminder> reminders) async {
+    if (!_ready) return;
+    for (final p in await plugin.pendingNotificationRequests()) {
+      if (p.id >= _firstId && p.id <= _lastId) await plugin.cancel(id: p.id);
     }
-    await reschedule();
-    notifyListeners();
-  }
-
-  Future<void> reschedule() async {
-    await _plugin.cancelAll();
-    if (waterEnabled) {
-      var i = 0;
-      for (var h = waterStartH; h <= waterEndH; h += waterIntervalH) {
-        await _daily(
-          _waterBase + i++,
-          h,
-          0,
-          'water',
-          'Water reminders',
-          '💧 Time for water',
-          'Drink a glass of water to stay on track with your goal.',
-        );
-      }
-    }
-    if (calorieEnabled) {
-      var i = 0;
-      for (final t in calorieTimes) {
-        await _daily(
-          _calorieBase + i++,
-          t.hour,
-          t.minute,
-          'calories',
-          'Calorie reminders',
-          '🍽️ Fuel up',
-          'Have you eaten enough today? Log a meal or add a snack to reach your calorie goal.',
-        );
-      }
+    for (final r in reminders) {
+      await plugin.zonedSchedule(
+        id: r.id,
+        scheduledDate: tz.TZDateTime.from(r.at, tz.local),
+        title: r.title,
+        body: r.body,
+        payload: _payload(r.kind, r.title, r.body, meal: r.meal, day: r.day, planned: r.mealPlanned),
+        notificationDetails: details(r.kind, mealPlanned: r.mealPlanned, meal: r.meal),
+        // Inexact: no exact-alarm permission needed; may drift a few minutes.
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
     }
   }
 
-  Future<void> _daily(
-    int id,
-    int hour,
-    int minute,
-    String channel,
-    String channelName,
-    String title,
-    String body,
-  ) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var when = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
-    if (!when.isAfter(now)) when = when.add(const Duration(days: 1));
-    await _plugin.zonedSchedule(
-      id: id,
-      scheduledDate: when,
-      title: title,
-      body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(channel, channelName, importance: Importance.high),
-        macOS: const DarwinNotificationDetails(),
-      ),
-      // Inexact avoids needing the "exact alarm" permission; may drift a few minutes.
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-  }
-
-  Future<void> test() async {
-    await _requestPermission();
-    await _plugin.show(
-      id: 1,
-      title: 'Notifications work ✅',
+  Future<void> showTest() async {
+    await requestPermission();
+    await plugin.show(
+      id: _testId,
+      title: 'Reminders work',
       body: 'You will get reminders at the times you set.',
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails('test', 'Test', importance: Importance.high),
-        macOS: DarwinNotificationDetails(),
+      notificationDetails: details(ReminderKind.checkin),
+    );
+  }
+
+  // ------------------------------------------------- Android foreground service
+
+  /// Keeps the app (and Wi-Fi sync) running while the phone is locked, with
+  /// a quiet ongoing notification. Android only.
+  Future<void> startSyncService() async {
+    if (!Platform.isAndroid) return;
+    await init();
+    await plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.startForegroundService(
+          id: _syncServiceId,
+          title: 'Wi-Fi sync is on',
+          body: 'Keeps ${AppInfo.name} in sync with your other devices while the phone is locked.',
+          notificationDetails: const AndroidNotificationDetails(
+            'sync',
+            'Wi-Fi sync',
+            channelDescription: 'Shown while sync keeps running in the background',
+            importance: Importance.low,
+            priority: Priority.low,
+            ongoing: true,
+            showWhen: false,
+          ),
+          foregroundServiceTypes: {AndroidServiceForegroundType.foregroundServiceTypeSpecialUse},
+        );
+  }
+
+  Future<void> stopSyncService() async {
+    if (!Platform.isAndroid) return;
+    await init();
+    await plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.stopForegroundService();
+  }
+
+  // ------------------------------------------------------------------ shared
+
+  static NotificationDetails details(ReminderKind kind, {bool mealPlanned = false, Meal? meal}) {
+    final (channel, name) = switch (kind) {
+      ReminderKind.water => ('water', 'Water reminders'),
+      ReminderKind.meal => ('meals', 'Meal reminders'),
+      ReminderKind.checkin => ('checkin', 'Calorie check-ins'),
+    };
+    final mealLabel = meal?.label.toLowerCase() ?? 'meal';
+    final actions = switch (kind) {
+      ReminderKind.water => const [
+        AndroidNotificationAction(_actWater, '+250 ml', cancelNotification: false),
+        AndroidNotificationAction(_actSnooze, 'Snooze'),
+      ],
+      ReminderKind.meal => [
+        mealPlanned
+            ? AndroidNotificationAction(_actLogMeal, 'Log $mealLabel', cancelNotification: false)
+            : AndroidNotificationAction(_actAddMeal, 'Add $mealLabel', showsUserInterface: true),
+        const AndroidNotificationAction(_actSnooze, 'Snooze 15 min'),
+      ],
+      ReminderKind.checkin => const <AndroidNotificationAction>[],
+    };
+    return NotificationDetails(
+      android: AndroidNotificationDetails(channel, name, importance: Importance.high, actions: actions),
+      macOS: DarwinNotificationDetails(
+        categoryIdentifier: switch (kind) {
+          ReminderKind.water => _catWater,
+          ReminderKind.meal => mealPlanned ? _catMealLog : _catMealAdd,
+          ReminderKind.checkin => _catCheckin,
+        },
       ),
     );
+  }
+
+  static String _payload(
+    ReminderKind kind,
+    String title,
+    String body, {
+    Meal? meal,
+    String? day,
+    bool planned = false,
+  }) =>
+      jsonEncode({'kind': kind.name, 'title': title, 'body': body, 'meal': meal?.name, 'day': day, 'planned': planned});
+
+  /// The meal a notification is about (for "Add lunch" / tapping a meal reminder).
+  static Meal? mealOf(NotificationResponse r) {
+    try {
+      final m = (jsonDecode(r.payload ?? '{}') as Map)['meal'] as String?;
+      return m == null ? null : Meal.parse(m);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+/// Runs a reminder action (+250 ml, Log meal, Snooze) and updates the
+/// notification. Works in the app or in a background isolate.
+Future<void> handleReminderAction(
+  NotificationResponse r, {
+  required FlutterLocalNotificationsPlugin plugin,
+  AppDb? db,
+}) async {
+  final p = jsonDecode(r.payload ?? '{}') as Map<String, dynamic>;
+  final kind = ReminderKind.values.firstWhere((k) => k.name == p['kind'], orElse: () => ReminderKind.checkin);
+  final id = r.id ?? 0;
+  final meal = p['meal'] == null ? null : Meal.parse(p['meal'] as String);
+  final details = NotificationService.details(kind, mealPlanned: p['planned'] == true, meal: meal);
+
+  if (r.actionId == NotificationService._actSnooze) {
+    await plugin.cancel(id: id);
+    await plugin.zonedSchedule(
+      id: id,
+      scheduledDate: tz.TZDateTime.now(tz.local).add(const Duration(minutes: 15)),
+      title: p['title'] as String?,
+      body: p['body'] as String?,
+      payload: r.payload,
+      notificationDetails: details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+    return;
+  }
+
+  final ownDb = db == null;
+  final d = db ?? await AppDb.open();
+  try {
+    final goals = (await SyncedSettings.load(d)).goals;
+    final today = DateTime.now();
+    if (r.actionId == NotificationService._actWater) {
+      final water = WaterRepo(d);
+      await water.add(today, 250, 'notification');
+      final total = await water.total(dayKey(today));
+      await plugin.show(
+        id: id,
+        title: 'Added 250 ml',
+        body: ReminderText.waterBody(total, goals.waterMl),
+        notificationDetails: details,
+      );
+    } else if (r.actionId == NotificationService._actLogMeal && meal != null) {
+      final repo = FoodRepo(d);
+      final day = p['day'] as String? ?? dayKey(today);
+      final planned = (await repo.entries(FoodRepo.plans, day)).where((e) => e.meal == meal).toList();
+      await repo.copy(planned, FoodRepo.logs, day: day);
+      final eaten = Nutrients.sum((await repo.entries(FoodRepo.logs, day)).map((e) => e.totals)).kcal;
+      final kcal = Nutrients.sum(planned.map((e) => e.totals)).kcal;
+      await plugin.show(
+        id: id,
+        title: 'Logged ${meal.label.toLowerCase()} · ${kcal.round()} kcal',
+        body: ReminderText.mealBody(goals.kcal - eaten),
+        notificationDetails: NotificationService.details(ReminderKind.checkin),
+      );
+    }
+  } finally {
+    if (ownDb) await d.close();
+  }
+}
+
+/// Entry point for notification actions while the app isn't running.
+@pragma('vm:entry-point')
+Future<void> notificationActionInBackground(NotificationResponse r) async {
+  DartPluginRegistrant.ensureInitialized();
+  await NotificationService.initTimeZone();
+  final plugin = FlutterLocalNotificationsPlugin();
+  await plugin.initialize(
+    settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+  );
+  try {
+    await handleReminderAction(r, plugin: plugin);
+  } catch (e) {
+    debugPrint('[reminders] background action failed: $e');
   }
 }

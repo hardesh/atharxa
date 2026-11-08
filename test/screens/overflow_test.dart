@@ -133,13 +133,13 @@ void main() {
         await step(tester);
       });
 
-      testWidgets('You › Goals, Appearance, Body stats · $label', (tester) async {
+      testWidgets('You › Goals, Appearance, Reminders, Body stats · $label', (tester) async {
         setSize(tester, size);
         final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': scale})))!;
         await tester.runAsync(() => seed(t));
         await tester.pumpWidget(t.app);
         await settle(tester);
-        for (final section in ['Goals', 'Appearance', 'Body stats']) {
+        for (final section in ['Goals', 'Appearance', 'Reminders', 'Body stats']) {
           if (find.byType(NavigationRail).evaluate().isNotEmpty) {
             await goTo(tester, 'You');
           } else {

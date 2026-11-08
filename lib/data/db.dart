@@ -242,6 +242,14 @@ class AppDb {
     _emit(table, local: true);
   }
 
+  /// Another process (e.g. a notification action in a background isolate)
+  /// may have written to the database: re-query everything.
+  void notifyExternalChange() {
+    for (final t in syncedTables) {
+      _changes.add(t);
+    }
+  }
+
   void _emit(String table, {required bool local}) {
     _changes.add(table);
     if (local) _localChanges.add(table);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app_info.dart';
+import '../../../state/reminders_controller.dart';
 import '../../../state/settings_providers.dart';
 import '../../../state/sync_controller.dart';
 import '../../format.dart';
@@ -12,6 +13,7 @@ import 'appearance_page.dart';
 import 'body_stats_page.dart';
 import 'device_sync_page.dart';
 import 'goals_page.dart';
+import 'reminders_page.dart';
 
 /// A section of You: hub row + its page.
 class YouSection {
@@ -26,7 +28,7 @@ class YouSection {
 final youSections = <YouSection>[
   YouSection('goals', 'Goals', Icons.flag_outlined, (_) => const GoalsPage()),
   YouSection('appearance', 'Appearance', Icons.palette_outlined, (_) => const AppearancePage()),
-  const YouSection('reminders', 'Reminders', Icons.notifications_none, null),
+  YouSection('reminders', 'Reminders', Icons.notifications_none, (_) => const RemindersPage()),
   YouSection('sync', 'Device sync', Icons.sync, (_) => const DeviceSyncPage()),
   const YouSection('services', 'Connected services', Icons.link, null),
   const YouSection('ai', 'AI models', Icons.auto_awesome_outlined, null),
@@ -49,6 +51,10 @@ String? _summary(String id, WidgetRef ref) {
       final (enabled, last) = ref.watch(syncControllerProvider.select((s) => (s.enabled, s.lastSync)));
       if (!enabled) return 'Off';
       return last == null ? 'On · not paired yet' : 'On · synced ${fmtWhen(last)}';
+    case 'reminders':
+      final r = ref.watch(remindersProvider);
+      final on = [if (r.mealsOn.values.any((v) => v)) 'Meals', if (r.waterOn) 'Water', if (r.checkinOn) 'Check-ins'];
+      return on.isEmpty ? 'Off' : on.join(' · ');
     case 'body':
       final b = ref.watch(syncedSettingsProvider.select((s) => s.body));
       if (b.heightCm == null && b.weightKg == null) return 'Height, weight, activity';

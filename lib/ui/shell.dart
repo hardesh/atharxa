@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../data/food_repo.dart';
+import '../state/reminders_controller.dart';
+import 'screens/food/food_picker_screen.dart';
 
 import 'screens/meal_plan_screen.dart';
 import 'screens/overview_screen.dart';
@@ -32,14 +37,26 @@ class Destination {
 /// Responsive app shell (DESIGN.md §2):
 /// phone → bottom NavigationBar (5 tabs), You via avatar;
 /// ≥ 600 dp → NavigationRail with 6 destinations (5 + You).
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> {
+  @override
+  void initState() {
+    super.initState();
+    // "Add lunch" / tapping a meal reminder: open Overview and the food picker.
+    ref.listenManual(pendingMealProvider, (_, meal) {
+      if (meal == null) return;
+      ref.read(pendingMealProvider.notifier).request(null);
+      setState(() => _index = 0);
+      FoodPickerScreen.open(context, table: FoodRepo.logs, date: DateTime.now(), meal: meal);
+    }, fireImmediately: true);
+  }
+
   int _index = 0;
 
   List<Destination> get _main => [

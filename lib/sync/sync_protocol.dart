@@ -29,6 +29,20 @@ class SyncException implements Exception {
   String toString() => message;
 }
 
+/// A session another device ran against this one (server side).
+class ServedSession {
+  ServedSession({
+    required this.peerId,
+    required this.peerName,
+    required this.host,
+    required this.sent,
+    required this.received,
+  });
+  final String peerId, peerName;
+  final String? host;
+  final int sent, received;
+}
+
 class SyncOutcome {
   SyncOutcome({required this.peerId, required this.peerName, required this.sent, required this.received});
   final String peerId, peerName;
@@ -56,11 +70,35 @@ typedef SyncProgress = void Function(int received, int total);
 /// Every request must be signed with the shared pairing code; responses are
 /// signed too so the caller can tell a wrong code from a network problem.
 class SyncServer {
-  SyncServer({required this.db, required this.auth, required this.name});
+  SyncServer({required this.db, required this.auth, required this.name, this.onSession});
 
   final AppDb db;
   final SyncAuth auth;
   final String Function() name;
+
+  /// Called after each request of a session another device runs against us,
+  /// with that session's running totals (so both sides show "Sent N,
+  /// received M", not just the device that started it).
+  final void Function(ServedSession)? onSession;
+
+  /// Running totals per peer for the session in progress (reset on hello).
+  final _sessions = <String, ({int sent, int received})>{};
+
+  void _record(Request req, String peerId, {int sent = 0, int received = 0}) {
+    final cur = _sessions[peerId] ?? (sent: 0, received: 0);
+    final next = (sent: cur.sent + sent, received: cur.received + received);
+    _sessions[peerId] = next;
+    final info = req.context['shelf.io.connection_info'] as HttpConnectionInfo?;
+    onSession?.call(
+      ServedSession(
+        peerId: peerId,
+        peerName: Uri.decodeComponent(req.headers[SyncHeaders.name] ?? ''),
+        host: info?.remoteAddress.address,
+        sent: next.sent,
+        received: next.received,
+      ),
+    );
+  }
 
   Future<Response> handle(Request req) async {
     final path = '/${req.url.path}';
@@ -80,10 +118,12 @@ class SyncServer {
     final input = body.isEmpty ? <String, dynamic>{} : jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
     switch ((req.method, path)) {
       case ('GET', '/v1/hello'):
+        _sessions.remove(sender);
         return _reply(path, 200, {'id': db.deviceId, 'name': name()});
       case ('POST', '/v1/pull'):
         final since = (input['since'] as num?)?.toInt() ?? 0;
         final page = await db.changesPage(since, limit: _pageSize, excludeDevice: sender);
+        _record(req, sender, sent: page.rows.length);
         final remaining = input['count'] == true ? await db.countChanges(since, excludeDevice: sender) : null;
         return _reply(path, 200, {
           'rows': [for (final r in page.rows) r.toJson()],
@@ -97,6 +137,7 @@ class SyncServer {
         ];
         final applied = await db.merge(rows);
         if (applied > 0) debugPrint('[sync] received $applied rows pushed by $sender');
+        _record(req, sender, received: rows.length);
         return _reply(path, 200, {'applied': applied});
       default:
         return _reply(path, 404, {'error': 'not_found'});
@@ -123,10 +164,14 @@ class SyncServer {
 
 /// Runs one sync session against a peer at `host:port`.
 class SyncClient {
-  SyncClient({required this.db, required this.auth, http.Client? client}) : _http = client ?? http.Client();
+  SyncClient({required this.db, required this.auth, this.deviceName = '', http.Client? client})
+    : _http = client ?? http.Client();
 
   final AppDb db;
   final SyncAuth auth;
+
+  /// Sent to the peer so its paired list can show this device's name.
+  final String deviceName;
   final http.Client _http;
 
   static String pushKey(String peerId) => 'push_$peerId';
@@ -202,6 +247,7 @@ class SyncClient {
     final headers = {
       'content-type': 'application/json',
       SyncHeaders.device: db.deviceId,
+      SyncHeaders.name: Uri.encodeComponent(deviceName),
       SyncHeaders.ts: '$ts',
       SyncHeaders.sig: auth.sign(method: method, path: path, ts: ts, sender: db.deviceId, body: body),
     };

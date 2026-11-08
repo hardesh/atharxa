@@ -88,6 +88,9 @@ class SyncAuth {
 /// Header names used by the sync protocol.
 abstract final class SyncHeaders {
   static const device = 'x-sync-device';
+
+  /// Sender's display name (URI-encoded); shown in the receiver's paired list.
+  static const name = 'x-sync-name';
   static const ts = 'x-sync-ts';
   static const sig = 'x-sync-sig';
 }

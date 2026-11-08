@@ -10,8 +10,13 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'helpers.dart';
 
 /// Starts [db]'s sync server on a free local port; returns its address.
-Future<(HttpServer, String)> serve(AppDb db, String code, {String name = 'Mac'}) async {
-  final server = SyncServer(db: db, auth: SyncAuth(code), name: () => name);
+Future<(HttpServer, String)> serve(
+  AppDb db,
+  String code, {
+  String name = 'Mac',
+  void Function(ServedSession)? onSession,
+}) async {
+  final server = SyncServer(db: db, auth: SyncAuth(code), name: () => name, onSession: onSession);
   final http = await shelf_io.serve(server.handle, InternetAddress.loopbackIPv4, 0);
   return (http, '127.0.0.1:${http.port}');
 }
@@ -111,5 +116,25 @@ void main() {
     expect(progress.length, greaterThan(1)); // more than one page
     expect(r.received, greaterThanOrEqualTo(950));
     client.close();
+  });
+
+  test('the answering device records the session too (sent/received, name)', () async {
+    final phone = await openTestDb(), mac = await openTestDb();
+    ServedSession? last;
+    final (server, address) = await serve(mac, '482913', onSession: (s) => last = s);
+    addTearDown(() => server.close(force: true));
+    await phone.save('water_logs', {'day': '2026-11-08', 'ml': 250, 'logged_at': 1, 'source': 'today'});
+    await mac.save('water_logs', {'day': '2026-11-08', 'ml': 500, 'logged_at': 2, 'source': 'mac'});
+
+    final client = SyncClient(db: phone, auth: SyncAuth('482913'), deviceName: 'Android phone');
+    final r = await client.syncWith(address);
+    client.close();
+
+    expect(last, isNotNull);
+    expect(last!.peerId, phone.deviceId);
+    expect(last!.peerName, 'Android phone');
+    expect(last!.host, '127.0.0.1');
+    expect(last!.received, r.sent); // what the phone sent, the Mac received
+    expect(last!.sent, r.received);
   });
 }

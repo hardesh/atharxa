@@ -44,7 +44,7 @@ void backgroundSyncDispatcher() {
     final prefs = SyncPrefs(await SharedPreferences.getInstance());
     if (!prefs.enabled || !prefs.autoSync || !SyncAuth.isValidCode(prefs.code) || prefs.peers.isEmpty) return true;
     final db = await AppDb.open();
-    final client = SyncClient(db: db, auth: SyncAuth(prefs.code));
+    final client = SyncClient(db: db, auth: SyncAuth(prefs.code), deviceName: prefs.deviceName);
     try {
       for (final p in prefs.peers) {
         try {

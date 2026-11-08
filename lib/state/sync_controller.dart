@@ -186,6 +186,22 @@ class SyncController extends Notifier<SyncState> {
     state = state.copyWith(paired: peers);
   }
 
+  /// Another device ran a session against us: update its stats too (and add
+  /// it to our paired list if it paired from its side).
+  Future<void> _recordServed(ServedSession s) async {
+    if (!ref.mounted) return;
+    final known = state.paired.where((p) => p.id == s.peerId).firstOrNull;
+    final peers = await _prefs.recordSession(
+      peerId: s.peerId,
+      peerName: s.peerName.isNotEmpty ? s.peerName : (known?.name ?? 'Other device'),
+      host: s.host ?? known?.host ?? '',
+      port: known?.port ?? syncPort,
+      sent: s.sent,
+      received: s.received,
+    );
+    if (ref.mounted) state = state.copyWith(paired: peers, lastResult: 'Sent ${s.sent}, received ${s.received}');
+  }
+
   static String _newCode() => (math.Random.secure().nextInt(900000) + 100000).toString();
 
   // ----------------------------------------------------------------- actions
@@ -214,7 +230,12 @@ class SyncController extends Notifier<SyncState> {
 
   Future<void> _start() async {
     final db = ref.read(dbProvider);
-    final server = SyncServer(db: db, auth: SyncAuth(state.code), name: () => state.deviceName);
+    final server = SyncServer(
+      db: db,
+      auth: SyncAuth(state.code),
+      name: () => state.deviceName,
+      onSession: _recordServed,
+    );
     try {
       _server = await shelf_io.serve(server.handle, InternetAddress.anyIPv4, syncPort, shared: true);
     } catch (e) {
@@ -336,7 +357,7 @@ class SyncController extends Notifier<SyncState> {
 
   Future<void> _syncWith(String address, {bool full = false, bool manual = false}) async {
     if (!state.codeValid || state.busy) return;
-    final client = SyncClient(db: ref.read(dbProvider), auth: SyncAuth(state.code));
+    final client = SyncClient(db: ref.read(dbProvider), auth: SyncAuth(state.code), deviceName: state.deviceName);
     state = state.copyWith(busy: true, clearProgress: true, clearFailure: manual);
     try {
       final r = await client.syncWith(

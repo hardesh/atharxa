@@ -10,21 +10,10 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import '../../widgets/tag.dart';
 
 /// "482913" → "482 913".
 String formatCode(String c) => c.length == 6 ? '${c.substring(0, 3)} ${c.substring(3)}' : c;
-
-/// "today, 13:12" / "yesterday, 08:05" / "Sun 8 Nov, 13:12".
-String whenText(DateTime t) {
-  final now = DateTime.now();
-  final days = DateTime(now.year, now.month, now.day).difference(DateTime(t.year, t.month, t.day)).inDays;
-  final day = switch (days) {
-    0 => 'today',
-    1 => 'yesterday',
-    _ => fmtDayShort(t),
-  };
-  return '$day, ${fmtTime(t)}';
-}
 
 /// Device sync (DESIGN.md §5 You › Device sync, §7.2; Pairing.dc.html).
 class DeviceSyncPage extends ConsumerStatefulWidget {
@@ -47,9 +36,12 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
     final s = ref.read(syncControllerProvider);
     _name.text = s.deviceName;
     _code.text = s.code;
-    // Show the mismatch dialog whenever a session fails on the code.
-    ref.listenManual(syncControllerProvider.select((s) => s.mismatchPeer), (_, peer) {
-      if (peer != null && mounted) _showMismatch(peer);
+    // A code mismatch opens a dialog with the fix.
+    ref.listenManual(syncControllerProvider.select((s) => s.failure), (prev, next) {
+      final e = next?.error;
+      if (e != null && e.kind == SyncErrorKind.codeMismatch && !identical(prev, next) && mounted) {
+        _showMismatch(e.peer ?? 'The other device');
+      }
     });
     ref.listenManual(syncControllerProvider.select((s) => s.code), (_, code) {
       if (_code.text != code) _code.text = code;
@@ -81,73 +73,67 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
         ],
       ),
     );
-    _ctl.dismissMismatch();
     if (again == true) {
       await _ctl.syncNow();
     } else if (again == false && mounted) {
-      FocusScope.of(context).requestFocus(_codeFocus);
+      _codeFocus.requestFocus();
     }
   }
 
   Future<void> _addByIp() async {
-    final c = TextEditingController();
-    final address = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add device by IP'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'On the other device, open You › Device sync. Its address is shown under "Sync with my devices".',
-              style: ctx.tt.bodySmall,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: c,
-              autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'IP address', hintText: '192.168.1.42'),
-              onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, c.text.trim()), child: const Text('Connect')),
-        ],
-      ),
+    final address = await askText(
+      context,
+      title: 'Add device by IP',
+      label: 'IP address',
+      hint: '192.168.1.42',
+      message: 'On the other device, open You › Device sync. Its address is shown under "Sync with my devices".',
+      confirmLabel: 'Connect',
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
     );
     if (address != null && address.isNotEmpty) await _ctl.addByAddress(address);
   }
 
   @override
   Widget build(BuildContext context) {
-    final s = ref.watch(syncControllerProvider);
-    if (!s.enabled) return _OffState(onTurnOn: () => _ctl.setEnabled(true));
+    // Only what this page shows; progress ticks rebuild just _StatusCard.
+    final (:enabled, :listening, :address, :paired, :discovered, :busy, :autoSync, :intervalMin) = ref.watch(
+      syncControllerProvider.select(
+        (s) => (
+          enabled: s.enabled,
+          listening: s.listening,
+          address: s.address,
+          paired: s.paired,
+          discovered: s.discovered,
+          busy: s.busy,
+          autoSync: s.autoSync,
+          intervalMin: s.intervalMin,
+        ),
+      ),
+    );
+    if (!enabled) return _OffState(onTurnOn: () => _ctl.setEnabled(true));
 
-    final addr = s.addresses.isEmpty ? 'not connected to Wi-Fi' : '${s.addresses.first} : $syncPort';
+    final newDevices = discovered.values.where((d) => !paired.any((p) => p.id == d.id)).toList();
+    final addr = address == null ? 'not connected to Wi-Fi' : '$address : $syncPort';
     return PageBody(
       children: [
         Card(
           child: SwitchListTile(
             contentPadding: const EdgeInsets.fromLTRB(16, 4, 12, 4),
             title: Text('Sync with my devices', style: context.tt.titleMedium),
-            subtitle: Text(s.listening ? 'On · $addr' : 'Starting…'),
+            subtitle: Text(listening ? 'On · $addr' : 'Starting…'),
             value: true,
             onChanged: (_) => _ctl.setEnabled(false),
           ),
         ),
-        _StatusCard(state: s, onSyncNow: _ctl.syncNow),
-        if (s.paired.isNotEmpty)
+        const _StatusCard(),
+        if (paired.isNotEmpty)
           _Section(
             title: 'Paired devices',
             child: Column(
               children: [
-                for (final (i, p) in s.paired.indexed) ...[
+                for (final (i, p) in paired.indexed) ...[
                   if (i > 0) const Divider(),
-                  _PairedTile(peer: p, online: s.isOnline(p.id), busy: s.busyPeer != null),
+                  _PairedTile(peer: p, online: discovered.containsKey(p.id), busy: busy),
                 ],
               ],
             ),
@@ -201,7 +187,7 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (s.unpaired.isEmpty)
+              if (newDevices.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
@@ -212,12 +198,8 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
                     ],
                   ),
                 ),
-              for (final d in s.unpaired)
-                _DiscoveredTile(peer: d, busy: s.busyPeer != null, onPair: () => _ctl.pair(d)),
-              TextButton(
-                onPressed: s.busyPeer == null ? _addByIp : null,
-                child: const Text('Not listed? Add device by IP'),
-              ),
+              for (final d in newDevices) _DiscoveredTile(peer: d, busy: busy, onPair: () => _ctl.pair(d)),
+              TextButton(onPressed: busy ? null : _addByIp, child: const Text('Not listed? Add device by IP')),
             ],
           ),
         ),
@@ -230,10 +212,10 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Sync automatically'),
                 subtitle: const Text('A few seconds after a change, when the app opens, and on a timer'),
-                value: s.autoSync,
+                value: autoSync,
                 onChanged: _ctl.setAutoSync,
               ),
-              if (s.autoSync) ...[
+              if (autoSync) ...[
                 const SizedBox(height: 4),
                 Text('Also every', style: context.tt.bodySmall),
                 const SizedBox(height: 6),
@@ -243,7 +225,7 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
                     ButtonSegment(value: 5, label: Text('5 min')),
                     ButtonSegment(value: 15, label: Text('15 min')),
                   ],
-                  selected: {s.intervalMin},
+                  selected: {intervalMin},
                   onSelectionChanged: (v) => _ctl.setIntervalMin(v.first),
                 ),
               ],
@@ -290,92 +272,86 @@ class _OffState extends StatelessWidget {
   );
 }
 
-class _StatusCard extends StatelessWidget {
-  const _StatusCard({required this.state, required this.onSyncNow});
-  final SyncState state;
-  final VoidCallback onSyncNow;
+/// Last sync / progress / Sync now, plus the latest failure.
+class _StatusCard extends ConsumerWidget {
+  const _StatusCard();
 
   @override
-  Widget build(BuildContext context) {
-    final s = state;
-    final last = s.paired
-        .map((p) => p.lastSyncAt)
-        .whereType<DateTime>()
-        .fold<DateTime?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
-    final error = s.error;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s.busyPeer != null
-                            ? 'Syncing…'
-                            : last == null
-                            ? 'Not synced yet'
-                            : 'Last sync ${whenText(last)}',
-                        style: context.tt.titleSmall,
-                      ),
-                      if (s.progress case final p? when p.total > 0)
-                        Text('received ${fmtInt(p.received)} of ${fmtInt(p.total)}', style: context.tt.bodySmall)
-                      else if (s.busyPeer == null && s.lastResult != null)
-                        Text(s.lastResult!, style: context.tt.bodySmall),
-                    ],
-                  ),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: s.busyPeer == null && s.paired.isNotEmpty ? onSyncNow : null,
-                  icon: const Icon(Icons.sync, size: 18),
-                  label: const Text('Sync now'),
-                ),
-              ],
-            ),
-            if (s.busyPeer != null) ...[
-              const SizedBox(height: 12),
-              LinearProgressIndicator(
-                value: switch (s.progress) {
-                  final p? when p.total > 0 => (p.received / p.total).clamp(0.0, 1.0),
-                  _ => null,
-                },
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ],
-            if (error != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: context.cs.errorContainer, borderRadius: BorderRadius.circular(12)),
-                child: Row(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(syncControllerProvider);
+    final last = s.lastSync;
+    final p = s.progress;
+    final failure = s.failure;
+    final title = s.busy ? 'Syncing…' : (last == null ? 'Not synced yet' : 'Last sync ${fmtWhen(last)}');
+    final detail = p != null && p.total > 0
+        ? 'received ${fmtInt(p.received)} of ${fmtInt(p.total)}'
+        : (s.busy ? null : s.lastResult);
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      error.kind == SyncErrorKind.interrupted ? Icons.sync_problem : Icons.error_outline,
-                      color: context.cs.onErrorContainer,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        error.kind == SyncErrorKind.unreachable
-                            ? '${error.message}. Check it is on the same Wi-Fi with sync turned on.'
-                            : error.message,
-                        style: context.tt.bodyMedium?.copyWith(color: context.cs.onErrorContainer),
-                      ),
-                    ),
+                    Text(title, style: context.tt.titleSmall),
+                    if (detail != null) Text(detail, style: context.tt.bodySmall),
                   ],
                 ),
               ),
+              FilledButton.tonalIcon(
+                onPressed: !s.busy && s.paired.isNotEmpty ? ref.read(syncControllerProvider.notifier).syncNow : null,
+                icon: const Icon(Icons.sync, size: 18),
+                label: const Text('Sync now'),
+              ),
             ],
+          ),
+          if (s.busy) ...[
+            const SizedBox(height: 12),
+            LinearProgressIndicator(
+              value: p != null && p.total > 0 ? (p.received / p.total).clamp(0.0, 1.0) : null,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ],
-        ),
+          if (failure != null && !s.busy) ...[
+            const SizedBox(height: 12),
+            failure.manual || failure.error.kind == SyncErrorKind.codeMismatch
+                ? _ErrorBanner(error: failure.error)
+                : Text('Last automatic attempt: ${_describe(failure.error)}', style: context.tt.bodySmall),
+          ],
+        ],
       ),
     );
   }
+}
+
+String _describe(SyncException e) => e.kind == SyncErrorKind.unreachable
+    ? '${e.message}. Check it is on the same Wi-Fi with sync turned on.'
+    : e.message;
+
+class _ErrorBanner extends StatelessWidget {
+  const _ErrorBanner({required this.error});
+  final SyncException error;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(color: context.cs.errorContainer, borderRadius: BorderRadius.circular(12)),
+    child: Row(
+      children: [
+        Icon(
+          error.kind == SyncErrorKind.interrupted ? Icons.sync_problem : Icons.error_outline,
+          color: context.cs.onErrorContainer,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(_describe(error), style: context.tt.bodyMedium?.copyWith(color: context.cs.onErrorContainer)),
+        ),
+      ],
+    ),
+  );
 }
 
 class _PairedTile extends ConsumerWidget {
@@ -390,7 +366,7 @@ class _PairedTile extends ConsumerWidget {
     final detail = [
       peer.host,
       if (peer.lastSyncAt != null)
-        'Sent ${peer.lastSent}, received ${peer.lastReceived} · ${whenText(peer.lastSyncAt!)}',
+        'Sent ${peer.lastSent}, received ${peer.lastReceived} · ${fmtWhen(peer.lastSyncAt!)}',
     ].join(' · ');
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -399,11 +375,7 @@ class _PairedTile extends ConsumerWidget {
         children: [
           Flexible(child: Text(peer.name, overflow: TextOverflow.ellipsis)),
           const SizedBox(width: 8),
-          _Tag(
-            label: online ? 'Online' : 'Offline',
-            fg: online ? sem.success : context.cs.onSurfaceVariant,
-            bg: online ? sem.successContainer : context.cs.surfaceContainerHigh,
-          ),
+          online ? Tag('Online', fg: sem.success, bg: sem.successContainer) : const Tag('Offline'),
         ],
       ),
       subtitle: Text(detail),
@@ -457,36 +429,22 @@ class _DiscoveredTile extends StatelessWidget {
   );
 }
 
-class _Tag extends StatelessWidget {
-  const _Tag({required this.label, required this.fg, required this.bg});
-  final String label;
-  final Color fg, bg;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
-    child: Text(label, style: context.tt.labelMedium?.copyWith(color: fg)),
-  );
-}
-
+/// Titled card section (primary-coloured heading).
 class _Section extends StatelessWidget {
   const _Section({required this.title, required this.child});
   final String title;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(title, style: context.tt.titleSmall?.copyWith(color: context.cs.primary)),
-          const SizedBox(height: 4),
-          child,
-        ],
-      ),
+  Widget build(BuildContext context) => AppCard(
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(title, style: context.tt.titleSmall?.copyWith(color: context.cs.primary)),
+        const SizedBox(height: 4),
+        child,
+      ],
     ),
   );
 }

@@ -44,3 +44,15 @@ String fmtDayShort(DateTime d) => _dayShort.format(d);
 
 /// "S" — first letter of the weekday (chart labels).
 String fmtWeekdayInitial(DateTime d) => _weekday.format(d).substring(0, 1);
+
+/// "today, 13:12" / "yesterday, 08:05" / "Sun 8 Nov, 13:12".
+String fmtWhen(DateTime t) {
+  final now = DateTime.now();
+  final days = DateTime(now.year, now.month, now.day).difference(DateTime(t.year, t.month, t.day)).inDays;
+  final day = switch (days) {
+    0 => 'today',
+    1 => 'yesterday',
+    _ => fmtDayShort(t),
+  };
+  return '$day, ${fmtTime(t)}';
+}

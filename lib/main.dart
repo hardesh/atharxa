@@ -19,12 +19,12 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   final db = await AppDb.open();
   final notifications = NotificationService(prefs);
-  runApp(
-    ProviderScope(
-      overrides: await appOverrides(db: db, prefs: prefs, notifications: notifications),
-      child: const App(),
-    ),
+  final container = ProviderContainer(
+    overrides: await appOverrides(db: db, prefs: prefs, notifications: notifications),
   );
+  // Wi-Fi sync lives for the app's lifetime and starts itself when enabled.
+  container.read(syncControllerProvider);
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
   // Non-critical startup work runs after the first frame.
   await notifications.init();
 }
@@ -47,8 +47,6 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Keep Wi-Fi sync alive for the app's lifetime (it starts itself when enabled).
-    ref.watch(syncControllerProvider.select((s) => s.enabled));
     final palette = ref.watch(syncedSettingsProvider.select((s) => s.palette));
     final device = ref.watch(deviceSettingsProvider);
     return MaterialApp(

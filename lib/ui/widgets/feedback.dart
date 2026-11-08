@@ -87,3 +87,89 @@ Future<bool> confirm(
   );
   return r ?? false;
 }
+
+/// Single text-field dialog (name, IP address, custom amount…). Returns the
+/// trimmed text, or null when cancelled.
+Future<String?> askText(
+  BuildContext context, {
+  required String title,
+  required String label,
+  String initial = '',
+  String? hint,
+  String? message,
+  String? suffix,
+  String confirmLabel = 'Save',
+  TextInputType? keyboardType,
+  TextCapitalization capitalization = TextCapitalization.none,
+}) => showDialog<String>(
+  context: context,
+  builder: (_) => _TextDialog(
+    title: title,
+    label: label,
+    initial: initial,
+    hint: hint,
+    message: message,
+    suffix: suffix,
+    confirmLabel: confirmLabel,
+    keyboardType: keyboardType,
+    capitalization: capitalization,
+  ),
+);
+
+class _TextDialog extends StatefulWidget {
+  const _TextDialog({
+    required this.title,
+    required this.label,
+    required this.initial,
+    required this.confirmLabel,
+    required this.capitalization,
+    this.hint,
+    this.message,
+    this.suffix,
+    this.keyboardType,
+  });
+
+  final String title, label, initial, confirmLabel;
+  final String? hint, message, suffix;
+  final TextInputType? keyboardType;
+  final TextCapitalization capitalization;
+
+  @override
+  State<_TextDialog> createState() => _TextDialogState();
+}
+
+class _TextDialogState extends State<_TextDialog> {
+  late final _c = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.pop(context, _c.text.trim());
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.title),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.message != null) ...[Text(widget.message!, style: context.tt.bodySmall), const SizedBox(height: 12)],
+        TextField(
+          controller: _c,
+          autofocus: true,
+          keyboardType: widget.keyboardType,
+          textCapitalization: widget.capitalization,
+          decoration: InputDecoration(labelText: widget.label, hintText: widget.hint, suffixText: widget.suffix),
+          onSubmitted: (_) => _submit(),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      FilledButton(onPressed: _submit, child: Text(widget.confirmLabel)),
+    ],
+  );
+}

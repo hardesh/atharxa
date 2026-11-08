@@ -195,17 +195,18 @@ class AppDb {
 
   int _tick() => _clock = max(DateTime.now().millisecondsSinceEpoch, _clock + 1);
 
-  Future<int> _nextRev(DatabaseExecutor tx) async {
+  Future<int> _readRev(DatabaseExecutor tx) async {
     final r = await tx.query('sync_meta', where: 'key = ?', whereArgs: ['rev']);
-    final next = (r.isEmpty ? 0 : int.parse(r.first['value'] as String)) + 1;
+    return r.isEmpty ? 0 : int.parse(r.first['value'] as String);
+  }
+
+  Future<int> _nextRev(DatabaseExecutor tx) async {
+    final next = await _readRev(tx) + 1;
     await tx.insert('sync_meta', {'key': 'rev', 'value': '$next'}, conflictAlgorithm: ConflictAlgorithm.replace);
     return next;
   }
 
-  Future<int> currentRev() async {
-    final r = await _db.query('sync_meta', where: 'key = ?', whereArgs: ['rev']);
-    return r.isEmpty ? 0 : int.parse(r.first['value'] as String);
-  }
+  Future<int> currentRev() => _readRev(_db);
 
   // ------------------------------------------------------------ local writes
 
@@ -223,8 +224,7 @@ class AppDb {
         'rev': rev,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
-    _changes.add(table);
-    _localChanges.add(table);
+    _emit(table, local: true);
     return id;
   }
 
@@ -239,8 +239,12 @@ class AppDb {
         whereArgs: [id],
       );
     });
+    _emit(table, local: true);
+  }
+
+  void _emit(String table, {required bool local}) {
     _changes.add(table);
-    _localChanges.add(table);
+    if (local) _localChanges.add(table);
   }
 
   Future<List<Map<String, Object?>>> query(
@@ -278,6 +282,10 @@ class AppDb {
 
   // -------------------------------------------------------------------- sync
 
+  /// `rev > since` (and not last edited by [excludeDevice]) as SQL + args.
+  static (String, List<Object?>) _sinceFilter(int sinceRev, String? excludeDevice) =>
+      excludeDevice == null ? ('rev > ?', [sinceRev]) : ('rev > ? AND device_id != ?', [sinceRev, excludeDevice]);
+
   /// One page of rows (tombstones included) changed after [sinceRev], ordered
   /// by `rev` across all synced tables. Rows last edited by [excludeDevice]
   /// are skipped: that peer already has them (or something newer), so this
@@ -289,65 +297,90 @@ class AppDb {
     int limit = 500,
     String? excludeDevice,
   }) async {
-    final where = excludeDevice == null ? 'rev > ?' : 'rev > ? AND device_id != ?';
-    final args = [sinceRev, ?excludeDevice];
-    final all = <SyncRow>[];
+    final (where, args) = _sinceFilter(sinceRev, excludeDevice);
+    // One cheap rev-only query finds the page boundary, so each table read
+    // below fetches just the rows that belong to this page.
+    final union = syncedTables.map((t) => 'SELECT rev FROM $t WHERE $where').join(' UNION ALL ');
+    final revs = await _db.rawQuery('SELECT rev FROM ($union) ORDER BY rev LIMIT ?', [
+      for (final _ in syncedTables) ...args,
+      limit + 1,
+    ]);
+    final more = revs.length > limit;
+    if (revs.isEmpty) return (rows: const <SyncRow>[], next: await currentRev(), more: false);
+    final upTo = (revs[(more ? limit : revs.length) - 1]['rev'] as num).toInt();
+    final page = <SyncRow>[];
     for (final t in syncedTables) {
-      // limit + 1 per table so a full page from one table still reports `more`.
-      final rows = await _db.query(t, where: where, whereArgs: args, orderBy: 'rev', limit: limit + 1);
-      all.addAll(rows.map((r) => SyncRow(t, r)));
+      final rows = await _db.query(t, where: '$where AND rev <= ?', whereArgs: [...args, upTo]);
+      page.addAll(rows.map((r) => SyncRow(t, r)));
     }
-    all.sort((a, b) => a.rev.compareTo(b.rev));
-    final more = all.length > limit;
-    final page = all.take(limit).toList();
-    final next = more ? page.last.rev : await currentRev();
-    return (rows: page, next: next, more: more);
+    page.sort((a, b) => a.rev.compareTo(b.rev));
+    return (rows: page, next: more ? upTo : await currentRev(), more: more);
   }
 
   /// Number of rows a [changesPage] walk from [sinceRev] would return.
   Future<int> countChanges(int sinceRev, {String? excludeDevice}) async {
-    final where = excludeDevice == null ? 'rev > ?' : 'rev > ? AND device_id != ?';
-    var n = 0;
-    for (final t in syncedTables) {
-      final r = await _db.rawQuery('SELECT COUNT(*) AS n FROM $t WHERE $where', [sinceRev, ?excludeDevice]);
-      n += (r.first['n'] as num).toInt();
-    }
-    return n;
+    final (where, args) = _sinceFilter(sinceRev, excludeDevice);
+    final sum = syncedTables.map((t) => '(SELECT COUNT(*) FROM $t WHERE $where)').join(' + ');
+    final r = await _db.rawQuery('SELECT $sum AS n', [for (final _ in syncedTables) ...args]);
+    return (r.first['n'] as num).toInt();
   }
 
   /// Merge rows from a peer. Newer (updated_at, device_id) wins; unknown
   /// tables and columns are ignored. Returns how many rows were applied.
-  Future<int> merge(Iterable<SyncRow> rows) async {
-    var applied = 0;
-    final touched = <String>{};
-    await _db.transaction((tx) async {
-      for (final r in rows) {
-        final cols = _columns[r.table];
-        if (cols == null) continue;
-        final row = <String, Object?>{
-          for (final e in r.row.entries)
-            if (cols.contains(e.key) && e.key != 'rev') e.key: e.value,
-        };
-        final id = row['id'] as String?;
-        final ts = (row['updated_at'] as num?)?.toInt();
-        final dev = row['device_id'] as String?;
-        if (id == null || ts == null || dev == null) continue;
-        final cur = await tx.query(r.table, columns: ['updated_at', 'device_id'], where: 'id = ?', whereArgs: [id]);
-        if (cur.isNotEmpty) {
-          final curTs = cur.first['updated_at'] as int;
-          final curDev = cur.first['device_id'] as String;
-          final newer = ts > curTs || (ts == curTs && dev.compareTo(curDev) > 0);
-          if (!newer) continue;
-        }
-        row['rev'] = await _nextRev(tx);
-        await tx.insert(r.table, row, conflictAlgorithm: ConflictAlgorithm.replace);
-        _clock = max(_clock, ts);
-        applied++;
-        touched.add(r.table);
+  ///
+  /// [cursor] (a sync_meta key/value) is written in the same transaction, so
+  /// a resumed sync never skips or re-applies a page.
+  Future<int> merge(Iterable<SyncRow> rows, {(String, String)? cursor}) async {
+    // Group incoming rows by table, keeping only known columns.
+    final byTable = <String, List<Map<String, Object?>>>{};
+    for (final r in rows) {
+      final cols = _columns[r.table];
+      if (cols == null) continue;
+      final row = <String, Object?>{
+        for (final e in r.row.entries)
+          if (cols.contains(e.key) && e.key != 'rev') e.key: e.value,
+      };
+      if (row['id'] is String && row['updated_at'] is num && row['device_id'] is String) {
+        (byTable[r.table] ??= []).add(row);
       }
+    }
+    final touched = <String>{};
+    var applied = 0;
+    await _db.transaction((tx) async {
+      var rev = await _readRev(tx);
+      final batch = tx.batch();
+      for (final MapEntry(key: table, value: incoming) in byTable.entries) {
+        // Current versions of all incoming ids in one query.
+        final ids = incoming.map((r) => r['id']).toList();
+        final current = {
+          for (final c in await tx.query(
+            table,
+            columns: ['id', 'updated_at', 'device_id'],
+            where: 'id IN (${List.filled(ids.length, '?').join(',')})',
+            whereArgs: ids,
+          ))
+            c['id'] as String: (c['updated_at'] as int, c['device_id'] as String),
+        };
+        for (final row in incoming) {
+          final ts = (row['updated_at'] as num).toInt();
+          final dev = row['device_id'] as String;
+          final cur = current[row['id'] as String];
+          if (cur != null && !(ts > cur.$1 || (ts == cur.$1 && dev.compareTo(cur.$2) > 0))) continue;
+          current[row['id'] as String] = (ts, dev);
+          batch.insert(table, {...row, 'rev': ++rev}, conflictAlgorithm: ConflictAlgorithm.replace);
+          _clock = max(_clock, ts);
+          applied++;
+          touched.add(table);
+        }
+      }
+      batch.insert('sync_meta', {'key': 'rev', 'value': '$rev'}, conflictAlgorithm: ConflictAlgorithm.replace);
+      if (cursor != null) {
+        batch.insert('sync_meta', {'key': cursor.$1, 'value': cursor.$2}, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await batch.commit(noResult: true);
     });
     for (final t in touched) {
-      _changes.add(t);
+      _emit(t, local: false);
     }
     return applied;
   }

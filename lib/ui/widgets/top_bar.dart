@@ -79,38 +79,36 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
                       ),
                     ),
                   const SizedBox(width: 10),
-                  Builder(
-                    builder: (context) => Semantics(
-                      label: 'You: profile and settings',
-                      button: true,
-                      child: InkResponse(
-                        onTap: onOpenYou,
-                        radius: 24,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: cs.secondaryContainer,
-                              foregroundColor: cs.onSecondaryContainer,
-                              child: Text(initial, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                            ),
-                            if (wide && syncing)
-                              Positioned(
-                                right: -1,
-                                bottom: -1,
-                                child: Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: context.sem.success,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: cs.surface, width: 2),
-                                  ),
+                  Semantics(
+                    label: 'You: profile and settings',
+                    button: true,
+                    child: InkResponse(
+                      onTap: onOpenYou,
+                      radius: 24,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: cs.secondaryContainer,
+                            foregroundColor: cs.onSecondaryContainer,
+                            child: Text(initial, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                          ),
+                          if (wide && syncing)
+                            Positioned(
+                              right: -1,
+                              bottom: -1,
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: context.sem.success,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: cs.surface, width: 2),
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
                     ),
                   ),

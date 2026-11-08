@@ -53,7 +53,7 @@ void main() {
     await mac.save('water_logs', {'day': '2026-11-08', 'ml': 500, 'logged_at': 2, 'source': 'mac'});
     await mac.setPref('goal_kcal', '2000');
 
-    final client = SyncClient(db: phone, auth: SyncAuth('482913'), name: 'Phone');
+    final client = SyncClient(db: phone, auth: SyncAuth('482913'));
     final first = await client.syncWith(address);
     expect(first.peerName, 'Mac');
     expect(first.sent, greaterThan(0));
@@ -79,7 +79,7 @@ void main() {
     final phone = await openTestDb(), mac = await openTestDb();
     final (server, address) = await serve(mac, '482913');
     addTearDown(() => server.close(force: true));
-    final client = SyncClient(db: phone, auth: SyncAuth('000000'), name: 'Phone');
+    final client = SyncClient(db: phone, auth: SyncAuth('000000'));
     await expectLater(
       client.syncWith(address),
       throwsA(isA<SyncException>().having((e) => e.kind, 'kind', SyncErrorKind.codeMismatch)),
@@ -89,7 +89,7 @@ void main() {
 
   test('unreachable device is reported as such', () async {
     final phone = await openTestDb();
-    final client = SyncClient(db: phone, auth: SyncAuth('482913'), name: 'Phone');
+    final client = SyncClient(db: phone, auth: SyncAuth('482913'));
     await expectLater(
       client.syncWith('127.0.0.1:1'),
       throwsA(isA<SyncException>().having((e) => e.kind, 'kind', SyncErrorKind.unreachable)),
@@ -105,7 +105,7 @@ void main() {
       await mac.save('water_logs', {'day': '2026-11-08', 'ml': i + 1, 'logged_at': i, 'source': 'mac'});
     }
     final progress = <int>[];
-    final client = SyncClient(db: phone, auth: SyncAuth('482913'), name: 'Phone');
+    final client = SyncClient(db: phone, auth: SyncAuth('482913'));
     final r = await client.syncWith(address, onProgress: (rec, total) => progress.add(rec));
     expect(await waterCount(phone), 950);
     expect(progress.length, greaterThan(1)); // more than one page

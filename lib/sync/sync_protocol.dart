@@ -12,13 +12,17 @@ import 'sync_auth.dart';
 const syncPort = 47811;
 const _pageSize = 400;
 
-enum SyncErrorKind { codeMismatch, unreachable, interrupted, syncOff, other }
+enum SyncErrorKind { codeMismatch, unreachable, interrupted, other }
 
 class SyncException implements Exception {
-  SyncException(this.kind, this.message, {this.received = 0, this.total = 0});
+  SyncException(this.kind, this.message, {this.peer});
   final SyncErrorKind kind;
   final String message;
-  final int received, total;
+
+  /// Name of the device the session was with, when known (for dialogs).
+  final String? peer;
+
+  SyncException withPeer(String name) => SyncException(kind, message, peer: name);
 
   @override
   String toString() => message;
@@ -31,6 +35,14 @@ class SyncOutcome {
 }
 
 typedef SyncProgress = void Function(int received, int total);
+
+/// "192.168.1.42" or "192.168.1.42:47811" → host + port (default [syncPort]).
+({String host, int port}) parseAddress(String input) {
+  final a = input.trim();
+  final i = a.lastIndexOf(':');
+  if (i < 0) return (host: a, port: syncPort);
+  return (host: a.substring(0, i), port: int.tryParse(a.substring(i + 1)) ?? syncPort);
+}
 
 // ------------------------------------------------------------------ server
 
@@ -108,12 +120,10 @@ class SyncServer {
 
 /// Runs one sync session against a peer at `host:port`.
 class SyncClient {
-  SyncClient({required this.db, required this.auth, required this.name, http.Client? client})
-    : _http = client ?? http.Client();
+  SyncClient({required this.db, required this.auth, http.Client? client}) : _http = client ?? http.Client();
 
   final AppDb db;
   final SyncAuth auth;
-  final String name;
   final http.Client _http;
 
   static String pushKey(String peerId) => 'push_$peerId';
@@ -161,22 +171,16 @@ class SyncClient {
         if (first) total = (j['remaining'] as num?)?.toInt() ?? 0;
         first = false;
         final rows = [for (final r in j['rows'] as List) SyncRow.fromJson(r as Map<String, dynamic>)];
-        await db.merge(rows);
-        received += rows.length;
         since = (j['next'] as num).toInt();
-        await db.setMeta(pullKey(peer.id), '$since');
+        await db.merge(rows, cursor: (pullKey(peer.id), '$since'));
+        received += rows.length;
         onProgress?.call(received, total);
         if (j['more'] != true) break;
       }
     } on SyncException catch (e) {
       if (e.kind == SyncErrorKind.unreachable) {
         // Lost the connection mid-session; cursors already saved → resumes.
-        throw SyncException(
-          SyncErrorKind.interrupted,
-          'Sync interrupted — $received of $total received, will resume',
-          received: received,
-          total: total,
-        );
+        throw SyncException(SyncErrorKind.interrupted, 'Sync interrupted — $received of $total received, will resume');
       }
       rethrow;
     }
@@ -207,12 +211,11 @@ class SyncClient {
       res = await http.Response.fromStream(
         await _http.send(req).timeout(Duration(seconds: connecting ? 5 : 30)),
       ).timeout(const Duration(seconds: 60));
-    } on SocketException {
-      throw SyncException(SyncErrorKind.unreachable, 'Device not reachable ($address)');
-    } on TimeoutException {
-      throw SyncException(SyncErrorKind.unreachable, 'Device not reachable ($address)');
-    } on http.ClientException {
-      throw SyncException(SyncErrorKind.unreachable, 'Device not reachable ($address)');
+    } on Exception catch (e) {
+      if (e is SocketException || e is TimeoutException || e is http.ClientException) {
+        throw SyncException(SyncErrorKind.unreachable, 'Device not reachable ($address)');
+      }
+      rethrow;
     }
 
     final verified = auth.verify(
@@ -226,7 +229,6 @@ class SyncClient {
     if (res.statusCode == 401 || !verified) {
       throw SyncException(SyncErrorKind.codeMismatch, 'Pairing code does not match');
     }
-    if (res.statusCode == 503) throw SyncException(SyncErrorKind.syncOff, 'Sync is off on the other device');
     if (res.statusCode != 200) throw SyncException(SyncErrorKind.other, 'Sync failed (HTTP ${res.statusCode})');
     return jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
   }

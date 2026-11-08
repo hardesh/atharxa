@@ -10,6 +10,7 @@ import '../../state/settings_providers.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
 import '../widgets/water_entries.dart';
+import '../widgets/feedback.dart';
 import '../widgets/layout.dart';
 import '../widgets/switchers.dart';
 
@@ -19,27 +20,15 @@ class WaterScreen extends ConsumerWidget {
   const WaterScreen({super.key});
 
   Future<void> _custom(BuildContext context, DateTime date) async {
-    final c = TextEditingController();
-    final ml = await showDialog<int>(
-      context: context,
-      builder: (ctx) {
-        void submit() => Navigator.pop(ctx, int.tryParse(c.text.trim()));
-        return AlertDialog(
-          title: const Text('Add water'),
-          content: TextField(
-            controller: c,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Amount', suffixText: 'ml'),
-            onSubmitted: (_) => submit(),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            FilledButton(onPressed: submit, child: const Text('Add')),
-          ],
-        );
-      },
+    final text = await askText(
+      context,
+      title: 'Add water',
+      label: 'Amount',
+      suffix: 'ml',
+      confirmLabel: 'Add',
+      keyboardType: TextInputType.number,
     );
+    final ml = int.tryParse(text ?? '');
     if (ml != null && ml > 0 && ml <= 5000 && context.mounted) await addWaterWithUndo(context, date, ml, 'water');
   }
 

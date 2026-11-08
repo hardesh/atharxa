@@ -28,7 +28,7 @@ final _onState = SyncState(
   autoSync: true,
   intervalMin: 5,
   listening: true,
-  addresses: const ['192.168.1.23'],
+  address: '192.168.1.23',
   paired: [
     PairedPeer(
       id: 'mac',
@@ -44,7 +44,7 @@ final _onState = SyncState(
     'mac': DiscoveredPeer(id: 'mac', name: 'MacBook Air', host: '192.168.1.42', port: 47811),
     'tab': DiscoveredPeer(id: 'tab', name: 'Pixel Tablet', host: '192.168.1.57', port: 47811),
   },
-  busyPeer: '192.168.1.42:47811',
+  busy: true,
   progress: (received: 84, total: 126),
 );
 

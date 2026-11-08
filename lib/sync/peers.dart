@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,23 +21,6 @@ class PairedPeer {
   final int lastSent, lastReceived;
 
   String get address => '$host:$port';
-
-  PairedPeer copyWith({
-    String? name,
-    String? host,
-    int? port,
-    DateTime? lastSyncAt,
-    int? lastSent,
-    int? lastReceived,
-  }) => PairedPeer(
-    id: id,
-    name: name ?? this.name,
-    host: host ?? this.host,
-    port: port ?? this.port,
-    lastSyncAt: lastSyncAt ?? this.lastSyncAt,
-    lastSent: lastSent ?? this.lastSent,
-    lastReceived: lastReceived ?? this.lastReceived,
-  );
 
   Map<String, Object?> toJson() => {
     'id': id,
@@ -73,7 +57,15 @@ class SyncPrefs {
   String get code => prefs.getString(_code) ?? '';
   Future<void> setCode(String v) => prefs.setString(_code, v);
 
-  String? get deviceName => prefs.getString(_name);
+  /// This device's name as shown to the other device.
+  String get deviceName => prefs.getString(_name) ?? defaultDeviceName();
+
+  static String defaultDeviceName() {
+    if (Platform.isAndroid) return 'Android phone';
+    final h = Platform.localHostname.replaceAll(RegExp(r'\.local$'), '').replaceAll('-', ' ');
+    return h.isEmpty ? 'Mac' : h;
+  }
+
   Future<void> setDeviceName(String v) => prefs.setString(_name, v.trim());
 
   bool get autoSync => prefs.getBool(_auto) ?? true;
@@ -89,4 +81,28 @@ class SyncPrefs {
 
   Future<void> setPeers(List<PairedPeer> peers) =>
       prefs.setString(_peers, jsonEncode([for (final p in peers) p.toJson()]));
+
+  /// Records a successful session with the peer at [address]; returns the
+  /// updated list (most recent first). Shared by foreground and background sync.
+  Future<List<PairedPeer>> recordSession({
+    required String peerId,
+    required String peerName,
+    required String host,
+    required int port,
+    required int sent,
+    required int received,
+  }) async {
+    final peer = PairedPeer(
+      id: peerId,
+      name: peerName,
+      host: host,
+      port: port,
+      lastSyncAt: DateTime.now(),
+      lastSent: sent,
+      lastReceived: received,
+    );
+    final list = [peer, ...peers.where((p) => p.id != peerId)];
+    await setPeers(list);
+    return list;
+  }
 }

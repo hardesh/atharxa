@@ -13,6 +13,7 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import '../../widgets/tag.dart';
 import 'food_editor_screen.dart';
 import 'portion_dialog.dart';
 
@@ -226,7 +227,7 @@ class _FoodPickerScreenState extends State<FoodPickerScreen> with SingleTickerPr
                         children: [
                           Text('Ask AI', style: TextStyle(color: context.cs.outline)),
                           const SizedBox(width: 6),
-                          const _SoonTag(),
+                          const Tag('soon', small: true),
                         ],
                       ),
                     ),
@@ -362,15 +363,4 @@ class _FoodPickerScreenState extends State<FoodPickerScreen> with SingleTickerPr
       ],
     );
   }
-}
-
-class _SoonTag extends StatelessWidget {
-  const _SoonTag();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-    decoration: BoxDecoration(color: context.cs.surfaceContainerHigh, borderRadius: BorderRadius.circular(8)),
-    child: Text('soon', style: context.tt.labelSmall?.copyWith(fontSize: 10, color: context.cs.onSurfaceVariant)),
-  );
 }

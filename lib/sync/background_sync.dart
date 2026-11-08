@@ -35,27 +35,6 @@ class BackgroundSync {
     if (!Platform.isAndroid || !_initialized) return;
     await Workmanager().cancelByUniqueName(_uniqueName);
   }
-
-  /// One pass with every paired peer. Returns peers with updated stats.
-  static Future<List<PairedPeer>> runOnce(AppDb db, SyncPrefs prefs) async {
-    final client = SyncClient(db: db, auth: SyncAuth(prefs.code), name: prefs.deviceName ?? 'Android phone');
-    final updated = <PairedPeer>[];
-    try {
-      for (final p in prefs.peers) {
-        try {
-          final r = await client.syncWith(p.address);
-          updated.add(
-            p.copyWith(name: r.peerName, lastSyncAt: DateTime.now(), lastSent: r.sent, lastReceived: r.received),
-          );
-        } on SyncException {
-          updated.add(p);
-        }
-      }
-    } finally {
-      client.close();
-    }
-    return updated;
-  }
 }
 
 @pragma('vm:entry-point')
@@ -65,9 +44,25 @@ void backgroundSyncDispatcher() {
     final prefs = SyncPrefs(await SharedPreferences.getInstance());
     if (!prefs.enabled || !prefs.autoSync || !SyncAuth.isValidCode(prefs.code) || prefs.peers.isEmpty) return true;
     final db = await AppDb.open();
+    final client = SyncClient(db: db, auth: SyncAuth(prefs.code));
     try {
-      await prefs.setPeers(await BackgroundSync.runOnce(db, prefs));
+      for (final p in prefs.peers) {
+        try {
+          final r = await client.syncWith(p.address);
+          await prefs.recordSession(
+            peerId: r.peerId,
+            peerName: r.peerName,
+            host: p.host,
+            port: p.port,
+            sent: r.sent,
+            received: r.received,
+          );
+        } on SyncException {
+          // Try again next run.
+        }
+      }
     } finally {
+      client.close();
       await db.close();
     }
     return true;

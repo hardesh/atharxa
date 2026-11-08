@@ -43,13 +43,9 @@ String? _summary(String id, WidgetRef ref) {
       final d = ref.watch(deviceSettingsProvider);
       return '${p.label} · ${d.themeMode.name[0].toUpperCase()}${d.themeMode.name.substring(1)} · ${(d.textScale * 100).round()}%';
     case 'sync':
-      final s = ref.watch(syncControllerProvider);
-      if (!s.enabled) return 'Off';
-      final last = s.paired
-          .map((p) => p.lastSyncAt)
-          .whereType<DateTime>()
-          .fold<DateTime?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
-      return last == null ? 'On · not paired yet' : 'On · synced ${whenText(last)}';
+      final (enabled, last) = ref.watch(syncControllerProvider.select((s) => (s.enabled, s.lastSync)));
+      if (!enabled) return 'Off';
+      return last == null ? 'On · not paired yet' : 'On · synced ${fmtWhen(last)}';
     case 'about':
       return AppInfo.name;
     default:
@@ -159,23 +155,12 @@ class _ProfileCard extends ConsumerWidget {
         subtitle: const Text('Profile and body stats'),
         trailing: const Icon(Icons.edit_outlined),
         onTap: () async {
-          final c = TextEditingController(text: s.profileName);
-          final name = await showDialog<String>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Your name'),
-              content: TextField(
-                controller: c,
-                autofocus: true,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Name'),
-                onSubmitted: (v) => Navigator.pop(ctx, v),
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: const Text('Save')),
-              ],
-            ),
+          final name = await askText(
+            context,
+            title: 'Your name',
+            label: 'Name',
+            initial: s.profileName,
+            capitalization: TextCapitalization.words,
           );
           if (name != null) await ref.read(syncedSettingsProvider.notifier).setProfileName(name);
         },

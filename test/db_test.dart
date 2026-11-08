@@ -16,24 +16,24 @@ void main() {
     final mac = await openTestDb();
 
     final id = await phone.save('water_logs', {'day': '2026-11-08', 'ml': 250, 'logged_at': 1, 'source': 'today'});
-    await mac.merge(await phone.changesSince(0));
+    await mac.merge((await phone.changesPage(0)).rows);
     expect((await mac.query('water_logs', where: 'id = ?', args: [id])).single['ml'], 250);
 
     // Mac edits later -> wins on the phone.
     await Future<void>.delayed(const Duration(milliseconds: 2));
     await mac.save('water_logs', {'id': id, 'day': '2026-11-08', 'ml': 500, 'logged_at': 1, 'source': 'today'});
-    await phone.merge(await mac.changesSince(0));
+    await phone.merge((await mac.changesPage(0)).rows);
     expect((await phone.query('water_logs', where: 'id = ?', args: [id])).single['ml'], 500);
 
     // An older copy arriving late does not overwrite the newer one.
-    final stale = await phone.changesSince(0);
+    final stale = (await phone.changesPage(0)).rows;
     await Future<void>.delayed(const Duration(milliseconds: 2));
     await mac.delete('water_logs', id);
     await mac.merge(stale);
     expect(await mac.query('water_logs', where: 'id = ?', args: [id]), isEmpty);
 
     // The delete (tombstone) propagates.
-    await phone.merge(await mac.changesSince(0));
+    await phone.merge((await mac.changesPage(0)).rows);
     expect(await phone.query('water_logs', where: 'id = ?', args: [id]), isEmpty);
   });
 

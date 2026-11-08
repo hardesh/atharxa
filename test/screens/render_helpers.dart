@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:atharxa/data/db.dart';
 import 'package:atharxa/main.dart';
 import 'package:atharxa/services/notification_service.dart';
-import 'package:atharxa/sync/sync_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,17 +34,12 @@ class TestApp {
 }
 
 /// Builds the real app on a fresh test database. Call inside `tester.runAsync`.
-Future<TestApp> buildTestApp({Map<String, Object> prefs = const {}}) async {
+Future<TestApp> buildTestApp({Map<String, Object> prefs = const {}, List<Override> overrides = const []}) async {
   SharedPreferences.setMockInitialValues({'text_scale': 1.0, ...prefs});
   final sp = await SharedPreferences.getInstance();
   final db = await openTestDb();
-  final overrides = await appOverrides(
-    db: db,
-    prefs: sp,
-    sync: SyncService(db, sp),
-    notifications: NotificationService(sp),
-  );
-  return TestApp(db, ProviderScope(overrides: overrides, child: const App()));
+  final base = await appOverrides(db: db, prefs: sp, notifications: NotificationService(sp));
+  return TestApp(db, ProviderScope(overrides: [...base, ...overrides], child: const App()));
 }
 
 /// Lets real async DB work finish, then settles frames.

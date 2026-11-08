@@ -39,10 +39,15 @@ class AppDb {
   final String deviceId;
   int _clock;
   final _changes = StreamController<String>.broadcast();
+  final _localChanges = StreamController<String>.broadcast();
   final Map<String, Set<String>> _columns = {};
 
   /// Emits the table name whenever a table changes (local edit or sync).
   Stream<String> get changes => _changes.stream;
+
+  /// Emits only for edits made on this device (not rows merged from a peer).
+  /// Auto-sync listens to this so a sync never triggers another sync.
+  Stream<String> get localChanges => _localChanges.stream;
 
   /// Opens the app database in the platform's application-support directory.
   static Future<AppDb> open() async {
@@ -219,6 +224,7 @@ class AppDb {
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
     _changes.add(table);
+    _localChanges.add(table);
     return id;
   }
 
@@ -234,6 +240,7 @@ class AppDb {
       );
     });
     _changes.add(table);
+    _localChanges.add(table);
   }
 
   Future<List<Map<String, Object?>>> query(
@@ -271,49 +278,72 @@ class AppDb {
 
   // -------------------------------------------------------------------- sync
 
-  /// All rows (including tombstones) changed after [sinceRev], grouped by table.
-  Future<Map<String, List<Map<String, Object?>>>> changesSince(int sinceRev) async {
-    final out = <String, List<Map<String, Object?>>>{};
+  /// One page of rows (tombstones included) changed after [sinceRev], ordered
+  /// by `rev` across all synced tables. Rows last edited by [excludeDevice]
+  /// are skipped: that peer already has them (or something newer), so this
+  /// avoids echoing a peer's own edits back to it.
+  ///
+  /// [next] is the cursor to resume from; [more] says whether rows remain.
+  Future<({List<SyncRow> rows, int next, bool more})> changesPage(
+    int sinceRev, {
+    int limit = 500,
+    String? excludeDevice,
+  }) async {
+    final where = excludeDevice == null ? 'rev > ?' : 'rev > ? AND device_id != ?';
+    final args = [sinceRev, ?excludeDevice];
+    final all = <SyncRow>[];
     for (final t in syncedTables) {
-      final rows = await _db.query(t, where: 'rev > ?', whereArgs: [sinceRev]);
-      if (rows.isNotEmpty) {
-        out[t] = rows.map((r) => Map.of(r)..remove('rev')).toList();
-      }
+      // limit + 1 per table so a full page from one table still reports `more`.
+      final rows = await _db.query(t, where: where, whereArgs: args, orderBy: 'rev', limit: limit + 1);
+      all.addAll(rows.map((r) => SyncRow(t, r)));
     }
-    return out;
+    all.sort((a, b) => a.rev.compareTo(b.rev));
+    final more = all.length > limit;
+    final page = all.take(limit).toList();
+    final next = more ? page.last.rev : await currentRev();
+    return (rows: page, next: next, more: more);
   }
 
-  /// Merge rows from a peer. Newer (updated_at, device_id) wins.
-  Future<int> merge(Map<String, dynamic> changes) async {
+  /// Number of rows a [changesPage] walk from [sinceRev] would return.
+  Future<int> countChanges(int sinceRev, {String? excludeDevice}) async {
+    final where = excludeDevice == null ? 'rev > ?' : 'rev > ? AND device_id != ?';
+    var n = 0;
+    for (final t in syncedTables) {
+      final r = await _db.rawQuery('SELECT COUNT(*) AS n FROM $t WHERE $where', [sinceRev, ?excludeDevice]);
+      n += (r.first['n'] as num).toInt();
+    }
+    return n;
+  }
+
+  /// Merge rows from a peer. Newer (updated_at, device_id) wins; unknown
+  /// tables and columns are ignored. Returns how many rows were applied.
+  Future<int> merge(Iterable<SyncRow> rows) async {
     var applied = 0;
     final touched = <String>{};
     await _db.transaction((tx) async {
-      for (final entry in changes.entries) {
-        final table = entry.key;
-        final cols = _columns[table];
-        if (cols == null) continue; // unknown table -> ignore
-        for (final raw in (entry.value as List)) {
-          final row = <String, Object?>{
-            for (final e in (raw as Map).entries)
-              if (cols.contains(e.key) && e.key != 'rev') e.key as String: e.value,
-          };
-          final id = row['id'] as String?;
-          final ts = (row['updated_at'] as num?)?.toInt();
-          final dev = row['device_id'] as String?;
-          if (id == null || ts == null || dev == null) continue;
-          final cur = await tx.query(table, columns: ['updated_at', 'device_id'], where: 'id = ?', whereArgs: [id]);
-          if (cur.isNotEmpty) {
-            final curTs = cur.first['updated_at'] as int;
-            final curDev = cur.first['device_id'] as String;
-            final newer = ts > curTs || (ts == curTs && dev.compareTo(curDev) > 0);
-            if (!newer) continue;
-          }
-          row['rev'] = await _nextRev(tx);
-          await tx.insert(table, row, conflictAlgorithm: ConflictAlgorithm.replace);
-          _clock = max(_clock, ts);
-          applied++;
-          touched.add(table);
+      for (final r in rows) {
+        final cols = _columns[r.table];
+        if (cols == null) continue;
+        final row = <String, Object?>{
+          for (final e in r.row.entries)
+            if (cols.contains(e.key) && e.key != 'rev') e.key: e.value,
+        };
+        final id = row['id'] as String?;
+        final ts = (row['updated_at'] as num?)?.toInt();
+        final dev = row['device_id'] as String?;
+        if (id == null || ts == null || dev == null) continue;
+        final cur = await tx.query(r.table, columns: ['updated_at', 'device_id'], where: 'id = ?', whereArgs: [id]);
+        if (cur.isNotEmpty) {
+          final curTs = cur.first['updated_at'] as int;
+          final curDev = cur.first['device_id'] as String;
+          final newer = ts > curTs || (ts == curTs && dev.compareTo(curDev) > 0);
+          if (!newer) continue;
         }
+        row['rev'] = await _nextRev(tx);
+        await tx.insert(r.table, row, conflictAlgorithm: ConflictAlgorithm.replace);
+        _clock = max(_clock, ts);
+        applied++;
+        touched.add(r.table);
       }
     });
     for (final t in touched) {
@@ -321,4 +351,17 @@ class AppDb {
     }
     return applied;
   }
+}
+
+/// A row of a synced table, as exchanged between devices.
+class SyncRow {
+  SyncRow(this.table, this.row);
+  final String table;
+  final Map<String, Object?> row;
+
+  int get rev => (row['rev'] as num?)?.toInt() ?? 0;
+
+  Map<String, Object?> toJson() => {'t': table, 'r': Map.of(row)..remove('rev')};
+
+  static SyncRow fromJson(Map<String, dynamic> j) => SyncRow(j['t'] as String, (j['r'] as Map).cast<String, Object?>());
 }

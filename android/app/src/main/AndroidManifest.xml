@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Wi-Fi sync: local network, mDNS discovery -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <!-- Sync uses plain HTTP to devices on the local network (requests are signed with the pairing code). -->
     <application
+        android:usesCleartextTraffic="true"
         android:label="Atharxa"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

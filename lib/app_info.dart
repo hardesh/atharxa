@@ -8,4 +8,9 @@ abstract final class AppInfo {
 
   /// Shown on the AI button ("Ask Atharxa") and assistant screens.
   static const assistantName = name;
+
+  /// mDNS/DNS-SD service type devices advertise for Wi-Fi sync. Changing it
+  /// stops old and new versions from finding each other; keep it stable and
+  /// in sync with NSBonjourServices in macos/Runner/Info.plist.
+  static const syncServiceType = '_atharxa-sync._tcp';
 }

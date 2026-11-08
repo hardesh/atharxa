@@ -24,7 +24,7 @@ The app's name may change, so **don't build the product name into code identifie
   - `pubspec.yaml` `name:` (the package import prefix)
   - Android `applicationId`/`namespace` (`android/app/build.gradle.kts`), the `android:label`, and the Kotlin package folder
   - macOS `PRODUCT_NAME` / `PRODUCT_BUNDLE_IDENTIFIER` (`macos/Runner/Configs/AppInfo.xcconfig`) and `project.pbxproj`
-  - The database file name (`lib/data/db.dart`) and the mDNS service type (`lib/sync/sync_service.dart`)
+  - The database file name (`lib/data/db.dart`), plus the mDNS service type `AppInfo.syncServiceType` together with its copy in `NSBonjourServices` in `macos/Runner/Info.plist`
   - App icons (`assets/icon/`)
 
 ## Architecture
@@ -36,12 +36,20 @@ The app's name may change, so **don't build the product name into code identifie
     - `selectedDayProvider`: shared by Overview and Water.
   - `lib/state/data_providers.dart`: per-screen `FutureProvider.family`s keyed by day key, plus `AsyncBody`.
   - Callbacks without a `ref` can use `context.db` / `context.readProvider(...)` for imperative reads only.
-  - `SyncService` and `NotificationService` are still `ChangeNotifier` classes. They move to notifiers in the sync and reminders features.
+  - `lib/state/sync_controller.dart` (`syncControllerProvider`): Wi-Fi sync state and actions.
+  - `NotificationService` is still a plain class. It becomes a notifier in the reminders feature.
 - **Data**: SQLite through `sqflite` (`lib/data/db.dart`).
   - Every synced table has `id` (a UUID), `updated_at` (a hybrid logical clock), `device_id`, `deleted` (a tombstone) and `rev` (a local change counter).
   - Always write through `AppDb.save` and `AppDb.delete`, never with raw SQL writes, so that sync sees the change.
   - Food logs and plans store a **per-100 g snapshot** plus grams. Macros may be `null`, meaning unknown; show them as "—", never as 0.
   - Repositories: `FoodRepo`, `WaterRepo`.
+- **Wi-Fi sync** (`lib/sync/`), peer to peer with no cloud:
+  - `sync_auth.dart`: a key derived from the 6-digit pairing code (PBKDF2), and HMAC-signed requests and responses.
+  - `sync_protocol.dart`: an HTTP server with hello, pull and push, and a client that sends paged changes with cursors per peer. Errors are typed (code mismatch, unreachable, interrupted).
+  - `discovery.dart`: mDNS through bonsoir.
+  - `peers.dart`: per-device prefs.
+  - `background_sync.dart`: an Android workmanager task every 15 minutes.
+  - Edits made on the device itself (`AppDb.localChanges`) trigger auto-sync. Rows merged from a peer don't, and rows last edited by a peer are never sent back to it.
 - **UI**:
   - `lib/ui/shell.dart` is the responsive shell: `NavigationBar` under 600 dp, `NavigationRail` (with You) at 600 dp and up.
   - The theme is in `lib/ui/theme/`. Colour schemes are explicit, from DESIGN.md §3.1 (never `fromSeed`). Semantic colours are a `ThemeExtension` (`context.sem`).

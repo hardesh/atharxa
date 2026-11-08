@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'screens/meal_plan_screen.dart';
 import 'screens/overview_screen.dart';
 import 'screens/water_screen.dart';
+import 'screens/you/you_screen.dart';
 import 'widgets/feedback.dart';
 import 'widgets/layout.dart';
 import 'widgets/top_bar.dart';
@@ -17,6 +18,7 @@ class Destination {
     required this.build,
     this.fab,
     this.actions,
+    this.fullWidthHeader = false,
   });
 
   final String label;
@@ -24,6 +26,7 @@ class Destination {
   final WidgetBuilder build;
   final Widget Function(BuildContext context)? fab;
   final List<Widget> Function(BuildContext context)? actions;
+  final bool fullWidthHeader;
 }
 
 /// Responsive app shell (DESIGN.md §2):
@@ -76,7 +79,8 @@ class _AppShellState extends State<AppShell> {
     label: 'You',
     icon: Icons.person_outline,
     selectedIcon: Icons.person,
-    build: (_) => const PlaceholderPage('You'),
+    build: (_) => const YouScreen(),
+    fullWidthHeader: true,
   );
 
   void _openYou() {
@@ -102,7 +106,12 @@ class _AppShellState extends State<AppShell> {
     final d = dests[index];
 
     final page = Scaffold(
-      appBar: AppTopBar(title: d.label, onOpenYou: _openYou, actions: d.actions?.call(context) ?? const []),
+      appBar: AppTopBar(
+        title: d.label,
+        onOpenYou: _openYou,
+        actions: d.actions?.call(context) ?? const [],
+        fullWidth: d.fullWidthHeader,
+      ),
       floatingActionButton: d.fab?.call(context),
       body: IndexedStack(
         index: index,

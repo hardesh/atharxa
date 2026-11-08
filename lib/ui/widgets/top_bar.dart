@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app_info.dart';
-import '../../state/core_providers.dart';
+import '../../state/sync_controller.dart';
 import '../../state/settings_providers.dart';
 import '../theme/semantic.dart';
 import 'layout.dart';
@@ -11,11 +11,15 @@ import 'layout.dart';
 /// Phone: title · round AI button · avatar (opens You).
 /// Mac/wide: headline title · "Ask `assistant` ⌘K" pill · avatar with sync dot.
 class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
-  const AppTopBar({super.key, required this.title, this.onOpenYou, this.actions = const []});
+  const AppTopBar({super.key, required this.title, this.onOpenYou, this.actions = const [], this.fullWidth = false});
 
   final String title;
   final VoidCallback? onOpenYou;
   final List<Widget> actions;
+
+  /// Wide layouts normally centre the header on the content column; pages with
+  /// their own multi-pane layout (You) span the full width instead.
+  final bool fullWidth;
 
   @override
   Size get preferredSize => const Size.fromHeight(64);
@@ -25,13 +29,13 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
     final cs = context.cs;
     final wide = context.isWide;
     final initial = ref.watch(syncedSettingsProvider.select((s) => s.initial));
-    final sync = ref.watch(syncServiceProvider);
+    final syncing = ref.watch(syncControllerProvider.select((s) => s.listening));
     return SafeArea(
       bottom: false,
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: wide ? contentMaxWidth + 64 : double.infinity),
+          constraints: BoxConstraints(maxWidth: wide && !fullWidth ? contentMaxWidth + 64 : double.infinity),
           child: SizedBox(
             height: 64,
             child: Padding(
@@ -75,11 +79,8 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
                       ),
                     ),
                   const SizedBox(width: 10),
-                  // SyncService is still a ChangeNotifier; it becomes a Riverpod
-                  // notifier in the sync feature.
-                  ListenableBuilder(
-                    listenable: sync,
-                    builder: (context, _) => Semantics(
+                  Builder(
+                    builder: (context) => Semantics(
                       label: 'You: profile and settings',
                       button: true,
                       child: InkResponse(
@@ -94,7 +95,7 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
                               foregroundColor: cs.onSecondaryContainer,
                               child: Text(initial, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                             ),
-                            if (wide && sync.running)
+                            if (wide && syncing)
                               Positioned(
                                 right: -1,
                                 bottom: -1,

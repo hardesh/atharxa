@@ -8,7 +8,7 @@ import 'data/db.dart';
 import 'services/notification_service.dart';
 import 'state/core_providers.dart';
 import 'state/settings_providers.dart';
-import 'sync/sync_service.dart';
+import 'state/sync_controller.dart';
 import 'ui/shell.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/text_scale.dart';
@@ -18,17 +18,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final db = await AppDb.open();
-  final sync = SyncService(db, prefs);
   final notifications = NotificationService(prefs);
   runApp(
     ProviderScope(
-      overrides: await appOverrides(db: db, prefs: prefs, sync: sync, notifications: notifications),
+      overrides: await appOverrides(db: db, prefs: prefs, notifications: notifications),
       child: const App(),
     ),
   );
   // Non-critical startup work runs after the first frame.
   await notifications.init();
-  if (sync.enabled) await sync.start();
 }
 
 /// Injects the async-created singletons, plus synced settings preloaded so
@@ -36,12 +34,10 @@ Future<void> main() async {
 Future<List<Override>> appOverrides({
   required AppDb db,
   required SharedPreferences prefs,
-  required SyncService sync,
   required NotificationService notifications,
 }) async => [
   dbProvider.overrideWithValue(db),
   prefsProvider.overrideWithValue(prefs),
-  syncServiceProvider.overrideWithValue(sync),
   notificationServiceProvider.overrideWithValue(notifications),
   initialSyncedSettingsProvider.overrideWithValue(await SyncedSettings.load(db)),
 ];
@@ -51,6 +47,8 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keep Wi-Fi sync alive for the app's lifetime (it starts itself when enabled).
+    ref.watch(syncControllerProvider.select((s) => s.enabled));
     final palette = ref.watch(syncedSettingsProvider.select((s) => s.palette));
     final device = ref.watch(deviceSettingsProvider);
     return MaterialApp(

@@ -5,15 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db.dart';
 import '../services/notification_service.dart';
-import '../sync/sync_service.dart';
 
 /// Opened in `main` (async) and injected with `overrideWithValue`.
 final dbProvider = Provider<AppDb>((ref) => throw UnimplementedError('dbProvider must be overridden'));
 final prefsProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('prefsProvider must be overridden'),
-);
-final syncServiceProvider = Provider<SyncService>(
-  (ref) => throw UnimplementedError('syncServiceProvider must be overridden'),
 );
 final notificationServiceProvider = Provider<NotificationService>(
   (ref) => throw UnimplementedError('notificationServiceProvider must be overridden'),

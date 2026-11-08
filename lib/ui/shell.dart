@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'screens/meal_plan_screen.dart';
 import 'screens/today_screen.dart';
 import 'widgets/feedback.dart';
 import 'widgets/layout.dart';
@@ -48,7 +49,7 @@ class _AppShellState extends State<AppShell> {
       label: 'Meal plan',
       icon: Icons.event_note_outlined,
       selectedIcon: Icons.event_note,
-      build: (_) => const PlaceholderPage('Meal plan'),
+      build: (_) => const MealPlanScreen(),
     ),
     Destination(
       label: 'Water',

@@ -121,9 +121,18 @@ class _WaterCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(child: Text('Water', style: context.tt.titleSmall)),
-                            Text('${fmtInt(ml)} / ${fmtInt(goal)} ml', style: context.tt.bodyMedium),
+                            Text('Water', style: context.tt.titleSmall),
+                            const SizedBox(width: 8),
+                            // Wraps instead of overflowing at large text sizes.
+                            Expanded(
+                              child: Text(
+                                '${fmtInt(ml)} / ${fmtInt(goal)} ml',
+                                textAlign: TextAlign.right,
+                                style: context.tt.bodyMedium,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 6),

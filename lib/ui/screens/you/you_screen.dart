@@ -62,11 +62,16 @@ class YouScreen extends ConsumerStatefulWidget {
   ConsumerState<YouScreen> createState() => _YouScreenState();
 }
 
+/// Two panes need room for a 344 px section list plus a usable page.
+const _twoPaneMinWidth = 900.0;
+
 class _YouScreenState extends ConsumerState<YouScreen> {
+  bool get _twoPane => MediaQuery.sizeOf(context).width >= _twoPaneMinWidth;
+
   String _selected = 'sync';
 
   void _open(YouSection s) {
-    if (context.isWide) {
+    if (_twoPane) {
       setState(() => _selected = s.id);
       return;
     }
@@ -83,12 +88,7 @@ class _YouScreenState extends ConsumerState<YouScreen> {
   @override
   Widget build(BuildContext context) {
     final hub = ListView(
-      padding: EdgeInsets.fromLTRB(
-        context.isWide ? 16 : context.screenPad,
-        4,
-        context.isWide ? 16 : context.screenPad,
-        24,
-      ),
+      padding: EdgeInsets.fromLTRB(_twoPane ? 16 : context.screenPad, 4, _twoPane ? 16 : context.screenPad, 24),
       children: [
         const _ProfileCard(),
         const SizedBox(height: 12),
@@ -98,12 +98,12 @@ class _YouScreenState extends ConsumerState<YouScreen> {
               for (final (i, s) in youSections.indexed) ...[
                 if (i > 0) const Divider(indent: 56),
                 ListTile(
-                  selected: context.isWide && s.id == _selected,
+                  selected: _twoPane && s.id == _selected,
                   selectedTileColor: context.cs.secondaryContainer,
                   leading: Icon(s.icon),
                   title: Text(s.title),
                   subtitle: Text(_summary(s.id, ref) ?? ''),
-                  trailing: context.isWide ? null : const Icon(Icons.chevron_right),
+                  trailing: _twoPane ? null : const Icon(Icons.chevron_right),
                   onTap: () => _open(s),
                 ),
               ],
@@ -112,7 +112,7 @@ class _YouScreenState extends ConsumerState<YouScreen> {
         ),
       ],
     );
-    if (!context.isWide) return hub;
+    if (!_twoPane) return hub;
 
     final section = youSections.firstWhere((s) => s.id == _selected);
     return Row(

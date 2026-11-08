@@ -222,13 +222,17 @@ class _FoodPickerScreenState extends State<FoodPickerScreen> with SingleTickerPr
                     const Tab(text: 'My foods'),
                     const Tab(text: 'Online'),
                     Tab(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Ask AI', style: TextStyle(color: context.cs.outline)),
-                          const SizedBox(width: 6),
-                          const Tag('soon', small: true),
-                        ],
+                      // Scales down rather than overflowing a narrow tab at large text.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Ask AI', style: TextStyle(color: context.cs.outline)),
+                            const SizedBox(width: 6),
+                            const Tag('soon', small: true),
+                          ],
+                        ),
                       ),
                     ),
                   ],

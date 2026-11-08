@@ -152,32 +152,28 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
                 onTapOutside: (_) => _ctl.setDeviceName(_name.text),
               ),
               const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _code,
-                      focusNode: _codeFocus,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
-                      style: context.tt.titleMedium?.copyWith(letterSpacing: 4),
-                      decoration: const InputDecoration(
-                        labelText: 'Pairing code',
-                        helperText: 'Enter this same code on your other device',
-                        helperMaxLines: 2,
-                      ),
-                      onChanged: (v) {
-                        if (v.length == 6) _ctl.setCode(v);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: TextButton(onPressed: _ctl.generateCode, child: const Text('New code')),
-                  ),
-                ],
+              TextField(
+                controller: _code,
+                focusNode: _codeFocus,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+                style: context.tt.titleMedium?.copyWith(letterSpacing: 4),
+                decoration: const InputDecoration(
+                  labelText: 'Pairing code',
+                  helperText: 'Enter this same code on your other device',
+                  helperMaxLines: 2,
+                ),
+                onChanged: (v) {
+                  if (v.length == 6) _ctl.setCode(v);
+                },
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _ctl.generateCode,
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('New code'),
+                ),
               ),
             ],
           ),
@@ -194,7 +190,7 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
                     children: [
                       const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                       const SizedBox(width: 12),
-                      Text('Searching…', style: context.tt.bodyMedium),
+                      Expanded(child: Text('Searching…', style: context.tt.bodyMedium)),
                     ],
                   ),
                 ),
@@ -290,16 +286,20 @@ class _StatusCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          // Status and button side by side; the button wraps below when narrow.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: context.tt.titleSmall),
-                    if (detail != null) Text(detail, style: context.tt.bodySmall),
-                  ],
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: context.tt.titleSmall),
+                  if (detail != null) Text(detail, style: context.tt.bodySmall),
+                ],
               ),
               FilledButton.tonalIcon(
                 onPressed: !s.busy && s.paired.isNotEmpty ? ref.read(syncControllerProvider.notifier).syncNow : null,
@@ -425,7 +425,15 @@ class _DiscoveredTile extends StatelessWidget {
     leading: const CircleAvatar(child: Icon(Icons.devices_other_outlined, size: 20)),
     title: Text(peer.name),
     subtitle: Text('${peer.host} · ready to pair'),
-    trailing: FilledButton(onPressed: busy ? null : onPair, child: const Text('Pair')),
+    trailing: FilledButton(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      onPressed: busy ? null : onPair,
+      child: const Text('Pair'),
+    ),
   );
 }
 

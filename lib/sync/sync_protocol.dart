@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
 import 'package:shelf/shelf.dart';
 
@@ -94,7 +95,9 @@ class SyncServer {
         final rows = [
           for (final j in (input['rows'] as List? ?? const [])) SyncRow.fromJson(j as Map<String, dynamic>),
         ];
-        return _reply(path, 200, {'applied': await db.merge(rows)});
+        final applied = await db.merge(rows);
+        if (applied > 0) debugPrint('[sync] received $applied rows pushed by $sender');
+        return _reply(path, 200, {'applied': applied});
       default:
         return _reply(path, 404, {'error': 'not_found'});
     }

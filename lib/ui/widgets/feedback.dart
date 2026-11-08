@@ -10,6 +10,8 @@ void showUndo(BuildContext context, String message, Future<void> Function() undo
     SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 5),
+      // Snackbars with an action persist by default; Undo should time out.
+      persist: false,
       action: SnackBarAction(label: 'Undo', onPressed: () => undo()),
     ),
   );

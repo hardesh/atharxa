@@ -109,6 +109,9 @@ class SyncController extends Notifier<SyncState> {
   StreamSubscription<List<ConnectivityResult>>? _netSub;
   AppLifecycleListener? _lifecycle;
   bool _onLan = true;
+
+  /// Local edits not yet sent to the paired devices.
+  bool _pending = false;
   int _failures = 0;
   DateTime? _retryAfter;
 
@@ -236,10 +239,16 @@ class SyncController extends Notifier<SyncState> {
 
     if (state.autoSync) {
       _localSub = db.localChanges.listen((_) {
+        _pending = true;
         _debounce?.cancel();
-        _debounce = Timer(const Duration(seconds: 5), _syncAll);
+        _debounce = Timer(const Duration(milliseconds: 1500), _syncAll);
       });
-      _lifecycle = AppLifecycleListener(onResume: _syncAll);
+      _lifecycle = AppLifecycleListener(
+        onResume: _syncAll,
+        // Android pauses the app in the background; send pending edits first.
+        onInactive: _flush,
+        onHide: _flush,
+      );
       _netSub = Connectivity().onConnectivityChanged.listen((r) {
         final lan = r.contains(ConnectivityResult.wifi) || r.contains(ConnectivityResult.ethernet);
         final cameBack = lan && !_onLan;
@@ -252,6 +261,12 @@ class SyncController extends Notifier<SyncState> {
     } else {
       await BackgroundSync.cancel();
     }
+  }
+
+  void _flush() {
+    if (!_pending) return;
+    _debounce?.cancel();
+    _syncAll();
   }
 
   void _schedulePeriodic() {
@@ -312,6 +327,8 @@ class SyncController extends Notifier<SyncState> {
       );
       _failures = 0;
       _retryAfter = null;
+      _pending = false;
+      debugPrint('[sync] ${r.peerName} @ $address: sent ${r.sent}, received ${r.received}${full ? ' (full)' : ''}');
       state = state.copyWith(paired: peers, lastResult: 'Sent ${r.sent}, received ${r.received}', clearFailure: true);
     } on SyncException catch (e) {
       if (!ref.mounted) return;
@@ -319,6 +336,7 @@ class SyncController extends Notifier<SyncState> {
       // Back off auto-sync after failures: 30 s, 1 min, 2 min … up to the interval.
       final backoff = Duration(seconds: math.min(30 * (1 << math.min(_failures - 1, 10)), state.intervalMin * 60));
       _retryAfter = DateTime.now().add(backoff);
+      debugPrint('[sync] $address failed (${manual ? 'manual' : 'auto'}): ${e.kind.name} — ${e.message}');
       final name =
           state.paired.where((p) => p.address == address).firstOrNull?.name ??
           state.discovered.values.where((d) => d.address == address).firstOrNull?.name ??

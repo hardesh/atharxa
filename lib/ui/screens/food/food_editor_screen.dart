@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/food_repo.dart';
 import '../../../data/models.dart';
-import '../../app_scope.dart';
+import '../../../state/core_providers.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../app_info.dart';
+
 import 'db.dart';
 import 'food_repo.dart';
 import 'models.dart';
@@ -31,7 +33,7 @@ class LocalFoodsSource implements NutritionSource {
 }
 
 class OpenFoodFactsSource implements NutritionSource {
-  static const _ua = 'Atharxa/1.0 (personal nutrition tracker)';
+  static const _ua = '${AppInfo.name}/1.0 (personal nutrition tracker)';
 
   @override
   String get name => 'Open Food Facts';

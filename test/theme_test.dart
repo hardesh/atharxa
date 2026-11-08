@@ -25,10 +25,10 @@ void main() {
   });
 
   test('text scaler: body ×1.3, large styles ×1.15, total clamped at 2.0', () {
-    const s = AtharxaTextScaler(system: TextScaler.noScaling, userFactor: 1.3);
+    const s = AppTextScaler(system: TextScaler.noScaling, userFactor: 1.3);
     expect(s.scale(14), closeTo(18.2, 1e-9));
     expect(s.scale(36), closeTo(41.4, 1e-9));
-    const big = AtharxaTextScaler(system: TextScaler.linear(1.8), userFactor: 1.5);
+    const big = AppTextScaler(system: TextScaler.linear(1.8), userFactor: 1.5);
     expect(big.scale(14), closeTo(28, 1e-9));
   });
 }

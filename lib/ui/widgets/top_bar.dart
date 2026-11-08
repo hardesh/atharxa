@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app_scope.dart';
+import '../../app_info.dart';
+import '../../state/core_providers.dart';
+import '../../state/settings_providers.dart';
 import '../theme/semantic.dart';
 import 'layout.dart';
 
 /// Shared top bar (DESIGN.md §4).
 /// Phone: title · round AI button · avatar (opens You).
-/// Mac/wide: headline title · "Ask Atharxa ⌘K" pill · avatar with sync dot.
-class AtharxaTopBar extends StatelessWidget implements PreferredSizeWidget {
-  const AtharxaTopBar({super.key, required this.title, this.onOpenYou, this.actions = const []});
+/// Mac/wide: headline title · "Ask `assistant` ⌘K" pill · avatar with sync dot.
+class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
+  const AppTopBar({super.key, required this.title, this.onOpenYou, this.actions = const []});
 
   final String title;
   final VoidCallback? onOpenYou;
@@ -18,11 +21,11 @@ class AtharxaTopBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(64);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = context.cs;
     final wide = context.isWide;
-    final settings = context.settings;
-    final sync = AppScope.of(context).sync;
+    final initial = ref.watch(syncedSettingsProvider.select((s) => s.initial));
+    final sync = ref.watch(syncServiceProvider);
     return SafeArea(
       bottom: false,
       child: Align(
@@ -55,11 +58,11 @@ class AtharxaTopBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                       onPressed: () => showAssistantComingSoon(context),
                       icon: const Icon(Icons.auto_awesome, size: 20),
-                      label: const Text('Ask Atharxa  ⌘K'),
+                      label: const Text('Ask ${AppInfo.assistantName}  ⌘K'),
                     )
                   else
                     Semantics(
-                      label: 'Ask Atharxa',
+                      label: 'Ask ${AppInfo.assistantName}',
                       button: true,
                       child: IconButton.filled(
                         style: IconButton.styleFrom(
@@ -72,8 +75,10 @@ class AtharxaTopBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ),
                   const SizedBox(width: 10),
+                  // SyncService is still a ChangeNotifier; it becomes a Riverpod
+                  // notifier in the sync feature.
                   ListenableBuilder(
-                    listenable: Listenable.merge([settings, sync]),
+                    listenable: sync,
                     builder: (context, _) => Semantics(
                       label: 'You: profile and settings',
                       button: true,
@@ -87,10 +92,7 @@ class AtharxaTopBar extends StatelessWidget implements PreferredSizeWidget {
                               radius: 20,
                               backgroundColor: cs.secondaryContainer,
                               foregroundColor: cs.onSecondaryContainer,
-                              child: Text(
-                                settings.initial,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
+                              child: Text(initial, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                             ),
                             if (wide && sync.running)
                               Positioned(
@@ -135,7 +137,7 @@ void showAssistantComingSoon(BuildContext context) {
             children: [
               Icon(Icons.auto_awesome, color: ctx.cs.primary),
               const SizedBox(width: 12),
-              Text('Atharxa assistant', style: ctx.tt.titleLarge),
+              Text('${AppInfo.assistantName} assistant', style: ctx.tt.titleLarge),
             ],
           ),
           const SizedBox(height: 12),

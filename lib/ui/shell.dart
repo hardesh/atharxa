@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'screens/meal_plan_screen.dart';
-import 'screens/today_screen.dart';
+import 'screens/overview_screen.dart';
+import 'screens/water_screen.dart';
 import 'widgets/feedback.dart';
 import 'widgets/layout.dart';
 import 'widgets/top_bar.dart';
@@ -40,10 +41,10 @@ class _AppShellState extends State<AppShell> {
 
   List<Destination> get _main => [
     Destination(
-      label: 'Today',
+      label: 'Overview',
       icon: Icons.restaurant_outlined,
       selectedIcon: Icons.restaurant,
-      build: (_) => const TodayScreen(),
+      build: (_) => const OverviewScreen(),
     ),
     Destination(
       label: 'Meal plan',
@@ -55,7 +56,7 @@ class _AppShellState extends State<AppShell> {
       label: 'Water',
       icon: Icons.water_drop_outlined,
       selectedIcon: Icons.water_drop,
-      build: (_) => const PlaceholderPage('Water'),
+      build: (_) => const WaterScreen(),
     ),
     Destination(
       label: 'Workout',
@@ -101,7 +102,7 @@ class _AppShellState extends State<AppShell> {
     final d = dests[index];
 
     final page = Scaffold(
-      appBar: AtharxaTopBar(title: d.label, onOpenYou: _openYou, actions: d.actions?.call(context) ?? const []),
+      appBar: AppTopBar(title: d.label, onOpenYou: _openYou, actions: d.actions?.call(context) ?? const []),
       floatingActionButton: d.fab?.call(context),
       body: IndexedStack(
         index: index,
@@ -133,8 +134,11 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       body: Row(
         children: [
-          SafeArea(
-            right: false,
+          // Rail background runs to the top edge (under the macOS title bar);
+          // only its contents are inset.
+          Container(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + 8),
             child: NavigationRail(
               selectedIndex: index,
               labelType: NavigationRailLabelType.all,

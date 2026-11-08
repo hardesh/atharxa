@@ -31,8 +31,8 @@ void main() {
   }
 
   for (final (name, size, scale) in [
-    ('today_phone', const Size(412, 915), 1.3),
-    ('today_mac', const Size(1200, 860), 1.0),
+    ('overview_phone', const Size(412, 915), 1.3),
+    ('overview_mac', const Size(1200, 860), 1.0),
   ]) {
     for (final dark in [false, true]) {
       testWidgets('$name ${dark ? 'dark' : 'light'}', (tester) async {
@@ -50,7 +50,10 @@ void main() {
         expect(find.text('Nothing logged yet'), findsOneWidget);
         expect(find.text('1,250 / 3,000 ml'), findsOneWidget);
 
-        await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/${name}_${dark ? 'dark' : 'light'}.png'));
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('goldens/${name}_${dark ? 'dark' : 'light'}.png'),
+        );
       });
     }
   }

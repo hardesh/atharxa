@@ -25,9 +25,7 @@ void main() {
   }
 
   Future<void> openMealPlan(WidgetTester tester) async {
-    await tester.tap(find.text('Meal plan').first);
-    await tester.pump();
-    await settle(tester);
+    await goTo(tester, 'Meal plan');
   }
 
   for (final (name, size, scale) in [

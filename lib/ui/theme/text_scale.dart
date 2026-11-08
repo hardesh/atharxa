@@ -6,8 +6,8 @@ import 'package:flutter/widgets.dart';
 /// total at 2.0, and scales large styles (≥ 20 px: headline, title-large,
 /// display) by only half as much — 130 % → ×1.15 — like Android 14's
 /// non-linear scaling.
-class AtharxaTextScaler extends TextScaler {
-  const AtharxaTextScaler({required this.system, required this.userFactor});
+class AppTextScaler extends TextScaler {
+  const AppTextScaler({required this.system, required this.userFactor});
 
   final TextScaler system;
   final double userFactor;
@@ -27,8 +27,7 @@ class AtharxaTextScaler extends TextScaler {
   double get textScaleFactor => scale(14) / 14;
 
   @override
-  bool operator ==(Object other) =>
-      other is AtharxaTextScaler && other.system == system && other.userFactor == userFactor;
+  bool operator ==(Object other) => other is AppTextScaler && other.system == system && other.userFactor == userFactor;
 
   @override
   int get hashCode => Object.hash(system, userFactor);
@@ -46,7 +45,7 @@ class AppTextScale extends StatelessWidget {
     final mq = MediaQuery.of(context);
     return MediaQuery(
       data: mq.copyWith(
-        textScaler: AtharxaTextScaler(system: mq.textScaler, userFactor: factor),
+        textScaler: AppTextScaler(system: mq.textScaler, userFactor: factor),
       ),
       child: child,
     );

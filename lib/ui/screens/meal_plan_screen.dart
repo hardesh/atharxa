@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../data/db.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/food_repo.dart';
 import '../../data/models.dart';
-import '../app_scope.dart';
+import '../../state/core_providers.dart';
+import '../../state/data_providers.dart';
+import '../../state/settings_providers.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
 import '../theme/text_scale.dart';
@@ -17,31 +20,18 @@ import 'food/portion_dialog.dart';
 /// Meal plan (DESIGN.md §5, MealPlan.dc.html). Defaults to tomorrow.
 /// Phone rows are stacked (name + grams, then the nutrient line) with
 /// swipe-left-to-remove; Mac shows a full table with a total row.
-class MealPlanScreen extends StatefulWidget {
+class MealPlanScreen extends ConsumerStatefulWidget {
   const MealPlanScreen({super.key});
 
   @override
-  State<MealPlanScreen> createState() => _MealPlanScreenState();
+  ConsumerState<MealPlanScreen> createState() => _MealPlanScreenState();
 }
 
-class _PlanData {
-  _PlanData(this.plan, this.logged);
-  final List<FoodEntry> plan;
-
-  /// Entries already in that day's log (to detect logging a meal twice).
-  final List<FoodEntry> logged;
-}
-
-class _MealPlanScreenState extends State<MealPlanScreen> {
+class _MealPlanScreenState extends ConsumerState<MealPlanScreen> {
   DateTime _date = DateTime.now().add(const Duration(days: 1));
   String get _day => dayKey(_date);
 
-  Future<_PlanData> _load(AppDb db) async {
-    final repo = FoodRepo(db);
-    return _PlanData(await repo.entries(FoodRepo.plans, _day), await repo.entries(FoodRepo.logs, _day));
-  }
-
-  FoodRepo get _repo => FoodRepo(context.db);
+  FoodRepo get _repo => FoodRepo(ref.read(dbProvider));
 
   Future<void> _add(Meal m) => FoodPickerScreen.open(context, table: FoodRepo.plans, date: _date, meal: m);
 
@@ -122,48 +112,43 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: context.settings,
-      builder: (context, _) => DbBuilder<_PlanData>(
-        tables: const ['meal_plans', 'food_logs'],
-        deps: [_day],
-        load: _load,
-        builder: (context, d) {
-          final goals = context.settings.goals;
-          final totals = Nutrients.sum(d.plan.map((e) => e.totals));
-          final menu = PopupMenuButton<String>(
-            tooltip: 'Plan options',
-            icon: const Icon(Icons.more_vert),
-            onSelected: (v) => switch (v) {
-              'log' => _log(d.plan, d.logged, what: 'the whole day'),
-              'copy' => _copyFrom(),
-              _ => _clear(d.plan),
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(value: 'log', enabled: d.plan.isNotEmpty, child: const Text('Log whole day')),
-              const PopupMenuItem(value: 'copy', child: Text('Copy plan from another day…')),
-              PopupMenuItem(value: 'clear', enabled: d.plan.isNotEmpty, child: const Text('Clear plan')),
-            ],
-          );
-          final wide = context.isWide;
-          return PageBody(
-            children: [
-              DateSwitcher(date: _date, onChanged: (v) => setState(() => _date = v)),
-              _PlannedCard(totals: totals, goals: goals, menu: menu, wide: wide),
-              for (final m in Meal.values)
-                _PlanMealCard(
-                  meal: m,
-                  items: d.plan.where((e) => e.meal == m).toList(),
-                  wide: wide,
-                  onAdd: () => _add(m),
-                  onLog: (items) => _log(items, d.logged, what: m.label),
-                  onEdit: _edit,
-                  onRemove: _remove,
-                ),
-            ],
-          );
-        },
-      ),
+    final goals = ref.watch(goalsProvider);
+    return AsyncBody(
+      value: ref.watch(mealPlanProvider(_day)),
+      builder: (context, d) {
+        final totals = Nutrients.sum(d.plan.map((e) => e.totals));
+        final menu = PopupMenuButton<String>(
+          tooltip: 'Plan options',
+          icon: const Icon(Icons.more_vert),
+          onSelected: (v) => switch (v) {
+            'log' => _log(d.plan, d.logged, what: 'the whole day'),
+            'copy' => _copyFrom(),
+            _ => _clear(d.plan),
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(value: 'log', enabled: d.plan.isNotEmpty, child: const Text('Log whole day')),
+            const PopupMenuItem(value: 'copy', child: Text('Copy plan from another day…')),
+            PopupMenuItem(value: 'clear', enabled: d.plan.isNotEmpty, child: const Text('Clear plan')),
+          ],
+        );
+        final wide = context.isWide;
+        return PageBody(
+          children: [
+            DateSwitcher(date: _date, onChanged: (v) => setState(() => _date = v)),
+            _PlannedCard(totals: totals, goals: goals, menu: menu, wide: wide),
+            for (final m in Meal.values)
+              _PlanMealCard(
+                meal: m,
+                items: d.plan.where((e) => e.meal == m).toList(),
+                wide: wide,
+                onAdd: () => _add(m),
+                onLog: (items) => _log(items, d.logged, what: m.label),
+                onEdit: _edit,
+                onRemove: _remove,
+              ),
+          ],
+        );
+      },
     );
   }
 }

@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../../data/food_repo.dart';
 import '../../../data/models.dart';
 import '../../../data/nutrition_sources.dart';
-import '../../app_scope.dart';
+import '../../../state/core_providers.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';

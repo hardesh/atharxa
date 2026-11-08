@@ -33,12 +33,16 @@ class SyncState {
     this.paired = const [],
     this.discovered = const {},
     this.busy = false,
+    this.scanning = false,
     this.progress,
     this.lastResult,
     this.failure,
   });
 
   final bool enabled, autoSync, listening, busy;
+
+  /// A network search for other devices is running.
+  final bool scanning;
   final String deviceName, code;
   final int intervalMin;
 
@@ -73,6 +77,7 @@ class SyncState {
     List<PairedPeer>? paired,
     Map<String, DiscoveredPeer>? discovered,
     bool? busy,
+    bool? scanning,
     ({int received, int total})? progress,
     String? lastResult,
     SyncFailure? failure,
@@ -89,6 +94,7 @@ class SyncState {
     paired: paired ?? this.paired,
     discovered: discovered ?? this.discovered,
     busy: busy ?? this.busy,
+    scanning: scanning ?? this.scanning,
     progress: clearProgress ? null : (progress ?? this.progress),
     lastResult: lastResult ?? this.lastResult,
     failure: clearFailure ? null : (failure ?? this.failure),
@@ -227,15 +233,19 @@ class SyncController extends Notifier<SyncState> {
       deviceId: db.deviceId,
       onFound: (d) {
         state = state.copyWith(discovered: {...state.discovered, d.id: d});
-        if (state.autoSync && state.paired.any((p) => p.id == d.id)) _syncWith(d.address);
+        // A paired device showed up at a new address, or hasn't synced lately.
+        final p = state.paired.where((p) => p.id == d.id).firstOrNull;
+        final stale = p?.lastSyncAt == null || DateTime.now().difference(p!.lastSyncAt!) > const Duration(minutes: 1);
+        if (state.autoSync && p != null && (p.address != d.address || stale)) _syncWith(d.address);
       },
       onLost: (id) => state = state.copyWith(discovered: Map.of(state.discovered)..remove(id)),
     );
     try {
-      await _discovery!.start(name: state.deviceName, port: syncPort);
+      await _discovery!.advertise(name: state.deviceName, port: syncPort);
     } catch (_) {
       // Discovery is optional; Add device by IP still works.
     }
+    unawaited(scan(const Duration(seconds: 10)));
 
     if (state.autoSync) {
       _localSub = db.localChanges.listen((_) {
@@ -244,7 +254,10 @@ class SyncController extends Notifier<SyncState> {
         _debounce = Timer(const Duration(milliseconds: 1500), _syncAll);
       });
       _lifecycle = AppLifecycleListener(
-        onResume: _syncAll,
+        onResume: () {
+          unawaited(scan(const Duration(seconds: 10)));
+          _syncAll();
+        },
         // Android pauses the app in the background; send pending edits first.
         onInactive: _flush,
         onHide: _flush,
@@ -260,6 +273,24 @@ class SyncController extends Notifier<SyncState> {
       unawaited(Future.delayed(const Duration(seconds: 2), _syncAll));
     } else {
       await BackgroundSync.cancel();
+    }
+  }
+
+  /// Searches the network for other devices for [duration] (Device sync page
+  /// opened, "Search again"), then stops to save battery.
+  Future<void> scan([Duration duration = const Duration(seconds: 30)]) async {
+    final d = _discovery;
+    if (d == null) return;
+    state = state.copyWith(scanning: true);
+    try {
+      await d.scan(
+        duration,
+        onDone: () {
+          if (ref.mounted) state = state.copyWith(scanning: false);
+        },
+      );
+    } catch (_) {
+      state = state.copyWith(scanning: false);
     }
   }
 
@@ -286,7 +317,7 @@ class SyncController extends Notifier<SyncState> {
     _discovery = null;
     await _server?.close(force: true);
     _server = null;
-    if (ref.mounted) state = state.copyWith(listening: false, discovered: const {});
+    if (ref.mounted) state = state.copyWith(listening: false, scanning: false, discovered: const {});
   }
 
   // ------------------------------------------------------------------ syncing
@@ -342,6 +373,9 @@ class SyncController extends Notifier<SyncState> {
           state.discovered.values.where((d) => d.address == address).firstOrNull?.name ??
           address;
       state = state.copyWith(failure: (error: e.withPeer(name), manual: manual));
+      // The device may have a new IP address: look for it briefly. If found,
+      // onFound syncs with its new address.
+      if (e.kind == SyncErrorKind.unreachable && !state.scanning) unawaited(scan(const Duration(seconds: 10)));
     } finally {
       client.close();
       if (ref.mounted) state = state.copyWith(busy: false, clearProgress: true);

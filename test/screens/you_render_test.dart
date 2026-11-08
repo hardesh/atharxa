@@ -100,4 +100,42 @@ void main() {
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/$name.png'));
     });
   }
+
+  testWidgets('search stops; "Search again" starts a new search', (tester) async {
+    setSize(tester, const Size(412, 915));
+    final fake = _CountingSync();
+    final t = (await tester.runAsync(
+      () => buildTestApp(prefs: {'text_scale': 1.0}, overrides: [syncControllerProvider.overrideWith(() => fake)]),
+    ))!;
+    await tester.pumpWidget(t.app);
+    await settle(tester);
+    await openYou(tester);
+    await tester.tap(find.text('Device sync'));
+    await step(tester);
+    expect(fake.scans, 1); // opening the page searches once
+    await tester.scrollUntilVisible(find.text('Search again'), 200, scrollable: find.byType(Scrollable).last);
+    expect(find.text('No new devices found.'), findsOneWidget);
+    await tester.tap(find.text('Search again'));
+    await step(tester);
+    expect(fake.scans, 2);
+  });
+}
+
+/// Idle, nothing discovered; counts scan() calls.
+class _CountingSync extends SyncController {
+  int scans = 0;
+
+  @override
+  SyncState build() => const SyncState(
+    enabled: true,
+    deviceName: 'Android phone',
+    code: '482913',
+    autoSync: true,
+    intervalMin: 5,
+    listening: true,
+    address: '192.168.1.23',
+  );
+
+  @override
+  Future<void> scan([Duration duration = const Duration(seconds: 30)]) async => scans++;
 }

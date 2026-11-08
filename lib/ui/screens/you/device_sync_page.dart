@@ -46,6 +46,10 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
     ref.listenManual(syncControllerProvider.select((s) => s.code), (_, code) {
       if (_code.text != code) _code.text = code;
     });
+    // Look for new devices for a while when the page opens (or sync turns on).
+    ref.listenManual(syncControllerProvider.select((s) => s.listening), (_, listening) {
+      if (listening) _ctl.scan();
+    }, fireImmediately: true);
   }
 
   @override
@@ -96,7 +100,7 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
   @override
   Widget build(BuildContext context) {
     // Only what this page shows; progress ticks rebuild just _StatusCard.
-    final (:enabled, :listening, :address, :paired, :discovered, :busy, :autoSync, :intervalMin) = ref.watch(
+    final (:enabled, :listening, :address, :paired, :discovered, :busy, :scanning, :autoSync, :intervalMin) = ref.watch(
       syncControllerProvider.select(
         (s) => (
           enabled: s.enabled,
@@ -105,6 +109,7 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
           paired: s.paired,
           discovered: s.discovered,
           busy: s.busy,
+          scanning: s.scanning,
           autoSync: s.autoSync,
           intervalMin: s.intervalMin,
         ),
@@ -180,19 +185,35 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
         ),
         _Section(
           title: 'On this network',
+          trailing: scanning
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                )
+              : IconButton(
+                  tooltip: 'Search again',
+                  icon: const Icon(Icons.refresh),
+                  onPressed: listening ? () => _ctl.scan() : null,
+                ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (newDevices.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text('Searching…', style: context.tt.bodyMedium)),
-                    ],
-                  ),
+                  child: scanning
+                      ? Text('Searching…', style: context.tt.bodyMedium)
+                      : Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Text('No new devices found.', style: context.tt.bodyMedium),
+                            TextButton(
+                              onPressed: listening ? () => _ctl.scan() : null,
+                              child: const Text('Search again'),
+                            ),
+                          ],
+                        ),
                 ),
               for (final d in newDevices) _DiscoveredTile(peer: d, busy: busy, onPair: () => _ctl.pair(d)),
               TextButton(onPressed: busy ? null : _addByIp, child: const Text('Not listed? Add device by IP')),
@@ -439,9 +460,10 @@ class _DiscoveredTile extends StatelessWidget {
 
 /// Titled card section (primary-coloured heading).
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
+  const _Section({required this.title, required this.child, this.trailing});
   final String title;
   final Widget child;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => AppCard(
@@ -449,7 +471,14 @@ class _Section extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(title, style: context.tt.titleSmall?.copyWith(color: context.cs.primary)),
+        Row(
+          children: [
+            Expanded(
+              child: Text(title, style: context.tt.titleSmall?.copyWith(color: context.cs.primary)),
+            ),
+            ?trailing,
+          ],
+        ),
         const SizedBox(height: 4),
         child,
       ],

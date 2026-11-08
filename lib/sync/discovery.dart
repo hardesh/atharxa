@@ -12,9 +12,13 @@ class DiscoveredPeer {
   String get address => '$host:$port';
 }
 
-/// Advertises this device and finds others via mDNS/DNS-SD (Bonjour on macOS,
-/// NSD on Android). Discovery is a convenience; "Add device by IP" works
-/// without it.
+/// mDNS/DNS-SD (Bonjour on macOS, NSD on Android).
+///
+/// * **Advertising** runs while sync is on, so the other device can find us.
+/// * **Searching** runs in short bursts ([scan]) — browsing continuously costs
+///   battery and isn't needed once devices are paired.
+///
+/// Discovery is a convenience; "Add device by IP" works without it.
 class SyncDiscovery {
   SyncDiscovery({required this.deviceId, required this.onFound, required this.onLost});
 
@@ -25,15 +29,35 @@ class SyncDiscovery {
   BonsoirBroadcast? _broadcast;
   BonsoirDiscovery? _discovery;
   StreamSubscription<BonsoirDiscoveryEvent>? _sub;
+  Timer? _scanTimer;
 
-  Future<void> start({required String name, required int port}) async {
-    await stop();
-    _broadcast = BonsoirBroadcast(
+  bool get scanning => _discovery != null;
+
+  Future<void> advertise({required String name, required int port}) async {
+    await stopAdvertising();
+    final b = _broadcast = BonsoirBroadcast(
       service: BonsoirService(name: name, type: AppInfo.syncServiceType, port: port, attributes: {'id': deviceId}),
     );
-    await _broadcast!.initialize();
-    await _broadcast!.start();
+    await b.initialize();
+    await b.start();
+  }
 
+  Future<void> stopAdvertising() async {
+    try {
+      await _broadcast?.stop();
+    } catch (_) {}
+    _broadcast = null;
+  }
+
+  /// Searches for [duration], then stops by itself; [onDone] runs when it stops.
+  /// Calling it while a search runs restarts the timer.
+  Future<void> scan(Duration duration, {void Function()? onDone}) async {
+    _scanTimer?.cancel();
+    _scanTimer = Timer(duration, () async {
+      await stopScan();
+      onDone?.call();
+    });
+    if (_discovery != null) return;
     final d = _discovery = BonsoirDiscovery(type: AppInfo.syncServiceType);
     await d.initialize();
     _sub = d.eventStream?.listen((event) {
@@ -56,14 +80,19 @@ class SyncDiscovery {
     await d.start();
   }
 
-  Future<void> stop() async {
+  Future<void> stopScan() async {
+    _scanTimer?.cancel();
+    _scanTimer = null;
     await _sub?.cancel();
     _sub = null;
     try {
-      await _broadcast?.stop();
       await _discovery?.stop();
     } catch (_) {}
-    _broadcast = null;
     _discovery = null;
+  }
+
+  Future<void> stop() async {
+    await stopScan();
+    await stopAdvertising();
   }
 }

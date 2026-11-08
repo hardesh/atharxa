@@ -1,17 +1,10 @@
-# super_app
+# Atharxa
 
-A new Flutter project.
+A personal app for Android and macOS that covers calories, meal planning, water, workouts and finance.
+It works offline: data lives in a local database on each device, and two devices sync directly over local Wi-Fi with no cloud.
 
-## Getting Started
+Built with Flutter (Material 3). The design spec is in `docs/design/DESIGN.md`.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Branches
+- `main`: stable releases
+- `dev/v1`: integration branch for v1; feature branches (`feat/*`) are merged here through pull requests

@@ -11,12 +11,19 @@ import '../format.dart';
 import '../theme/semantic.dart';
 import 'feedback.dart';
 
-/// Stored source keys stay stable ('today' = the Overview card).
+/// Where an entry was added. Stored keys stay stable ('today' = the Overview card).
 const waterSourceLabels = {
-  'today': 'Overview card',
-  'water': 'Water tab',
-  'notification': 'Notification',
-  'mac': 'Mac',
+  'today': 'from Overview',
+  'water': 'from Water',
+  'notification': 'from a reminder',
+  'mac': 'on Mac',
+};
+
+const _sourceIcons = {
+  'today': Icons.dashboard_outlined,
+  'water': Icons.water_drop_outlined,
+  'notification': Icons.notifications_none,
+  'mac': Icons.laptop_mac,
 };
 
 DateTime _at(Map<String, Object?> r) => DateTime.fromMillisecondsSinceEpoch((r['logged_at'] as num).toInt());
@@ -119,7 +126,7 @@ class _EditWaterDialogState extends State<_EditWaterDialog> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.schedule),
               title: Text('${DateFormat('EEE d MMM').format(_time)} · ${DateFormat.Hm().format(_time)}'),
-              subtitle: Text(waterSourceLabels[widget.row['source']] ?? ''),
+              subtitle: Text('Added ${waterSourceLabels[widget.row['source']] ?? ''}'),
               trailing: const Icon(Icons.edit_outlined),
               onTap: () async {
                 final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(_time));
@@ -144,33 +151,53 @@ class _EditWaterDialogState extends State<_EditWaterDialog> {
   }
 }
 
-/// One entry row: time · amount · source · ✕. Tap to edit.
+/// One entry: water icon · "250 ml" over "19:29 · from Overview" · ✕.
+/// Tap the row to edit amount/time.
 class WaterEntryTile extends StatelessWidget {
-  const WaterEntryTile({super.key, required this.row});
+  const WaterEntryTile({super.key, required this.row, this.divider = true});
   final Map<String, Object?> row;
+  final bool divider;
 
   @override
   Widget build(BuildContext context) {
+    final sem = context.sem;
     final ml = fmtInt(row['ml'] as num);
     final time = DateFormat.Hm().format(_at(row));
+    final source = row['source'] as String?;
     return Semantics(
       button: true,
       label: 'Edit $ml ml at $time',
       child: InkWell(
+        borderRadius: BorderRadius.circular(12),
         onTap: () => editWaterEntry(context, row),
         child: Container(
-          decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: context.cs.outlineVariant)),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: divider
+              ? BoxDecoration(
+                  border: Border(bottom: BorderSide(color: context.cs.outlineVariant)),
+                )
+              : null,
           child: Row(
             children: [
-              const SizedBox(width: 4),
-              SizedBox(width: 60, child: Text(time, style: context.tt.bodyMedium)),
-              Expanded(child: Text('$ml ml', style: context.tt.bodyMedium)),
-              Text(waterSourceLabels[row['source']] ?? '', style: context.tt.bodySmall),
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: sem.waterContainer,
+                foregroundColor: sem.water,
+                child: Icon(_sourceIcons[source] ?? Icons.water_drop_outlined, size: 18),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$ml ml', style: context.tt.titleSmall),
+                    Text([time, ?waterSourceLabels[source]].join(' · '), style: context.tt.bodySmall),
+                  ],
+                ),
+              ),
               IconButton(
                 tooltip: 'Remove $ml ml at $time',
-                icon: const Icon(Icons.close, size: 18),
+                icon: const Icon(Icons.close, size: 20),
                 onPressed: () => removeWaterWithUndo(context, row),
               ),
             ],
@@ -216,7 +243,7 @@ class _WaterSheet extends ConsumerWidget {
                   padding: const EdgeInsets.all(4),
                   child: Text('No water logged yet', style: context.tt.bodySmall),
                 ),
-              for (final r in rows) WaterEntryTile(row: r),
+              for (final (i, r) in rows.indexed) WaterEntryTile(row: r, divider: i < rows.length - 1),
             ],
           ),
         ),

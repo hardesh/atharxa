@@ -226,10 +226,20 @@ class _WeekCard extends StatelessWidget {
                     child: Column(
                       children: [
                         if (wide) Text(fmtInt(values[i]), style: context.tt.bodySmall),
-                        Text(
-                          '${goal > 0 && values[i] >= goal ? '✓ ' : ''}${DateFormat('E').format(days[i]).substring(0, 1)}',
-                          style: context.tt.bodySmall,
-                          maxLines: 1,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (goal > 0 && values[i] >= goal)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 2),
+                                child: Icon(Icons.check, size: 12, color: context.sem.water),
+                              ),
+                            Text(
+                              DateFormat('E').format(days[i]).substring(0, 1),
+                              style: context.tt.bodySmall,
+                              maxLines: 1,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -291,7 +301,7 @@ class _EntriesCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text('No water logged yet', style: context.tt.bodySmall),
               ),
-            for (final r in entries) WaterEntryTile(row: r),
+            for (final (i, r) in entries.indexed) WaterEntryTile(row: r, divider: i < entries.length - 1),
           ],
         ),
       ),

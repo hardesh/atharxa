@@ -114,12 +114,7 @@ class _WaterCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: sem.waterContainer,
-                    foregroundColor: sem.water,
-                    child: const Icon(Icons.water_drop_outlined),
-                  ),
+                  const WaterBadge(),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

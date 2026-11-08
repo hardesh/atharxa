@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -175,7 +174,8 @@ class _WeekCard extends StatelessWidget {
     final sem = context.sem;
     final days = [for (var i = 6; i >= 0; i--) date.subtract(Duration(days: i))];
     final values = [for (final d in days) week[dayKey(d)] ?? 0];
-    final met = values.where((v) => goal > 0 && v >= goal).length;
+    final metDays = [for (final v in values) goal > 0 && v >= goal];
+    final met = metDays.where((m) => m).length;
     final maxV = math.max(goal * 7 / 6, values.fold<int>(0, math.max).toDouble());
     final chartH = wide ? 180.0 : 140.0;
     return Card(
@@ -200,13 +200,13 @@ class _WeekCard extends StatelessWidget {
                     for (var i = 0; i < 7; i++)
                       Expanded(
                         child: Tooltip(
-                          message: '${DateFormat('EEE d MMM').format(days[i])}: ${fmtInt(values[i])} ml',
+                          message: '${fmtDayShort(days[i])}: ${fmtInt(values[i])} ml',
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 5),
                             child: Container(
                               height: math.max(3, chartH * values[i] / maxV),
                               decoration: BoxDecoration(
-                                color: goal > 0 && values[i] >= goal ? sem.water : sem.waterContainer,
+                                color: metDays[i] ? sem.water : sem.waterContainer,
                                 borderRadius: BorderRadius.circular(6),
                                 border: i == 6 ? Border.all(color: sem.water, width: 2) : null,
                               ),
@@ -229,16 +229,12 @@ class _WeekCard extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (goal > 0 && values[i] >= goal)
+                            if (metDays[i])
                               Padding(
                                 padding: const EdgeInsets.only(right: 2),
-                                child: Icon(Icons.check, size: 12, color: context.sem.water),
+                                child: Icon(Icons.check, size: 12, color: sem.water),
                               ),
-                            Text(
-                              DateFormat('E').format(days[i]).substring(0, 1),
-                              style: context.tt.bodySmall,
-                              maxLines: 1,
-                            ),
+                            Text(fmtWeekdayInitial(days[i]), style: context.tt.bodySmall, maxLines: 1),
                           ],
                         ),
                       ],
@@ -296,12 +292,7 @@ class _EntriesCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 2, bottom: 4),
                 child: Text('Tap an entry to change the amount or time.', style: context.tt.bodySmall),
               ),
-            if (entries.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text('No water logged yet', style: context.tt.bodySmall),
-              ),
-            for (final (i, r) in entries.indexed) WaterEntryTile(row: r, divider: i < entries.length - 1),
+            WaterEntryList(rows: entries),
           ],
         ),
       ),

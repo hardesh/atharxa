@@ -4,6 +4,9 @@ import '../data/models.dart';
 
 final _int = NumberFormat('#,##0', 'en_US');
 final _one = NumberFormat('#,##0.0', 'en_US');
+final _hm = DateFormat.Hm();
+final _dayShort = DateFormat('EEE d MMM');
+final _weekday = DateFormat('E');
 
 /// kcal and ml: integers with grouping ("1,498").
 String fmtInt(num v) => _int.format(v.round());
@@ -32,3 +35,12 @@ String relativeDay(DateTime d) {
     _ => '${DateFormat('EEE').format(d)}, $date',
   };
 }
+
+/// "19:29".
+String fmtTime(DateTime t) => _hm.format(t);
+
+/// "Sun 8 Nov".
+String fmtDayShort(DateTime d) => _dayShort.format(d);
+
+/// "S" — first letter of the weekday (chart labels).
+String fmtWeekdayInitial(DateTime d) => _weekday.format(d).substring(0, 1);

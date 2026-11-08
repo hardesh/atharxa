@@ -1,29 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models.dart';
 import '../../data/water_repo.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../state/core_providers.dart';
 import '../../state/data_providers.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
 import 'feedback.dart';
 
-/// Where an entry was added. Stored keys stay stable ('today' = the Overview card).
-const waterSourceLabels = {
-  'today': 'from Overview',
-  'water': 'from Water',
-  'notification': 'from a reminder',
-  'mac': 'on Mac',
-};
-
-const _sourceIcons = {
-  'today': Icons.dashboard_outlined,
-  'water': Icons.water_drop_outlined,
-  'notification': Icons.notifications_none,
-  'mac': Icons.laptop_mac,
+/// Where an entry was added: label + icon. Stored keys stay stable ('today' = the Overview card).
+const _sources = {
+  'today': (label: 'from Overview', icon: Icons.dashboard_outlined),
+  'water': (label: 'from Water', icon: Icons.water_drop_outlined),
+  'notification': (label: 'from a reminder', icon: Icons.notifications_none),
+  'mac': (label: 'on Mac', icon: Icons.laptop_mac),
 };
 
 DateTime _at(Map<String, Object?> r) => DateTime.fromMillisecondsSinceEpoch((r['logged_at'] as num).toInt());
@@ -125,8 +116,8 @@ class _EditWaterDialogState extends State<_EditWaterDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.schedule),
-              title: Text('${DateFormat('EEE d MMM').format(_time)} · ${DateFormat.Hm().format(_time)}'),
-              subtitle: Text('Added ${waterSourceLabels[widget.row['source']] ?? ''}'),
+              title: Text('${fmtDayShort(_time)} · ${fmtTime(_time)}'),
+              subtitle: Text('Added ${_sources[widget.row['source']]?.label ?? ''}'),
               trailing: const Icon(Icons.edit_outlined),
               onTap: () async {
                 final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(_time));
@@ -151,59 +142,64 @@ class _EditWaterDialogState extends State<_EditWaterDialog> {
   }
 }
 
-/// One entry: water icon · "250 ml" over "19:29 · from Overview" · ✕.
-/// Tap the row to edit amount/time.
-class WaterEntryTile extends StatelessWidget {
-  const WaterEntryTile({super.key, required this.row, this.divider = true});
-  final Map<String, Object?> row;
-  final bool divider;
+/// A day's entries with dividers between rows, or an empty message.
+class WaterEntryList extends StatelessWidget {
+  const WaterEntryList({super.key, required this.rows});
+  final List<Map<String, Object?>> rows;
 
   @override
   Widget build(BuildContext context) {
-    final sem = context.sem;
+    if (rows.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text('No water logged yet', style: context.tt.bodySmall),
+      );
+    }
+    return Column(
+      children: [
+        for (final (i, r) in rows.indexed) ...[if (i > 0) const Divider(), WaterEntryTile(row: r)],
+      ],
+    );
+  }
+}
+
+/// Water-tinted circular badge (Overview water card, entry rows).
+class WaterBadge extends StatelessWidget {
+  const WaterBadge({super.key, this.icon = Icons.water_drop_outlined, this.radius = 20, this.iconSize = 24});
+  final IconData icon;
+  final double radius, iconSize;
+
+  @override
+  Widget build(BuildContext context) => CircleAvatar(
+    radius: radius,
+    backgroundColor: context.sem.waterContainer,
+    foregroundColor: context.sem.water,
+    child: Icon(icon, size: iconSize),
+  );
+}
+
+/// One entry: water badge · "250 ml" over "19:29 · from Overview" · ✕.
+/// Tap the row to edit amount/time.
+class WaterEntryTile extends StatelessWidget {
+  const WaterEntryTile({super.key, required this.row});
+  final Map<String, Object?> row;
+
+  @override
+  Widget build(BuildContext context) {
     final ml = fmtInt(row['ml'] as num);
-    final time = DateFormat.Hm().format(_at(row));
-    final source = row['source'] as String?;
-    return Semantics(
-      button: true,
-      label: 'Edit $ml ml at $time',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => editWaterEntry(context, row),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: divider
-              ? BoxDecoration(
-                  border: Border(bottom: BorderSide(color: context.cs.outlineVariant)),
-                )
-              : null,
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: sem.waterContainer,
-                foregroundColor: sem.water,
-                child: Icon(_sourceIcons[source] ?? Icons.water_drop_outlined, size: 18),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('$ml ml', style: context.tt.titleSmall),
-                    Text([time, ?waterSourceLabels[source]].join(' · '), style: context.tt.bodySmall),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Remove $ml ml at $time',
-                icon: const Icon(Icons.close, size: 20),
-                onPressed: () => removeWaterWithUndo(context, row),
-              ),
-            ],
-          ),
-        ),
+    final time = fmtTime(_at(row));
+    final source = _sources[row['source']];
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: WaterBadge(icon: source?.icon ?? Icons.water_drop_outlined, radius: 18, iconSize: 18),
+      title: Text('$ml ml', style: context.tt.titleSmall),
+      subtitle: Text([time, ?source?.label].join(' · ')),
+      trailing: IconButton(
+        tooltip: 'Remove $ml ml at $time',
+        icon: const Icon(Icons.close, size: 20),
+        onPressed: () => removeWaterWithUndo(context, row),
       ),
+      onTap: () => editWaterEntry(context, row),
     );
   }
 }
@@ -238,12 +234,7 @@ class _WaterSheet extends ConsumerWidget {
                 padding: const EdgeInsets.only(left: 4, bottom: 8),
                 child: Text('Tap an entry to change it.', style: context.tt.bodySmall),
               ),
-              if (rows.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Text('No water logged yet', style: context.tt.bodySmall),
-                ),
-              for (final (i, r) in rows.indexed) WaterEntryTile(row: r, divider: i < rows.length - 1),
+              WaterEntryList(rows: rows),
             ],
           ),
         ),

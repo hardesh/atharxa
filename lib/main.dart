@@ -11,6 +11,7 @@ import 'state/desktop_controller.dart';
 import 'state/reminders_controller.dart';
 import 'state/settings_providers.dart';
 import 'state/sync_controller.dart';
+import 'ui/screens/first_run_screen.dart';
 import 'ui/shell.dart';
 import 'ui/theme/app_theme.dart';
 import 'ui/theme/text_scale.dart';
@@ -21,6 +22,10 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   final db = await AppDb.open();
   final notifications = NotificationService();
+  // Existing installs (data already there) skip the welcome screen.
+  if (!(prefs.getBool('first_run_done') ?? false) && await db.hasUserData()) {
+    await prefs.setBool('first_run_done', true);
+  }
   final container = ProviderContainer(
     overrides: await appOverrides(db: db, prefs: prefs, notifications: notifications),
   );
@@ -63,7 +68,7 @@ class App extends ConsumerWidget {
       darkTheme: buildTheme(palette, Brightness.dark),
       themeMode: device.themeMode,
       builder: (context, child) => AppChrome.wrap(context, AppTextScale(factor: device.textScale, child: child!)),
-      home: const AppShell(),
+      home: device.firstRunDone ? const AppShell() : const FirstRunScreen(),
     );
   }
 }

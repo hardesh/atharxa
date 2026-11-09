@@ -42,4 +42,11 @@ void main() {
     await db.setPref('theme', 'ocean');
     expect(await db.getPref('theme'), 'ocean');
   });
+
+  test('hasUserData: false on a fresh install, true after logging', () async {
+    final db = await openTestDb();
+    expect(await db.hasUserData(), isFalse);
+    await db.save('water_logs', {'day': '2026-11-09', 'ml': 250, 'logged_at': 1, 'source': 'water'});
+    expect(await db.hasUserData(), isTrue);
+  });
 }

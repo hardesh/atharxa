@@ -64,4 +64,30 @@ void main() {
     expect(Theme.of(ctx).colorScheme.primary, const Color(0xFF0061A4));
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/appearance_phone.png'));
   });
+
+  testWidgets('first run: Start saves goals and opens the app', (tester) async {
+    setSize(tester, const Size(412, 915));
+    final t = (await tester.runAsync(() => buildTestApp(prefs: {'first_run_done': false})))!;
+    await tester.pumpWidget(t.app);
+    await settle(tester);
+    expect(find.text('Welcome to Atharxa'), findsOneWidget);
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/first_run_phone.png'));
+    await tester.enterText(find.widgetWithText(TextFormField, 'Calories'), '1800');
+    await tester.scrollUntilVisible(find.text('Start'), 200, scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.text('Start'));
+    await step(tester);
+    expect(find.text('Welcome to Atharxa'), findsNothing);
+    expect(find.textContaining('1,800 goal'), findsOneWidget);
+  });
+
+  testWidgets('first run: Skip goes straight to the app', (tester) async {
+    setSize(tester, const Size(412, 915));
+    final t = (await tester.runAsync(() => buildTestApp(prefs: {'first_run_done': false})))!;
+    await tester.pumpWidget(t.app);
+    await settle(tester);
+    await tester.scrollUntilVisible(find.text('Skip'), 200, scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.text('Skip'));
+    await step(tester);
+    expect(find.text('Overview'), findsWidgets);
+  });
 }

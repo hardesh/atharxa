@@ -242,6 +242,15 @@ class AppDb {
     _emit(table, local: true);
   }
 
+  /// True once anything was logged or a goal was set (used to skip first run).
+  Future<bool> hasUserData() async {
+    final r = await _db.rawQuery(
+      "SELECT (SELECT COUNT(*) FROM food_logs) + (SELECT COUNT(*) FROM water_logs) + "
+      "(SELECT COUNT(*) FROM transactions) + (SELECT COUNT(*) FROM prefs WHERE id LIKE 'goal_%') AS n",
+    );
+    return (r.first['n'] as num) > 0;
+  }
+
   /// Another process (e.g. a notification action in a background isolate)
   /// may have written to the database: re-query everything.
   void notifyExternalChange() {

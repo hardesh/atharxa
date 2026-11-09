@@ -12,7 +12,24 @@ import '../../widgets/layout.dart';
 /// You › Goals (synced): Calories, Water, Protein, Carbs, Fiber, Fat.
 /// "Suggest from body stats" fills the form; nothing is saved until Save.
 class GoalsPage extends ConsumerStatefulWidget {
-  const GoalsPage({super.key, this.onOpenBodyStats});
+  const GoalsPage({
+    super.key,
+    this.onOpenBodyStats,
+    this.header = const [],
+    this.saveLabel = 'Save',
+    this.onSaved,
+    this.onSkip,
+  });
+
+  /// Extra content above the form (first run: welcome text, currency).
+  final List<Widget> header;
+  final String saveLabel;
+
+  /// Called after goals are saved (first run continues to the app).
+  final VoidCallback? onSaved;
+
+  /// Shows a Skip button next to Save (first run).
+  final VoidCallback? onSkip;
 
   /// Opens You › Body stats (when the suggestion needs them).
   final VoidCallback? onOpenBodyStats;
@@ -75,7 +92,12 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
             fat: _v('fat'),
           ),
         );
-    if (mounted) showMessage(context, 'Goals saved');
+    if (!mounted) return;
+    if (widget.onSaved != null) {
+      widget.onSaved!();
+    } else {
+      showMessage(context, 'Goals saved');
+    }
   }
 
   void _suggest() {
@@ -96,6 +118,7 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
       key: _form,
       child: PageBody(
         children: [
+          ...widget.header,
           AppCard(
             child: Column(
               children: [
@@ -139,7 +162,13 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
           ),
           Align(
             alignment: Alignment.centerRight,
-            child: FilledButton(onPressed: _save, child: const Text('Save')),
+            child: Wrap(
+              spacing: 8,
+              children: [
+                if (widget.onSkip != null) TextButton(onPressed: widget.onSkip, child: const Text('Skip')),
+                FilledButton(onPressed: _save, child: Text(widget.saveLabel)),
+              ],
+            ),
           ),
           Text('Goals sync to your other devices.', style: context.tt.bodySmall),
         ],

@@ -35,7 +35,7 @@ class TestApp {
 
 /// Builds the real app on a fresh test database. Call inside `tester.runAsync`.
 Future<TestApp> buildTestApp({Map<String, Object> prefs = const {}, List<Override> overrides = const []}) async {
-  SharedPreferences.setMockInitialValues({'text_scale': 1.0, ...prefs});
+  SharedPreferences.setMockInitialValues({'text_scale': 1.0, 'first_run_done': true, ...prefs});
   final sp = await SharedPreferences.getInstance();
   final db = await openTestDb();
   final base = await appOverrides(db: db, prefs: sp, notifications: NotificationService());

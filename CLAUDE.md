@@ -77,7 +77,11 @@ The app's name may change, so **don't build the product name into code identifie
   - `device_info.dart`: RAM, chip and free space from system tools (`/proc/meminfo`, `getprop`, `sysctl`, `df`).
   - `lib/state/ai_controller.dart` (`aiProvider`, kept alive so downloads continue) and `assistant_controller.dart` (auto-dispose chat). A model loads only while the assistant is open and is freed a minute after it closes.
   - Build setup: `hooks: user_defines` in `pubspec.yaml` (llama.cpp only from llamadart; Tensor NPU dispatch on), Android `minSdk 30` and arm64 only, macOS 14. The engines' native files come from GitHub releases at build time; if GitHub keeps returning 5xx, the LiteRT-LM archives can be downloaded by hand, checked against the checksums in the package's `hook/build.dart`, and extracted to `~/Library/Caches/flutter_gemma/native/<platform>/`.
-- **UI**:
+- **Strava** (`lib/services/strava.dart`, `lib/state/strava_controller.dart`):
+  - The user registers their own Strava API app (callback domain `localhost`) and enters Client ID + Secret in You › Connected services. Credentials and tokens are per device (`DeviceKeys.strava`), never synced or backed up.
+  - Sign-in runs in an in-app WebView (`strava_sign_in.dart`) that catches the `http://localhost/strava-callback` redirect; no deep links or extra packages.
+  - Imports go into the synced `strava_activities` table (row id `strava-<id>`, written with `AppDb.saveIfChanged`), at most hourly when Workout opens, or with Import now. Finished sessions can upload as Weight Training.
+- **Assistant chats** are stored in the synced `chats` table (schema v2). `AppDb` migrations live in `_upgrade(db, from)`, which runs for new and existing databases.
   - `lib/ui/shell.dart` is the responsive shell: `NavigationBar` under 600 dp, `NavigationRail` (with You) at 600 dp and up.
   - The theme is in `lib/ui/theme/`. Colour schemes are explicit, from DESIGN.md §3.1 (never `fromSeed`). Semantic colours are a `ThemeExtension` (`context.sem`).
   - Text size uses the app-level `AppTextScaler`.

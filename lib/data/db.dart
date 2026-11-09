@@ -256,6 +256,16 @@ class AppDb {
     return id;
   }
 
+  /// [save]s [row] (which must have an id) unless a live row with the same
+  /// values is already there; true if it wrote. Re-imports (Strava) then
+  /// don't re-sync unchanged rows.
+  Future<bool> saveIfChanged(String table, Map<String, Object?> row) async {
+    final existing = await query(table, where: 'id = ?', args: [row['id']]);
+    if (existing.isNotEmpty && row.entries.every((e) => existing.first[e.key] == e.value)) return false;
+    await save(table, row);
+    return true;
+  }
+
   /// Soft delete (tombstone) so the deletion propagates to the other device.
   Future<void> delete(String table, String id) async {
     await _db.transaction((tx) async {

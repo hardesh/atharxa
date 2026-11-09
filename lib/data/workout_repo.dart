@@ -198,6 +198,25 @@ class WorkoutRepo {
 
   Future<void> discardSession(String id) => db.delete('sessions', id);
 
+  /// Links a session to the Strava activity it was uploaded as.
+  Future<void> setStravaId(String sessionId, String stravaId) async {
+    final rows = await db.query('sessions', where: 'id = ?', args: [sessionId]);
+    if (rows.isNotEmpty) await db.save('sessions', {...AppDb.editable(rows.first), 'strava_activity_id': stravaId});
+  }
+
+  /// Imported Strava activities between two days (inclusive), newest first.
+  Future<List<StravaActivity>> stravaBetween(String fromDay, String toDay) async {
+    final from = parseDay(fromDay).millisecondsSinceEpoch;
+    final to = parseDay(toDay).add(const Duration(days: 1)).millisecondsSinceEpoch;
+    final rows = await db.query(
+      'strava_activities',
+      where: 'start >= ? AND start < ?',
+      args: [from, to],
+      orderBy: 'start DESC',
+    );
+    return rows.map(StravaActivity.new).toList();
+  }
+
   /// kcal from today's finished sessions the user chose to add to Today.
   Future<double> kcalAddedOn(String day) async {
     final r = await db.raw(
@@ -206,4 +225,19 @@ class WorkoutRepo {
     );
     return (r.first['k'] as num).toDouble();
   }
+}
+
+/// A run, ride or other activity imported from Strava.
+class StravaActivity {
+  StravaActivity(this.row);
+  final Map<String, Object?> row;
+
+  String get type => row['type'] as String;
+  String get name => (row['name'] as String?) ?? type;
+  DateTime get start => DateTime.fromMillisecondsSinceEpoch((row['start'] as num).toInt());
+  double get km => ((row['distance_m'] as num?) ?? 0) / 1000;
+  Duration get moving => Duration(seconds: ((row['moving_time_s'] as num?) ?? 0).toInt());
+
+  bool get isRun => const {'Run', 'TrailRun', 'VirtualRun'}.contains(type);
+  bool get isRide => const {'Ride', 'MountainBikeRide', 'GravelRide', 'EBikeRide', 'VirtualRide'}.contains(type);
 }

@@ -4,6 +4,7 @@ import 'package:atharxa/data/finance_repo.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/workout_repo.dart';
 import 'package:atharxa/data/models.dart';
+import 'package:atharxa/services/strava.dart';
 import 'package:atharxa/state/ai_controller.dart';
 import 'package:atharxa/state/sync_controller.dart';
 import 'package:atharxa/sync/discovery.dart';
@@ -56,6 +57,16 @@ class _FakeSync extends SyncController {
 }
 
 Future<void> seed(TestApp t) async {
+  for (var i = 0; i < 3; i++) {
+    await t.db.save('strava_activities', {
+      'id': 'strava-$i',
+      'type': i.isEven ? 'Run' : 'Ride',
+      'name': 'Early morning tempo run along the river with intervals #$i',
+      'start': DateTime.now().subtract(Duration(hours: i)).millisecondsSinceEpoch,
+      'distance_m': 123456.7,
+      'moving_time_s': 98765,
+    });
+  }
   final repo = FoodRepo(t.db);
   final today = DateTime.now();
   final day = dayKey(today), tomorrow = dayKey(today.add(const Duration(days: 1)));
@@ -96,6 +107,10 @@ Future<void> seed(TestApp t) async {
     'note': 'Concert tickets and dinner with the whole family at the new place',
   });
 }
+
+final _stravaConnected = const StravaAccount(clientId: '123456', clientSecret: 'x')
+    .copyWith(accessToken: 'a', refreshToken: 'r', expiresAt: 1, athlete: 'Harshal Deshpande the Long-Distance Runner')
+    .toJson();
 
 void main() {
   setUpAll(loadFonts);
@@ -183,7 +198,7 @@ void main() {
         setSize(tester, size);
         final t = (await tester.runAsync(
           () => buildTestApp(
-            prefs: {'text_scale': scale},
+            prefs: {'text_scale': scale, 'strava': _stravaConnected},
             overrides: [
               aiRuntimeProvider.overrideWithValue(FakeAiRuntime(installed: {'Qwen3.5-2B-Q4_K_M.gguf'})),
             ],
@@ -192,7 +207,15 @@ void main() {
         await tester.runAsync(() => seed(t));
         await tester.pumpWidget(t.app);
         await settle(tester);
-        for (final section in ['Goals', 'Appearance', 'Reminders', 'Body stats', 'Data and backup', 'AI models']) {
+        for (final section in [
+          'Goals',
+          'Appearance',
+          'Reminders',
+          'Body stats',
+          'Data and backup',
+          'AI models',
+          'About',
+        ]) {
           if (find.byType(NavigationRail).evaluate().isNotEmpty) {
             await goTo(tester, 'You');
           } else {
@@ -272,11 +295,13 @@ void main() {
         await step(tester);
         await tester.tap(find.text('Cancel'));
         await step(tester);
-        await tester.scrollUntilVisible(find.text('Start workout'), -300, scrollable: find.byType(Scrollable).first);
+        // Back to the top, where today's card is (not under the top bar).
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, 5000));
+        await step(tester);
         // Live session with the rest timer, then the complete screen.
         await tester.tap(find.text('Start workout'));
         await step(tester);
-        await step(tester);
+        await waitFor(tester, find.text('Complete set'));
         await tester.tap(find.text('Complete set'));
         await step(tester);
         await tester.drag(find.byType(Scrollable).last, const Offset(0, -600), warnIfMissed: false);

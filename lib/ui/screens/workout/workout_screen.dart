@@ -6,12 +6,13 @@ import '../../../data/models.dart';
 import '../../../data/workout_repo.dart';
 import '../../../state/core_providers.dart';
 import '../../../state/data_providers.dart';
+import '../../../state/strava_controller.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
-import '../../widgets/tag.dart';
 import '../assistant/assistant_screen.dart';
+import '../you/connected_services_page.dart';
 import 'plan_editor_screen.dart';
 import 'plan_sharing.dart';
 import 'session_screen.dart';
@@ -199,21 +200,7 @@ class WorkoutScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-            AppCard(
-              child: Row(
-                children: [
-                  const Icon(Icons.directions_run),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Runs and rides from Strava, and uploading workouts, arrive in a later update.',
-                      style: context.tt.bodySmall,
-                    ),
-                  ),
-                  const Tag('soon', small: true),
-                ],
-              ),
-            ),
+            _StravaCard(activities: d.strava),
           ],
         );
       },
@@ -347,6 +334,80 @@ class _TodayCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// "From Strava": this week's runs and rides (km), imported activities, or
+/// a prompt to connect (You › Connected services).
+class _StravaCard extends ConsumerWidget {
+  const _StravaCard({required this.activities});
+  final List<StravaActivity> activities;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strava = ref.watch(stravaProvider);
+    // At most once an hour, quietly.
+    WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(stravaProvider.notifier).importIfStale());
+    if (!strava.connected && activities.isEmpty) {
+      return AppCard(
+        onTap: () => ConnectedServicesPage.open(context),
+        child: Row(
+          children: [
+            const Icon(Icons.directions_run),
+            const SizedBox(width: 12),
+            Expanded(child: Text('Connect Strava to see your runs and rides here.', style: context.tt.bodyMedium)),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+      );
+    }
+    final runKm = activities.where((a) => a.isRun).fold(0.0, (t, a) => t + a.km);
+    final rideKm = activities.where((a) => a.isRide).fold(0.0, (t, a) => t + a.km);
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text('From Strava', style: context.tt.titleMedium)),
+              if (strava.busy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _Stat(label: 'Activities', value: '${activities.length}'),
+              _Stat(label: 'Run', value: '${runKm.toStringAsFixed(1)} km'),
+              _Stat(label: 'Ride', value: '${rideKm.toStringAsFixed(1)} km'),
+            ],
+          ),
+          if (activities.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('No activities this week yet.', style: context.tt.bodySmall),
+            ),
+          for (final a in activities)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                a.isRun
+                    ? Icons.directions_run
+                    : a.isRide
+                    ? Icons.directions_bike
+                    : Icons.fitness_center,
+              ),
+              title: Text(a.name),
+              subtitle: Text(
+                [
+                  DateFormat('EEE d MMM').format(a.start),
+                  if (a.km > 0) '${a.km.toStringAsFixed(1)} km',
+                  fmtDuration(a.moving),
+                ].join(' · '),
+              ),
+            ),
+        ],
       ),
     );
   }

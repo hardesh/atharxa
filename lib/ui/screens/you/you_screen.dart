@@ -5,13 +5,16 @@ import '../../../app_info.dart';
 import '../../../state/ai_controller.dart';
 import '../../../state/reminders_controller.dart';
 import '../../../state/settings_providers.dart';
+import '../../../state/strava_controller.dart';
 import '../../../state/sync_controller.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import 'about_page.dart';
 import 'ai_models_page.dart';
 import 'appearance_page.dart';
+import 'connected_services_page.dart';
 import 'body_stats_page.dart';
 import 'data_backup_page.dart';
 import 'device_sync_page.dart';
@@ -33,11 +36,11 @@ final youSections = <YouSection>[
   YouSection('appearance', 'Appearance', Icons.palette_outlined, (_) => const AppearancePage()),
   YouSection('reminders', 'Reminders', Icons.notifications_none, (_) => const RemindersPage()),
   YouSection('sync', 'Device sync', Icons.sync, (_) => const DeviceSyncPage()),
-  const YouSection('services', 'Connected services', Icons.link, null),
+  YouSection('services', 'Connected services', Icons.link, (_) => const ConnectedServicesPage()),
   YouSection('ai', 'AI models', Icons.auto_awesome_outlined, (_) => const AiModelsPage()),
   YouSection('body', 'Body stats', Icons.monitor_weight_outlined, (_) => const BodyStatsPage()),
   YouSection('data', 'Data and backup', Icons.backup_outlined, (_) => const DataBackupPage()),
-  const YouSection('about', 'About', Icons.info_outline, null),
+  YouSection('about', 'About', Icons.info_outline, (_) => const AboutPage()),
 ];
 
 /// One-line summaries under each hub row.
@@ -69,11 +72,14 @@ String? _summary(String id, WidgetRef ref) {
     case 'data':
       final last = ref.watch(deviceSettingsProvider.select((s) => s.lastBackupAt));
       return last == null ? 'Export or restore everything' : 'Last backup ${fmtWhen(last)}';
+    case 'services':
+      final strava = ref.watch(stravaProvider);
+      return strava.connected ? 'Strava · ${strava.account!.athlete ?? 'connected'}' : 'Strava, workout tips';
     case 'ai':
       final m = ref.watch(aiProvider.select((s) => s.active));
       return m == null ? 'Download a model for the assistant' : m.name;
     case 'about':
-      return AppInfo.name;
+      return '${AppInfo.name} ${AppInfo.version}';
     default:
       return 'Coming soon';
   }

@@ -6,6 +6,12 @@
 abstract final class AppInfo {
   static const name = 'Atharxa';
 
+  /// Keep equal to `version:` in pubspec.yaml (a test checks).
+  static const version = '1.0.0';
+
+  /// The app icon (About page). Its file name is one of the rename points.
+  static const iconAsset = 'assets/icon/atharxa-icon-1024.png';
+
   /// Shown on the AI button ("Ask Atharxa") and assistant screens.
   static const assistantName = name;
 

@@ -138,6 +138,7 @@ Future<AssistantContext> buildAssistantContext(
     final monday = t.subtract(Duration(days: t.weekday - 1));
     final sessions = await repo.sessionsBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6))));
     final plans = await repo.plans();
+    final strava = await repo.stravaBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6))));
     data['workouts'] = {
       'plans': [
         for (final p in plans)
@@ -157,6 +158,17 @@ Future<AssistantContext> buildAssistantContext(
             'volume_kg': _r(s.volume),
           },
       ],
+      if (strava.isNotEmpty)
+        'strava_this_week': [
+          for (final a in strava)
+            {
+              'day': dayKey(a.start),
+              'type': a.type,
+              'name': a.name,
+              if (a.km > 0) 'km': a.km.toStringAsFixed(1),
+              'minutes': a.moving.inMinutes,
+            },
+        ],
     };
     reads.add('Workouts this week');
   }

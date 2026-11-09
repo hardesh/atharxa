@@ -32,7 +32,13 @@ class BackgroundSync {
   }
 
   static Future<void> cancel() async {
-    if (!Platform.isAndroid || !_initialized) return;
+    if (!Platform.isAndroid) return;
+    // A job scheduled by an earlier run survives restarts: initialize so it
+    // can be cancelled.
+    if (!_initialized) {
+      await Workmanager().initialize(backgroundSyncDispatcher);
+      _initialized = true;
+    }
     await Workmanager().cancelByUniqueName(_uniqueName);
   }
 }

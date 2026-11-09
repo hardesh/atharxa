@@ -293,12 +293,18 @@ class SyncController extends Notifier<SyncState> {
       });
       _lifecycle = AppLifecycleListener(
         onResume: () {
+          _inBackground = false;
+          _schedulePeriodic();
           unawaited(scan(const Duration(seconds: 10)));
           _syncAll();
         },
         // Android pauses the app in the background; send pending edits first.
         onInactive: _flush,
-        onHide: _flush,
+        onHide: () {
+          _flush();
+          _inBackground = true;
+          _schedulePeriodic();
+        },
       );
       _netSub = Connectivity().onConnectivityChanged.listen((r) {
         final lan = r.contains(ConnectivityResult.wifi) || r.contains(ConnectivityResult.ethernet);
@@ -307,7 +313,13 @@ class SyncController extends Notifier<SyncState> {
         if (cameBack) _syncAll();
       });
       _schedulePeriodic();
-      await BackgroundSync.schedule();
+      // With "Keep syncing while locked" the app stays running, so the
+      // WorkManager job would only duplicate work.
+      if (Platform.isAndroid && state.whileLocked) {
+        await BackgroundSync.cancel();
+      } else {
+        await BackgroundSync.schedule();
+      }
       unawaited(Future.delayed(const Duration(seconds: 2), _syncAll));
     } else {
       await BackgroundSync.cancel();
@@ -338,10 +350,17 @@ class SyncController extends Notifier<SyncState> {
     _syncAll();
   }
 
+  /// Battery: the periodic sync is only a safety net (each device pushes its
+  /// own edits within seconds), so in the background it runs every 30 min
+  /// instead of the chosen 1/5/15.
+  static const backgroundIntervalMin = 30;
+  bool _inBackground = false;
+
   void _schedulePeriodic() {
     _periodic?.cancel();
     if (!state.enabled || !state.autoSync) return;
-    _periodic = Timer.periodic(Duration(minutes: state.intervalMin), (_) => _syncAll());
+    final minutes = _inBackground ? backgroundIntervalMin : state.intervalMin;
+    _periodic = Timer.periodic(Duration(minutes: minutes), (_) => _syncAll());
   }
 
   Future<void> _stop() async {

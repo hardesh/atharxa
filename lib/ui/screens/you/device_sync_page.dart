@@ -245,7 +245,10 @@ class _DeviceSyncPageState extends ConsumerState<DeviceSyncPage> {
               ),
               if (autoSync) ...[
                 const SizedBox(height: 4),
-                Text('Also every', style: context.tt.bodySmall),
+                Text(
+                  'Also every — while the app is open; every 30 min in the background to save battery',
+                  style: context.tt.bodySmall,
+                ),
                 const SizedBox(height: 6),
                 SegmentedButton<int>(
                   segments: const [

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app_info.dart';
 import '../../state/sync_controller.dart';
 import '../../state/settings_providers.dart';
+import '../screens/assistant/assistant_screen.dart';
 import '../theme/semantic.dart';
 import 'layout.dart';
 
@@ -60,7 +61,7 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
                         minimumSize: const Size(0, 44),
                         padding: const EdgeInsets.fromLTRB(14, 0, 18, 0),
                       ),
-                      onPressed: () => showAssistantComingSoon(context),
+                      onPressed: () => openAssistant(context),
                       icon: const Icon(Icons.auto_awesome, size: 20),
                       label: const Text('Ask ${AppInfo.assistantName}  ⌘K'),
                     )
@@ -74,7 +75,7 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
                           backgroundColor: cs.primary,
                           foregroundColor: cs.onPrimary,
                         ),
-                        onPressed: () => showAssistantComingSoon(context),
+                        onPressed: () => openAssistant(context),
                         icon: const Icon(Icons.auto_awesome, size: 22),
                       ),
                     ),
@@ -120,33 +121,4 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
     );
   }
-}
-
-/// Placeholder until the on-device assistant ships (Milestone 6).
-void showAssistantComingSoon(BuildContext context) {
-  showModalBottomSheet<void>(
-    context: context,
-    builder: (ctx) => Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.auto_awesome, color: ctx.cs.primary),
-              const SizedBox(width: 12),
-              Text('${AppInfo.assistantName} assistant', style: ctx.tt.titleLarge),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'The on-device assistant (Gemma 4, with Qwen as an option) is coming in a later version. '
-            'It will answer questions about your food, water, workouts and spending — entirely on this device.',
-            style: ctx.tt.bodyMedium,
-          ),
-        ],
-      ),
-    ),
-  );
 }

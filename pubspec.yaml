@@ -54,6 +54,10 @@ dependencies:
   archive: ^4.6.0
   webview_flutter: ^4.14.1
   file_selector: ^1.1.0
+  flutter_edge_ai: 2.6.0
+  flutter_edge_ai_litertlm: 1.20.0
+  flutter_edge_ai_llama: 0.1.0
+  llamadart_llama_cpp_flutter: 0.17.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -72,6 +76,16 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+# Build-hook settings for the on-device AI engines (DESIGN.md §7.6):
+# llamadart ships only llama.cpp (LiteRT-LM comes from flutter_edge_ai_litertlm),
+# and the LiteRT-LM build bundles the Google Tensor NPU dispatch (Pixel 10).
+hooks:
+  user_defines:
+    llamadart:
+      llamadart_native_runtimes: [llama_cpp]
+    flutter_edge_ai_litertlm:
+      google_tensor_npu: true
+
 flutter:
   uses-material-design: true
   assets:

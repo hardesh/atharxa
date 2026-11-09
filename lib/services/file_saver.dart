@@ -44,16 +44,23 @@ Future<String?> saveExportedFile(String fileName, Uint8List bytes) async {
 
 /// Lets the user pick a text file (system picker on Android and macOS) and
 /// returns its contents, or null if cancelled.
-Future<String?> openTextFile({List<String> extensions = const ['json', 'txt']}) async {
-  final file = await openFile(
-    acceptedTypeGroups: [
-      XTypeGroup(
-        label: 'Files',
-        extensions: extensions,
-        mimeTypes: const ['application/json', 'text/plain', 'application/octet-stream'],
-        uniformTypeIdentifiers: const ['public.json', 'public.plain-text'],
-      ),
-    ],
-  );
-  return file?.readAsString();
-}
+Future<String?> openTextFile({List<String> extensions = const ['json', 'txt']}) async => (await _pick(
+  extensions,
+  const ['application/json', 'text/plain'],
+  const ['public.json', 'public.plain-text'],
+))?.readAsString();
+
+/// Lets the user pick any file with one of [extensions] (e.g. a model file)
+/// and returns its path, or null if cancelled.
+Future<String?> pickFilePath(List<String> extensions) async => (await _pick(extensions, const [], const []))?.path;
+
+Future<XFile?> _pick(List<String> extensions, List<String> mimeTypes, List<String> utis) => openFile(
+  acceptedTypeGroups: [
+    XTypeGroup(
+      label: 'Files',
+      extensions: extensions,
+      mimeTypes: [...mimeTypes, 'application/octet-stream'],
+      uniformTypeIdentifiers: utis,
+    ),
+  ],
+);

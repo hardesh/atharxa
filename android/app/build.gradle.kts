@@ -21,10 +21,16 @@ android {
         applicationId = "com.harshal.atharxa"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // 30: on-device AI (LiteRT-LM .litertlm) fails to load below Android 11.
+        minSdk = 30
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // The on-device AI runtimes ship arm64 only (every supported phone).
+        ndk {
+            abiFilters.clear()
+            abiFilters += listOf("arm64-v8a")
+        }
     }
 
     buildTypes {

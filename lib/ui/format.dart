@@ -66,3 +66,6 @@ String fmtDuration(Duration d) {
   String two(int v) => v.toString().padLeft(2, '0');
   return h > 0 ? '$h:${two(m)}:${two(s)}' : '${two(m)}:${two(s)}';
 }
+
+/// "2.6 GB", "534 MB" (decimal units, as downloads and stores show them).
+String fmtSize(int bytes) => bytes >= 1e9 ? '${_one.format(bytes / 1e9)} GB' : '${_int.format(bytes / 1e6)} MB';

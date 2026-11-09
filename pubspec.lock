@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
+  background_downloader:
+    dependency: transitive
+    description:
+      name: background_downloader
+      sha256: "7c5c1d65a9778282229bfc90f41536074bd4921c775608b260a5b6bf129513e3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.6.6"
   bonsoir:
     dependency: "direct main"
     description:
@@ -201,6 +209,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.0"
+  decimal:
+    dependency: transitive
+    description:
+      name: decimal
+      sha256: "2c3c8b74f2948066d3f42585477aec9cfc48fefd7a723a4d4274a6c71a5c0df7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.6"
+  dinja:
+    dependency: transitive
+    description:
+      name: dinja
+      sha256: a3addbe07ebb562c062256f7c644ac498ab2ab3d97a85d9f95aafac7f53fa808
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.2"
+  email_validator:
+    dependency: transitive
+    description:
+      name: email_validator
+      sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   equatable:
     dependency: transitive
     description:
@@ -310,6 +342,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_edge_ai:
+    dependency: "direct main"
+    description:
+      name: flutter_edge_ai
+      sha256: "6718574603a0f9afbc14603fa17335a814756079bd4c3220fbbc96277161cdd6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
+  flutter_edge_ai_litertlm:
+    dependency: "direct main"
+    description:
+      name: flutter_edge_ai_litertlm
+      sha256: acbfa36080e54baf729b15ebb34a74f00f4f1b2d43b61416d80ef82d6121ca3b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.20.0"
+  flutter_edge_ai_llama:
+    dependency: "direct main"
+    description:
+      name: flutter_edge_ai_llama
+      sha256: "3d19a9e815cbd4a1234603925f5a66adc99407fd8ec0afd535bfa1682239c923"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -397,6 +453,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  genai_primitives:
+    dependency: transitive
+    description:
+      name: genai_primitives
+      sha256: "5a1e8c7ae9caf01aa609f59c54de47b73f51bf1ae95e0f679b7c7ab6948c4d9d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
   glob:
     dependency: transitive
     description:
@@ -477,6 +541,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.12.0"
+  json_schema_builder:
+    dependency: transitive
+    description:
+      name: json_schema_builder
+      sha256: "657db3229ba10305c48e8686e8b3aca16e12e639c3a7b96687a6eeb7836b6e1b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.7"
+  large_file_handler:
+    dependency: transitive
+    description:
+      name: large_file_handler
+      sha256: "44bdb88d9d6803177ce0feb0ad3bab22ed1d328895284a59095b859b2672a305"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.2"
   leak_tracker:
     dependency: transitive
     description:
@@ -517,6 +597,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  llamadart:
+    dependency: transitive
+    description:
+      name: llamadart
+      sha256: "62d8a9081579c2dc176dc509502edb8fc5714be3797a49230a3738d64bfe48ca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.5"
+  llamadart_llama_cpp_flutter:
+    dependency: "direct main"
+    description:
+      name: llamadart_llama_cpp_flutter
+      sha256: "06bbe4302688c51d8bec1eb6bba4b9a7f5c37c766bef9933938a4d99cd5649bf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.3"
   logging:
     dependency: transitive
     description:
@@ -557,6 +653,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.0"
+  mime:
+    dependency: transitive
+    description:
+      name: mime
+      sha256: bd47de35f07e27267e69c8c8b22edf9473bfee170a60d60fcc93730c5144b7f6
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
+  mutex:
+    dependency: transitive
+    description:
+      name: mutex
+      sha256: "8827da25de792088eb33e572115a5eb0d61d61a3c01acbc8bcbe76ed78f1a1f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -709,6 +821,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  rational:
+    dependency: transitive
+    description:
+      name: rational
+      sha256: cb808fb6f1a839e6fc5f7d8cb3b0a10e1db48b3be102de73938c627f0b636336
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
   record_use:
     dependency: transitive
     description:

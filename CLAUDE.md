@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Personal offline-first app (current name: **Atharxa**) for Android phones and macOS, built with Flutter (Material 3).
-It covers calories, meal plan, water, workouts and finance, with peer-to-peer Wi-Fi sync and a planned on-device AI assistant.
+It covers calories, meal plan, water, workouts and finance, with peer-to-peer Wi-Fi sync and an on-device AI assistant.
 
 ## Design source of truth
 - **`docs/design/DESIGN.md`** is the spec for behaviour, numbers, tokens and layout. Read the relevant section before building or changing a screen.
@@ -70,6 +70,13 @@ The app's name may change, so **don't build the product name into code identifie
   - `peers.dart`: per-device prefs.
   - `background_sync.dart`: an Android workmanager task every 15 minutes.
   - Edits made on the device itself (`AppDb.localChanges`) trigger auto-sync. Rows merged from a peer don't, and rows last edited by a peer are never sent back to it.
+- **On-device AI** (`lib/ai/`, DESIGN.md §7.6), through `flutter_edge_ai` (pinned exact versions):
+  - Two engines: LiteRT-LM (`flutter_edge_ai_litertlm`, `.litertlm`: GPU, and the Tensor G5 NPU build) for Gemma 4, and llama.cpp (`flutter_edge_ai_llama` → llamadart, `.gguf`: CPU on phones, Metal on the Mac) for Qwen3.5 and Gemma 4 12B.
+  - `ai_runtime.dart` is the **only** file that imports the AI packages (`AiRuntime` interface, `EdgeAiRuntime`); tests use a fake.
+  - `ai_models.dart`: the catalog (each file pinned to a Hugging Face commit with size and SHA-256) and the "fits this device" rules. Downloads are checked against the SHA-256 after downloading.
+  - `device_info.dart`: RAM, chip and free space from system tools (`/proc/meminfo`, `getprop`, `sysctl`, `df`).
+  - `lib/state/ai_controller.dart` (`aiProvider`, kept alive so downloads continue) and `assistant_controller.dart` (auto-dispose chat). A model loads only while the assistant is open and is freed a minute after it closes.
+  - Build setup: `hooks: user_defines` in `pubspec.yaml` (llama.cpp only from llamadart; Tensor NPU dispatch on), Android `minSdk 30` and arm64 only, macOS 14. The engines' native files come from GitHub releases at build time; if GitHub keeps returning 5xx, the LiteRT-LM archives can be downloaded by hand, checked against the checksums in the package's `hook/build.dart`, and extracted to `~/Library/Caches/flutter_gemma/native/<platform>/`.
 - **UI**:
   - `lib/ui/shell.dart` is the responsive shell: `NavigationBar` under 600 dp, `NavigationRail` (with You) at 600 dp and up.
   - The theme is in `lib/ui/theme/`. Colour schemes are explicit, from DESIGN.md §3.1 (never `fromSeed`). Semantic colours are a `ThemeExtension` (`context.sem`).

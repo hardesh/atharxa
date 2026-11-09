@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/food_repo.dart';
 import '../state/reminders_controller.dart';
+import 'screens/assistant/assistant_screen.dart';
 import 'screens/finance/finance_screen.dart';
 import 'screens/food/food_picker_screen.dart';
 
@@ -145,8 +146,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     final shortcuts = CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () => showAssistantComingSoon(context),
-        const SingleActivator(LogicalKeyboardKey.keyK, control: true): () => showAssistantComingSoon(context),
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () => openAssistant(context),
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true): () => openAssistant(context),
       },
       child: Focus(autofocus: true, child: page),
     );

@@ -4,6 +4,7 @@ import 'package:atharxa/data/finance_repo.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/workout_repo.dart';
 import 'package:atharxa/data/models.dart';
+import 'package:atharxa/state/ai_controller.dart';
 import 'package:atharxa/state/sync_controller.dart';
 import 'package:atharxa/sync/discovery.dart';
 import 'package:atharxa/sync/peers.dart';
@@ -19,6 +20,7 @@ import 'package:intl/intl.dart';
 import '../finance_test.dart' show seedNovember;
 import '../nutrition_test.dart' as sample;
 import '../workout_test.dart' show seedLowerBodyA;
+import 'assistant_test.dart' show FakeAiRuntime;
 import 'render_helpers.dart';
 
 /// Opens every screen and dialog at phone widths × text sizes. Any RenderFlex
@@ -143,6 +145,24 @@ void main() {
         await step(tester);
       });
 
+      testWidgets('assistant chat · $label', (tester) async {
+        setSize(tester, size);
+        final rt = FakeAiRuntime(
+          installed: {'gemma-4-E2B-it_Google_Tensor_G5.litertlm'},
+          reply: List.filled(40, 'protein ').join(),
+        );
+        final t = (await tester.runAsync(
+          () => buildTestApp(prefs: {'text_scale': scale}, overrides: [aiRuntimeProvider.overrideWithValue(rt)]),
+        ))!;
+        await tester.pumpWidget(t.app);
+        await settle(tester);
+        await tester.tap(find.bySemanticsLabel(RegExp('Ask ')).first);
+        await step(tester);
+        await tester.enterText(find.byType(TextField), List.filled(30, 'long question').join(' '));
+        await tester.testTextInput.receiveAction(TextInputAction.send);
+        await step(tester);
+      });
+
       testWidgets('water edit dialog + overview sheet · $label', (tester) async {
         setSize(tester, size);
         final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': scale})))!;
@@ -157,11 +177,18 @@ void main() {
 
       testWidgets('You › Goals, Appearance, Reminders, Body stats · $label', (tester) async {
         setSize(tester, size);
-        final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': scale})))!;
+        final t = (await tester.runAsync(
+          () => buildTestApp(
+            prefs: {'text_scale': scale},
+            overrides: [
+              aiRuntimeProvider.overrideWithValue(FakeAiRuntime(installed: {'Qwen3.5-2B-Q4_K_M.gguf'})),
+            ],
+          ),
+        ))!;
         await tester.runAsync(() => seed(t));
         await tester.pumpWidget(t.app);
         await settle(tester);
-        for (final section in ['Goals', 'Appearance', 'Reminders', 'Body stats', 'Data and backup']) {
+        for (final section in ['Goals', 'Appearance', 'Reminders', 'Body stats', 'Data and backup', 'AI models']) {
           if (find.byType(NavigationRail).evaluate().isNotEmpty) {
             await goTo(tester, 'You');
           } else {

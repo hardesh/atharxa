@@ -17,6 +17,8 @@ abstract final class DeviceKeys {
   static const reminders = 'reminders';
   static const menuBar = 'desktop_menu_bar';
   static const lastBackupAt = 'last_backup_at';
+  static const aiModel = 'ai_model';
+  static const aiWifiOnly = 'ai_wifi_only';
 
   /// The ones a backup carries (sync config and first run stay with the device).
   static const backedUp = [reminders, themeMode, textScale, menuBar];

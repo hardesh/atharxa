@@ -73,7 +73,8 @@ class DesktopController extends Notifier<DesktopState> {
   void _setUpWindow() {
     final w = _window = WindowManager.instance.getCurrent();
     if (w == null) return;
-    w.titleBarStyle = TitleBarStyle.hidden;
+    // The title bar blends in via MainMenu.xib (transparent, full-size
+    // content) so the window buttons stay; nativeapi's hidden style drops them.
     w.minimumSize = const Size(900, 640).toNative();
     w.addListener((e) {
       // Keep running in the background while sync is on.
@@ -83,6 +84,9 @@ class DesktopController extends Notifier<DesktopState> {
       }
     });
     Application.instance.addListener((e) {
+      // ⌘Q, Dock › Quit: nativeapi holds the quit until the app answers, so
+      // quit here, as the menu bar item does.
+      if (e is ApplicationQuitRequestedEvent) exit(0);
       if (e is ApplicationActivatedEvent && !w.isVisible) showWindow();
     });
   }

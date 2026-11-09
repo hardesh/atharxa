@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/finance_repo.dart';
 import '../data/food_repo.dart';
 import '../data/models.dart';
 import '../data/water_repo.dart';
@@ -40,6 +41,31 @@ final waterWeekProvider = FutureProvider.family<Map<String, int>, String>((ref, 
   );
   return {for (final r in rows) r['day'] as String: (r['ml'] as num).toInt()};
 });
+
+/// Transactions of a month ("2026-11").
+final financeMonthProvider = FutureProvider.family<List<Tx>, String>((ref, yyyyMm) {
+  ref.watchTables(const [FinanceRepo.table]);
+  return FinanceRepo(ref.watch(dbProvider)).month(yyyyMm);
+});
+
+/// Category names for income or expenses (defaults, then custom).
+final categoriesProvider = FutureProvider.family<List<String>, TxKind>((ref, kind) {
+  ref.watchTables(const ['categories']);
+  return FinanceRepo(ref.watch(dbProvider)).categories(kind);
+});
+
+/// The month shown on Finance (shared with the shell's Add/Export actions).
+final financeMonthSelectedProvider = NotifierProvider<FinanceMonth, DateTime>(FinanceMonth.new);
+
+class FinanceMonth extends Notifier<DateTime> {
+  @override
+  DateTime build() {
+    final n = DateTime.now();
+    return DateTime(n.year, n.month);
+  }
+
+  void select(DateTime m) => state = DateTime(m.year, m.month);
+}
 
 /// Renders an [AsyncValue]: previous data stays on screen while reloading;
 /// a spinner shows only on first load.

@@ -54,7 +54,7 @@ class AppTopBar extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                   ...actions,
                   const SizedBox(width: 6),
-                  if (wide)
+                  if (context.isRoomy)
                     FilledButton.icon(
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 44),

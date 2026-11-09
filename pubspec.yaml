@@ -51,6 +51,7 @@ dependencies:
   workmanager: ^0.10.10
   connectivity_plus: ^7.3.2
   nativeapi_flutter: ^0.5.10
+  archive: ^4.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

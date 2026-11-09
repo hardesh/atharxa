@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../format.dart';
 import '../theme/semantic.dart';
@@ -76,10 +75,11 @@ class MonthSwitcher extends StatelessWidget {
             onPressed: () => onChanged(DateTime(month.year, month.month - 1)),
           ),
           Flexible(
+            flex: 4,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                DateFormat('MMMM yyyy').format(month),
+                fmtMonth(month),
                 style: context.tt.titleMedium?.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             ),
@@ -89,7 +89,7 @@ class MonthSwitcher extends StatelessWidget {
             icon: const Icon(Icons.chevron_right),
             onPressed: () => onChanged(DateTime(month.year, month.month + 1)),
           ),
-          const Spacer(),
+          const Spacer(flex: 1),
           ?trailing,
         ],
       ),

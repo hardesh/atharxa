@@ -8,6 +8,9 @@ const contentMaxWidth = 760.0;
 
 extension LayoutContext on BuildContext {
   bool get isWide => MediaQuery.sizeOf(this).width >= wideBreakpoint;
+
+  /// Room for labelled header buttons (Mac window, large tablets).
+  bool get isRoomy => MediaQuery.sizeOf(this).width >= 900;
   double get screenPad => isWide ? 32 : 16;
   double get cardGap => isWide ? 16 : 12;
 }

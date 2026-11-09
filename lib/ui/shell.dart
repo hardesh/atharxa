@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/food_repo.dart';
 import '../state/reminders_controller.dart';
+import 'screens/finance/finance_screen.dart';
 import 'screens/food/food_picker_screen.dart';
 
 import 'screens/meal_plan_screen.dart';
@@ -30,7 +31,7 @@ class Destination {
   final IconData icon, selectedIcon;
   final WidgetBuilder build;
   final Widget Function(BuildContext context)? fab;
-  final List<Widget> Function(BuildContext context)? actions;
+  final List<Widget> Function(BuildContext context, WidgetRef ref)? actions;
   final bool fullWidthHeader;
 }
 
@@ -88,7 +89,9 @@ class _AppShellState extends ConsumerState<AppShell> {
       label: 'Finance',
       icon: Icons.account_balance_wallet_outlined,
       selectedIcon: Icons.account_balance_wallet,
-      build: (_) => const PlaceholderPage('Finance'),
+      build: (_) => const FinanceScreen(),
+      fab: FinanceScreen.fab,
+      actions: FinanceScreen.actions,
     ),
   ];
 
@@ -126,10 +129,11 @@ class _AppShellState extends ConsumerState<AppShell> {
       appBar: AppTopBar(
         title: d.label,
         onOpenYou: _openYou,
-        actions: d.actions?.call(context) ?? const [],
+        actions: d.actions?.call(context, ref) ?? const [],
         fullWidth: d.fullWidthHeader,
       ),
-      floatingActionButton: d.fab?.call(context),
+      // Wide layouts put primary actions in the header instead of a FAB.
+      floatingActionButton: wide ? null : d.fab?.call(context),
       body: IndexedStack(
         index: index,
         children: [for (final x in dests) Builder(builder: x.build)],

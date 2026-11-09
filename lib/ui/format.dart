@@ -56,3 +56,6 @@ String fmtWhen(DateTime t) {
   };
   return '$day, ${fmtTime(t)}';
 }
+
+/// "November 2026".
+String fmtMonth(DateTime d) => DateFormat('MMMM yyyy').format(d);

@@ -1,12 +1,19 @@
+import 'dart:async';
+
+import 'package:atharxa/data/finance_repo.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:atharxa/state/sync_controller.dart';
 import 'package:atharxa/sync/discovery.dart';
 import 'package:atharxa/sync/peers.dart';
+import 'package:atharxa/ui/screens/finance/finance_screen.dart';
+import 'package:atharxa/ui/screens/finance/transaction_sheet.dart';
 import 'package:atharxa/ui/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
+import '../finance_test.dart' show seedNovember;
 import '../nutrition_test.dart' as sample;
 import 'render_helpers.dart';
 
@@ -71,6 +78,16 @@ Future<void> seed(TestApp t) async {
     });
   }
   await t.db.setPref('profile_name', 'Harshal Deshpande with a rather long display name');
+  await seedNovember(t.db);
+  // A month with long names and a big amount in the current month too.
+  await t.db.save('transactions', {
+    'day': dayKey(today),
+    'kind': 'expense',
+    'amount_minor': 123456789,
+    'currency': 'INR',
+    'category': 'Entertainment',
+    'note': 'Concert tickets and dinner with the whole family at the new place',
+  });
 }
 
 void main() {
@@ -158,6 +175,39 @@ void main() {
             await step(tester);
           }
         }
+      });
+
+      testWidgets('finance sheets · $label', (tester) async {
+        setSize(tester, size);
+        final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': scale})))!;
+        await tester.runAsync(() => seed(t));
+        await tester.pumpWidget(t.app);
+        await settle(tester);
+        await goTo(tester, 'Finance');
+        await step(tester);
+        // Transaction sheet (via the row) and the export sheet.
+        // Open the edit sheet for the long transaction (same call the row's tap makes).
+        final tx = (await tester.runAsync(
+          () => FinanceRepo(t.db).month(DateFormat('yyyy-MM').format(DateTime.now())),
+        ))!.firstWhere((x) => (x.note ?? '').startsWith('Concert'));
+        unawaited(showTransactionSheet(tester.element(find.byType(FinanceScreen)), existing: tx));
+        await step(tester);
+        await tester.drag(find.byType(SingleChildScrollView).last, const Offset(0, -600), warnIfMissed: false);
+        await step(tester);
+        tester.state<NavigatorState>(find.byType(Navigator).first).pop(); // close the sheet
+        await step(tester);
+        if (find.text('Export').evaluate().isNotEmpty) {
+          await tester.tap(find.text('Export'));
+        } else if (find.byTooltip('Export').evaluate().isNotEmpty) {
+          await tester.tap(find.byTooltip('Export'));
+        } else {
+          await tester.tap(find.byTooltip('More'));
+          await step(tester);
+          await tester.tap(find.text('Export transactions'));
+        }
+        await step(tester);
+        await tester.drag(find.byType(SingleChildScrollView).last, const Offset(0, -600), warnIfMissed: false);
+        await step(tester);
       });
 
       testWidgets('You hub + device sync · $label', (tester) async {

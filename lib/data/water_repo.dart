@@ -1,5 +1,6 @@
 import 'db.dart';
 import 'models.dart';
+import '../app_clock.dart';
 
 /// Water entries. `source`: today | water | notification | mac.
 class WaterRepo {
@@ -18,7 +19,7 @@ class WaterRepo {
 
   /// Adds [ml] on [date]. The time is now if [date] is today, otherwise noon of that day.
   Future<String> add(DateTime date, int ml, String source) {
-    final now = DateTime.now();
+    final now = AppClock.now();
     final sameDay = date.year == now.year && date.month == now.month && date.day == now.day;
     final at = sameDay ? now : DateTime(date.year, date.month, date.day, 12);
     return db.save(table, {'day': dayKey(date), 'ml': ml, 'logged_at': at.millisecondsSinceEpoch, 'source': source});

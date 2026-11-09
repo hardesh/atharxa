@@ -13,6 +13,7 @@ import '../widgets/water_entries.dart';
 import '../widgets/feedback.dart';
 import '../widgets/layout.dart';
 import '../widgets/switchers.dart';
+import '../../app_clock.dart';
 
 /// Water (DESIGN.md §5, Water.dc.html): ring, quick-add +250/+500/+750/Custom,
 /// last-7-days chart with a goal line, and the day's entries with their source.
@@ -268,7 +269,7 @@ class _EntriesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isToday = DateUtils.isSameDay(date, DateTime.now());
+    final isToday = DateUtils.isSameDay(date, AppClock.now());
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),

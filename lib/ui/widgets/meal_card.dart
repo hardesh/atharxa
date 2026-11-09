@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
+import '../../app_clock.dart';
 
 /// Meal card (DESIGN.md §4): name + kcal subtotal + tonal "+"; rows
 /// "Rolled oats · 60 g" with the nutrient line; tap = edit grams; ✕ = remove.
@@ -146,7 +147,7 @@ class MealGrid extends StatelessWidget {
 
 /// Meal suggested by the time of day (⌘N, notifications).
 Meal mealForNow([DateTime? now]) {
-  final h = (now ?? DateTime.now()).hour;
+  final h = (now ?? AppClock.now()).hour;
   if (h < 11) return Meal.breakfast;
   if (h < 16) return Meal.lunch;
   if (h < 19) return Meal.snacks;

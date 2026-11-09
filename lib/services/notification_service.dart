@@ -15,6 +15,7 @@ import '../data/models.dart';
 import '../data/water_repo.dart';
 import '../state/settings_providers.dart';
 import 'reminder_plan.dart';
+import '../app_clock.dart';
 
 /// Local notifications: reminders (DESIGN.md §5 Notifications, §7.3) and the
 /// Android foreground service that keeps Wi-Fi sync alive while locked.
@@ -275,7 +276,7 @@ Future<void> handleReminderAction(
   final d = db ?? await AppDb.open(separateConnection: true);
   try {
     final goals = (await SyncedSettings.load(d)).goals;
-    final today = DateTime.now();
+    final today = AppClock.now();
     if (r.actionId == NotificationService._actWater) {
       final water = WaterRepo(d);
       await water.add(today, 250, 'notification');

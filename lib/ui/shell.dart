@@ -16,6 +16,7 @@ import 'screens/you/you_screen.dart';
 import 'widgets/layout.dart';
 import 'widgets/model_download_banner.dart';
 import 'widgets/top_bar.dart';
+import '../app_clock.dart';
 
 /// One main destination. [build] returns the page body (below the top bar).
 class Destination {
@@ -56,7 +57,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       if (meal == null) return;
       ref.read(pendingMealProvider.notifier).request(null);
       setState(() => _index = 0);
-      FoodPickerScreen.open(context, table: FoodRepo.logs, date: DateTime.now(), meal: meal);
+      FoodPickerScreen.open(context, table: FoodRepo.logs, date: AppClock.now(), meal: meal);
     }, fireImmediately: true);
   }
 

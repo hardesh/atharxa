@@ -8,6 +8,7 @@ import '../../state/data_providers.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
 import 'feedback.dart';
+import '../../app_clock.dart';
 
 /// Where an entry was added: label + icon. Stored keys stay stable ('today' = the Overview card).
 const _sources = {
@@ -50,7 +51,7 @@ Future<void> editWaterEntry(BuildContext context, Map<String, Object?> r) async 
 }
 
 class _EditResult {
-  _EditResult({this.ml = 0, DateTime? at, this.delete = false}) : at = at ?? DateTime.now();
+  _EditResult({this.ml = 0, DateTime? at, this.delete = false}) : at = at ?? AppClock.now();
   final int ml;
   final DateTime at;
   final bool delete;

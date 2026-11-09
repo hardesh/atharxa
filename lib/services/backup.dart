@@ -7,6 +7,7 @@ import '../app_info.dart';
 import '../data/db.dart';
 import '../data/models.dart';
 import '../state/core_providers.dart';
+import '../app_clock.dart';
 
 /// Full backup of this device's data (You › Data and backup).
 ///
@@ -31,7 +32,7 @@ abstract final class Backup {
           'format': format,
           'version': version,
           'app': AppInfo.name,
-          'createdAt': DateTime.now().toIso8601String(),
+          'createdAt': AppClock.now().toIso8601String(),
           'device': deviceName,
           'tables': tables,
           'deviceSettings': {for (final k in DeviceKeys.backedUp) k: ?prefs.get(k)},

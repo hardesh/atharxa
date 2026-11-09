@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/db.dart';
 import 'package:atharxa/data/exercise_tips.dart';
 import 'package:atharxa/data/models.dart';
@@ -13,7 +14,7 @@ Future<WorkoutPlan> seedLowerBodyA(AppDb db, {Set<int>? days}) async {
   final repo = WorkoutRepo(db);
   await repo.savePlan(
     name: 'Lower body A',
-    days: days ?? {DateTime.now().weekday},
+    days: days ?? {AppClock.now().weekday},
     exercises: [
       {'name': 'Goblet squat', 'sets': 3, 'reps': 10, 'kg': 16.0, 'rest_s': 90},
       {'name': 'Romanian deadlift', 'sets': 3, 'reps': 10, 'kg': 30.0, 'rest_s': 90},
@@ -62,7 +63,7 @@ void main() {
     expect(s.sets.length, 3);
     expect(s.volume, 10 * 16 + 8 * 18.0);
     expect(s.finished, isFalse);
-    final today = dayKey(DateTime.now());
+    final today = dayKey(AppClock.now());
     await repo.finishSession(s, feel: 'good', notes: ' ', kcal: 260, addKcalToToday: false);
     expect(await repo.kcalAddedOn(today), 0);
     await repo.finishSession((await repo.session(id))!, feel: 'good', notes: null, kcal: 260, addKcalToToday: true);

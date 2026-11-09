@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,9 +20,9 @@ void main() {
     await tester.runAsync(() async {
       final phone = await openTestDb();
       await phone.save('water_logs', {
-        'day': dayKey(DateTime.now()),
+        'day': dayKey(AppClock.now()),
         'ml': 250,
-        'logged_at': DateTime.now().millisecondsSinceEpoch,
+        'logged_at': AppClock.now().millisecondsSinceEpoch,
         'source': 'today',
       });
       await t.db.merge((await phone.changesPage(0)).rows.where((r) => r.table == 'water_logs'));

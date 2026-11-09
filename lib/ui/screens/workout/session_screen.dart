@@ -15,6 +15,7 @@ import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 import '../../widgets/youtube_video.dart';
+import '../../../app_clock.dart';
 
 /// Live workout (WorkoutSession.dc.html): timer, exercise n of m, set k of n,
 /// reps/kg steppers, Complete set (auto rest timer), set chips, form tips,
@@ -191,7 +192,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              fmtDuration(DateTime.now().difference(_session!.startedAt)),
+              fmtDuration(AppClock.now().difference(_session!.startedAt)),
               style: context.tt.displaySmall?.copyWith(color: context.cs.primary),
             ),
             const SizedBox(width: 12),
@@ -370,7 +371,7 @@ class _CompleteScreenState extends ConsumerState<CompleteScreen> {
   /// Starts from the Connected services default; only when connected.
   late bool _upload = ref.read(stravaProvider).account?.uploadByDefault ?? false;
   final _notes = TextEditingController();
-  late final DateTime _end = DateTime.now();
+  late final DateTime _end = AppClock.now();
 
   @override
   void dispose() {

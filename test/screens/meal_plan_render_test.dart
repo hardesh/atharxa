@@ -1,3 +1,4 @@
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'render_helpers.dart';
 void main() {
   setUpAll(loadFonts);
 
-  final tomorrow = dayKey(DateTime.now().add(const Duration(days: 1)));
+  final tomorrow = dayKey(AppClock.now().add(const Duration(days: 1)));
 
   Future<void> seed(TestApp t) async {
     final repo = FoodRepo(t.db);

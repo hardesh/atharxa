@@ -7,6 +7,7 @@ import '../../../state/settings_providers.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import '../../../app_clock.dart';
 
 /// You › Body stats (synced): used by Goals › "Suggest from body stats".
 class BodyStatsPage extends ConsumerStatefulWidget {
@@ -70,7 +71,7 @@ class _BodyStatsPageState extends ConsumerState<BodyStatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final year = DateTime.now().year;
+    final year = AppClock.now().year;
     final decimal = [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))];
     return Form(
       key: _form,

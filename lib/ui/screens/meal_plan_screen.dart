@@ -16,6 +16,7 @@ import '../widgets/layout.dart';
 import '../widgets/switchers.dart';
 import 'food/food_picker_screen.dart';
 import 'food/portion_dialog.dart';
+import '../../app_clock.dart';
 
 /// Meal plan (DESIGN.md §5, MealPlan.dc.html). Defaults to tomorrow.
 /// Phone rows are stacked (name + grams, then the nutrient line) with
@@ -28,7 +29,7 @@ class MealPlanScreen extends ConsumerStatefulWidget {
 }
 
 class _MealPlanScreenState extends ConsumerState<MealPlanScreen> {
-  DateTime _date = DateTime.now().add(const Duration(days: 1));
+  DateTime _date = AppClock.now().add(const Duration(days: 1));
   String get _day => dayKey(_date);
 
   FoodRepo get _repo => FoodRepo(ref.read(dbProvider));

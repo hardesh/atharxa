@@ -8,6 +8,7 @@ import '../data/db.dart';
 import '../data/models.dart';
 import '../ui/theme/palettes.dart';
 import 'core_providers.dart';
+import '../app_clock.dart';
 
 // ----------------------------------------------------------------- synced
 
@@ -183,7 +184,7 @@ class SelectedDayNotifier extends Notifier<DateTime> {
   bool _followToday = true;
 
   static DateTime today() {
-    final n = DateTime.now();
+    final n = AppClock.now();
     return DateTime(n.year, n.month, n.day);
   }
 

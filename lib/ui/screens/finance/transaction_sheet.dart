@@ -12,6 +12,7 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import 'currency_picker.dart';
+import '../../../app_clock.dart';
 
 /// Add or edit a transaction (DESIGN.md §5 Finance): Expense/Income, amount
 /// + currency, category chips (+ custom), date, note. Saving shows Undo.
@@ -34,7 +35,7 @@ class _TransactionSheetState extends ConsumerState<_TransactionSheet> {
   late TxKind _kind = widget.existing?.kind ?? TxKind.expense;
   late String _currency = widget.existing?.currency ?? ref.read(syncedSettingsProvider).currency;
   late String? _category = widget.existing?.category;
-  late DateTime _date = widget.existing == null ? (widget.day ?? DateTime.now()) : parseDay(widget.existing!.day);
+  late DateTime _date = widget.existing == null ? (widget.day ?? AppClock.now()) : parseDay(widget.existing!.day);
   final _amount = TextEditingController();
   final _note = TextEditingController();
 

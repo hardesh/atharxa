@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/ui/widgets/top_bar.dart';
 
 import 'render_helpers.dart';
@@ -24,7 +25,7 @@ void main() {
     await openSection(tester, 'Body stats');
     await tester.enterText(find.widgetWithText(TextFormField, 'Height'), '178');
     await tester.enterText(find.widgetWithText(TextFormField, 'Weight'), '75');
-    await tester.enterText(find.widgetWithText(TextFormField, 'Birth year'), '${DateTime.now().year - 30}');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Birth year'), '${AppClock.now().year - 30}');
     await tester.tap(find.text('Male'));
     await tester.scrollUntilVisible(find.text('Moderate'), 200, scrollable: find.byType(Scrollable).last);
     await tester.tap(find.text('Moderate'));

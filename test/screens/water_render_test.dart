@@ -1,3 +1,4 @@
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +9,7 @@ void main() {
   setUpAll(loadFonts);
 
   Future<void> seed(TestApp t) async {
-    final now = DateTime.now();
+    final now = AppClock.now();
     final today = DateTime(now.year, now.month, now.day);
     final past = [3100, 2400, 3000, 1800, 3200, 3050];
     for (var i = 0; i < past.length; i++) {

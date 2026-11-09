@@ -92,6 +92,7 @@ The app's name may change, so **don't build the product name into code identifie
 - **Work one feature at a time. Don't push or open PRs until the user asks.** Never merge without being asked.
 - **For now, keep all work on the current branch (`feat/sync`).** Don't create new branches until the user asks.
 - Before committing: `dart format lib test` (page width 120), then `flutter analyze` (must be clean) and `flutter test`.
+- **Time:** use `AppClock.now()` (`lib/app_clock.dart`) for anything the user sees (today, this week, meal times). Only sync/database bookkeeping, signed requests and Strava token expiry use `DateTime.now()`. `test/flutter_test_config.dart` starts every test at Mon 9 Nov 2026, 12:30, so screenshots don't depend on the day the suite runs.
 - Render tests in `test/screens/` produce PNGs in `test/screens/goldens/` at phone size (412 dp, 130 % text) and Mac size (1200 px). Refresh them with `flutter test --update-goldens test/screens` and compare against the boards.
 - Use the latest stable versions of packages and tools.
 - Running the app: `flutter run -d macos`, and on the Pixel `flutter run -d <id>` (`adb` is at `~/Library/Android/sdk/platform-tools`).

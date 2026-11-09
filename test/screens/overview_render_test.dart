@@ -1,3 +1,4 @@
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ void main() {
 
   Future<void> seed(TestApp t) async {
     final repo = FoodRepo(t.db);
-    final day = dayKey(DateTime.now());
+    final day = dayKey(AppClock.now());
     Future<void> add(Meal m, FoodItem f, double g) async =>
         repo.add(FoodRepo.logs, day: day, meal: m, food: await repo.cache(f), grams: g);
     await add(Meal.breakfast, sample.oats, 60);

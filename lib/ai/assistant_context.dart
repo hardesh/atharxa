@@ -9,6 +9,7 @@ import '../data/food_repo.dart';
 import '../data/models.dart';
 import '../data/water_repo.dart';
 import '../data/workout_repo.dart';
+import '../app_clock.dart';
 
 /// What the assistant may read (DESIGN.md §7.6), chosen per device on
 /// You › AI models. Transaction notes are off by default.
@@ -60,7 +61,7 @@ Future<AssistantContext> buildAssistantContext(
   required String currency,
   DateTime? now,
 }) async {
-  final t = now ?? DateTime.now();
+  final t = now ?? AppClock.now();
   final today = dayKey(t);
   final data = <String, Object?>{'now': DateFormat('EEE d MMM yyyy, HH:mm').format(t)};
   final reads = <String>[];

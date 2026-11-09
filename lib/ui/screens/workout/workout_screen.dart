@@ -16,6 +16,7 @@ import '../you/connected_services_page.dart';
 import 'plan_editor_screen.dart';
 import 'plan_sharing.dart';
 import 'session_screen.dart';
+import '../../../app_clock.dart';
 
 const _weekdayShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -37,7 +38,7 @@ class WorkoutScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final today = DateTime.now();
+    final today = AppClock.now();
     return AsyncBody(
       value: ref.watch(workoutProvider(dayKey(today))),
       builder: (context, d) {
@@ -287,7 +288,7 @@ class _TodayCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Today · ${DateFormat('EEE d MMM').format(DateTime.now())}',
+              'Today · ${DateFormat('EEE d MMM').format(AppClock.now())}',
               style: context.tt.bodySmall?.copyWith(color: cs.onPrimaryContainer),
             ),
             const SizedBox(height: 4),

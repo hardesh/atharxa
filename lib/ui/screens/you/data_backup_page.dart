@@ -13,6 +13,7 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import '../../../app_clock.dart';
 
 /// What each synced table is called on this page.
 const _labels = {
@@ -37,9 +38,9 @@ class DataBackupPage extends ConsumerWidget {
       ref.read(prefsProvider),
       deviceName: ref.read(syncControllerProvider).deviceName,
     );
-    final where = await saveExportedFile(Backup.fileName(DateTime.now()), bytes);
+    final where = await saveExportedFile(Backup.fileName(AppClock.now()), bytes);
     if (where == null) return;
-    await ref.read(deviceSettingsProvider.notifier).setBackedUp(DateTime.now());
+    await ref.read(deviceSettingsProvider.notifier).setBackedUp(AppClock.now());
     if (context.mounted) showMessage(context, 'Backup saved to $where');
   }
 

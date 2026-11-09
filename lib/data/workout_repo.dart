@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'db.dart';
 import 'models.dart';
+import '../app_clock.dart';
 
 /// An exercise in a plan: sets × reps × kg, rest between sets.
 class Exercise {
@@ -166,8 +167,8 @@ class WorkoutRepo {
   Future<String> startSession(WorkoutPlan p) => db.save('sessions', {
     'plan_id': p.id,
     'plan_name': p.name,
-    'day': dayKey(DateTime.now()),
-    'started_at': DateTime.now().millisecondsSinceEpoch,
+    'day': dayKey(AppClock.now()),
+    'started_at': AppClock.now().millisecondsSinceEpoch,
   });
 
   Future<void> logSet(String sessionId, Exercise e, {required int setNo, required int reps, double? kg}) =>
@@ -178,7 +179,7 @@ class WorkoutRepo {
         'set_no': setNo,
         'reps': reps,
         'kg': kg,
-        'done_at': DateTime.now().millisecondsSinceEpoch,
+        'done_at': AppClock.now().millisecondsSinceEpoch,
       });
 
   Future<void> finishSession(
@@ -189,7 +190,7 @@ class WorkoutRepo {
     required bool addKcalToToday,
   }) => db.save('sessions', {
     ...AppDb.editable(s.row),
-    'ended_at': DateTime.now().millisecondsSinceEpoch,
+    'ended_at': AppClock.now().millisecondsSinceEpoch,
     'feel': feel,
     'notes': (notes ?? '').trim().isEmpty ? null : notes!.trim(),
     'kcal': kcal,

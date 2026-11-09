@@ -10,6 +10,7 @@ import '../data/models.dart';
 import 'ai_controller.dart';
 import 'core_providers.dart';
 import 'settings_providers.dart';
+import '../app_clock.dart';
 
 /// One message in the assistant chat.
 @immutable
@@ -213,7 +214,7 @@ class AssistantController extends Notifier<AssistantState> {
   /// entry id for Undo.
   Future<String> addFood(FoodItem food, Meal meal) => FoodRepo(
     ref.read(dbProvider),
-  ).add(FoodRepo.logs, day: dayKey(DateTime.now()), meal: meal, food: food, grams: food.servingG ?? 100);
+  ).add(FoodRepo.logs, day: dayKey(AppClock.now()), meal: meal, food: food, grams: food.servingG ?? 100);
 
   Future<void> _endConversation() async {
     await _conversation?.close();

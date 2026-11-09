@@ -7,6 +7,7 @@ import '../data/models.dart';
 import '../data/water_repo.dart';
 import '../data/workout_repo.dart';
 import 'core_providers.dart';
+import '../app_clock.dart';
 
 /// Screen data providers auto-dispose: a day/month's data is dropped once no
 /// screen shows it, so browsing history doesn't grow memory.
@@ -71,7 +72,7 @@ final financeMonthSelectedProvider = NotifierProvider<FinanceMonth, DateTime>(Fi
 class FinanceMonth extends Notifier<DateTime> {
   @override
   DateTime build() {
-    final n = DateTime.now();
+    final n = AppClock.now();
     return DateTime(n.year, n.month);
   }
 

@@ -1,5 +1,6 @@
 import 'db.dart';
 import 'models.dart';
+import '../app_clock.dart';
 
 /// Food logging / planning operations shared by Today, Meal plan and
 /// notifications. `table` is `food_logs` or `meal_plans`.
@@ -29,7 +30,7 @@ class FoodRepo {
     'name': food.name,
     'brand': food.brand,
     'grams': grams,
-    'created_at': DateTime.now().millisecondsSinceEpoch,
+    'created_at': AppClock.now().millisecondsSinceEpoch,
     ...food.per100g.toRow(),
   });
 
@@ -44,7 +45,7 @@ class FoodRepo {
   /// Copies entries into another table/day (plan → log, plan day → plan day).
   Future<int> copy(Iterable<FoodEntry> from, String toTable, {String? day}) async {
     var n = 0;
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = AppClock.now().millisecondsSinceEpoch;
     for (final e in from) {
       await db.save(toTable, {...e.copyFields(), 'day': ?day, 'created_at': now + n});
       n++;

@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import '../data/models.dart';
+import '../app_clock.dart';
 
 final _int = NumberFormat('#,##0', 'en_US');
 final _one = NumberFormat('#,##0.0', 'en_US');
@@ -23,7 +24,7 @@ String nutrientLine(Nutrients n) =>
     'Carbs ${fmtMacro(n.carbs)} g · Fiber ${fmtMacro(n.fiber)} g · Fat ${fmtMacro(n.fat)} g';
 
 String relativeDay(DateTime d) {
-  final today = DateTime.now();
+  final today = AppClock.now();
   final a = DateTime(today.year, today.month, today.day);
   final b = DateTime(d.year, d.month, d.day);
   final diff = b.difference(a).inDays;
@@ -47,7 +48,7 @@ String fmtWeekdayInitial(DateTime d) => _weekday.format(d).substring(0, 1);
 
 /// "today, 13:12" / "yesterday, 08:05" / "Sun 8 Nov, 13:12".
 String fmtWhen(DateTime t) {
-  final now = DateTime.now();
+  final now = AppClock.now();
   final days = DateTime(now.year, now.month, now.day).difference(DateTime(t.year, t.month, t.day)).inDays;
   final day = switch (days) {
     0 => 'today',

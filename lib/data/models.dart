@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import 'db.dart';
+import '../app_clock.dart';
 
 String dayKey(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 DateTime parseDay(String key) => DateTime.parse(key);
@@ -178,7 +179,7 @@ class BodyStats {
   /// [complete].
   Goals? suggestGoals({DateTime? now}) {
     if (!complete) return null;
-    final w = weightKg!, h = heightCm!, age = ageAt(now ?? DateTime.now())!;
+    final w = weightKg!, h = heightCm!, age = ageAt(now ?? AppClock.now())!;
     final bmr = 10 * w + 6.25 * h - 5 * age + (sex == Sex.male ? 5 : -161);
     final kcal = _round(bmr * activity.factor, 50);
     final protein = _round(1.6 * w, 5);

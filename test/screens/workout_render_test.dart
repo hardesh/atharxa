@@ -1,3 +1,4 @@
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:atharxa/data/workout_repo.dart';
 import 'package:atharxa/services/workout_share.dart';
@@ -72,7 +73,7 @@ void main() {
     await waitFor(tester, find.textContaining('min · 2 sets · 345 kg'));
 
     final s = (await tester.runAsync(
-      () => WorkoutRepo(t.db).sessionsBetween(dayKey(DateTime.now()), dayKey(DateTime.now())),
+      () => WorkoutRepo(t.db).sessionsBetween(dayKey(AppClock.now()), dayKey(AppClock.now())),
     ))!;
     expect(s.single.finished, isTrue);
     expect(s.single.addKcalToToday, isTrue);

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/ai/ai_models.dart';
 import 'package:atharxa/ai/ai_runtime.dart';
 import 'package:atharxa/data/chat_repo.dart';
@@ -206,7 +207,7 @@ void main() {
     expect(find.text('Try another'), findsOneWidget);
     await tester.tap(chip);
     await step(tester);
-    final logged = await tester.runAsync(() => FoodRepo(t.db).entries(FoodRepo.logs, dayKey(DateTime.now())));
+    final logged = await tester.runAsync(() => FoodRepo(t.db).entries(FoodRepo.logs, dayKey(AppClock.now())));
     expect(logged!.single.name, 'Paneer bhurji');
     expect(find.text('Added Paneer bhurji to ${meal.label}'), findsOneWidget);
 
@@ -244,7 +245,7 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.send);
     await step(tester);
     expect(find.text('How much did I spend on food this month?'), findsOneWidget);
-    // Not a golden: the meal, times and month depend on when it runs.
-    expect(find.textContaining('Add Roti to'), findsOneWidget);
+    expect(find.textContaining('Add Roti to Lunch'), findsOneWidget); // 12:30 on the test clock
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/assistant_mac.png'));
   });
 }

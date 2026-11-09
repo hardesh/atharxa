@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/data/finance_repo.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/workout_repo.dart';
@@ -43,7 +44,7 @@ class _FakeSync extends SyncController {
         name: 'Harshal’s MacBook Air (15-inch, M4)',
         host: '192.168.100.142',
         port: 47811,
-        lastSyncAt: DateTime.now(),
+        lastSyncAt: AppClock.now(),
         lastSent: 1234,
         lastReceived: 56789,
       ),
@@ -62,13 +63,13 @@ Future<void> seed(TestApp t) async {
       'id': 'strava-$i',
       'type': i.isEven ? 'Run' : 'Ride',
       'name': 'Early morning tempo run along the river with intervals #$i',
-      'start': DateTime.now().subtract(Duration(hours: i)).millisecondsSinceEpoch,
+      'start': AppClock.now().subtract(Duration(hours: i)).millisecondsSinceEpoch,
       'distance_m': 123456.7,
       'moving_time_s': 98765,
     });
   }
   final repo = FoodRepo(t.db);
-  final today = DateTime.now();
+  final today = AppClock.now();
   final day = dayKey(today), tomorrow = dayKey(today.add(const Duration(days: 1)));
   final longFood = FoodItem(
     name: 'Homemade masala oats with roasted vegetables and peanuts',
@@ -247,7 +248,7 @@ void main() {
         // Transaction sheet (via the row) and the export sheet.
         // Open the edit sheet for the long transaction (same call the row's tap makes).
         final tx = (await tester.runAsync(
-          () => FinanceRepo(t.db).month(DateFormat('yyyy-MM').format(DateTime.now())),
+          () => FinanceRepo(t.db).month(DateFormat('yyyy-MM').format(AppClock.now())),
         ))!.firstWhere((x) => (x.note ?? '').startsWith('Concert'));
         unawaited(showTransactionSheet(tester.element(find.byType(FinanceScreen)), existing: tx));
         await step(tester);

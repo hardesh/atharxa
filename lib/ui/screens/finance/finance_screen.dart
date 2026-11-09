@@ -18,6 +18,7 @@ import '../../widgets/switchers.dart';
 import 'currency_picker.dart';
 import 'export_sheet.dart';
 import 'transaction_sheet.dart';
+import '../../../app_clock.dart';
 
 /// Finance (DESIGN.md §5, Finance.dc.html): month switcher + default currency,
 /// Income / Expenses / Balance (per currency, no conversion), spending by
@@ -100,7 +101,7 @@ class FinanceScreen extends ConsumerWidget {
             ),
             _SummaryCard(summary: s),
             // The assistant reads the current month.
-            if (txs.isNotEmpty && yyyyMm == DateFormat('yyyy-MM').format(DateTime.now()))
+            if (txs.isNotEmpty && yyyyMm == DateFormat('yyyy-MM').format(AppClock.now()))
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
@@ -132,7 +133,7 @@ class FinanceScreen extends ConsumerWidget {
 
   /// Today when adding in the current month, else the 1st of [month].
   static DateTime _dayIn(DateTime month) {
-    final now = DateTime.now();
+    final now = AppClock.now();
     return now.year == month.year && now.month == month.month ? now : month;
   }
 }

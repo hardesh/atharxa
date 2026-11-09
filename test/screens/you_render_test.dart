@@ -1,3 +1,4 @@
+import 'package:atharxa/app_clock.dart';
 import 'package:atharxa/state/sync_controller.dart';
 import 'package:atharxa/sync/discovery.dart';
 import 'package:atharxa/sync/peers.dart';
@@ -17,7 +18,7 @@ class _FakeSync extends SyncController {
 }
 
 DateTime _today(int h, int m) {
-  final n = DateTime.now();
+  final n = AppClock.now();
   return DateTime(n.year, n.month, n.day, h, m);
 }
 

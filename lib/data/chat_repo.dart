@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'db.dart';
+import '../app_clock.dart';
 
 /// One saved assistant chat. Syncs between devices like everything else.
 class Chat {
@@ -36,7 +37,7 @@ class ChatRepo {
       'messages': jsonEncode([
         for (final (u, t) in messages) {'u': u, 't': t},
       ]),
-      'last_at': DateTime.now().millisecondsSinceEpoch,
+      'last_at': AppClock.now().millisecondsSinceEpoch,
     });
   }
 

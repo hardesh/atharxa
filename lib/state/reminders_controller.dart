@@ -9,6 +9,7 @@ import '../data/water_repo.dart';
 import '../services/reminder_plan.dart';
 import 'core_providers.dart';
 import 'settings_providers.dart';
+import '../app_clock.dart';
 
 /// Reminder settings (per device) + keeping the scheduled notifications in
 /// step with what has been logged. Started once from `main`.
@@ -72,7 +73,7 @@ class RemindersController extends Notifier<ReminderSettings> {
     final s = state;
     if (!s.anyOn) return service.schedule(const []);
     final db = ref.read(dbProvider);
-    final now = DateTime.now();
+    final now = AppClock.now();
     final today = dayKey(now);
     final food = FoodRepo(db);
     final logs = await food.entries(FoodRepo.logs, today);

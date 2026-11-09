@@ -12,7 +12,7 @@ void main() {
     expect(g.fat, 75); // 25 % of kcal / 9 = 73.6 → 75
     expect(g.carbs, 375); // (2650 − 480 − 675) / 4 = 373.75 → 375
     expect(g.fiber, 37); // 14 g / 1,000 kcal
-    expect(g.waterMl, 2750); // 35 ml/kg = 2,625 → nearest 250
+    expect(g.waterMl, 3250); // max(35 ml/kg = 2,625, men 2,500) + 500 moderate = 3,125 → 3,250
   });
 
   test('female formula and incomplete stats', () {
@@ -25,6 +25,13 @@ void main() {
     );
     // 550 + 1000 − 150 − 161 = 1,239 × 1.2 = 1,486.8 → 1,500
     expect(f.suggestGoals(now: DateTime(2026, 11, 9))!.kcal, 1500);
+    expect(f.suggestGoals(now: DateTime(2026, 11, 9))!.waterMl, 2000); // 35 × 55 = 1,925 < women 2,000
     expect(const BodyStats(heightCm: 160).suggestGoals(), isNull);
+  });
+
+  test('a light man at 59 kg: water from the adult baseline, not weight alone', () {
+    const b = BodyStats(heightCm: 180, weightKg: 59, birthYear: 1999, sex: Sex.male, activity: ActivityLevel.light);
+    // 35 ml/kg would be 2,065 (≈ 2 L); men 2,500 + 250 light = 2,750.
+    expect(b.suggestGoals(now: DateTime(2026, 11, 9))!.waterMl, 2750);
   });
 }

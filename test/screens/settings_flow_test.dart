@@ -50,7 +50,7 @@ void main() {
     await step(tester);
     await tester.pageBack();
     await step(tester);
-    expect(find.text('2,650 kcal · 2,750 ml water'), findsOneWidget);
+    expect(find.text('2,650 kcal · 3,250 ml water'), findsOneWidget);
   });
 
   testWidgets('choosing Ocean changes the theme', (tester) async {

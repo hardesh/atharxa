@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:intl/intl.dart';
 
 import 'db.dart';
@@ -146,15 +147,18 @@ enum Sex { female, male }
 
 /// Activity level → multiplier on BMR (common TDEE factors).
 enum ActivityLevel {
-  sedentary('Sedentary', 'Little or no exercise', 1.2),
-  light('Light', 'Exercise 1–3 days a week', 1.375),
-  moderate('Moderate', 'Exercise 3–5 days a week', 1.55),
-  active('Active', 'Exercise 6–7 days a week', 1.725),
-  veryActive('Very active', 'Hard exercise or a physical job', 1.9);
+  sedentary('Sedentary', 'Little or no exercise', 1.2, 0),
+  light('Light', 'Exercise 1–3 days a week', 1.375, 250),
+  moderate('Moderate', 'Exercise 3–5 days a week', 1.55, 500),
+  active('Active', 'Exercise 6–7 days a week', 1.725, 750),
+  veryActive('Very active', 'Hard exercise or a physical job', 1.9, 1000);
 
-  const ActivityLevel(this.label, this.description, this.factor);
+  const ActivityLevel(this.label, this.description, this.factor, this.extraWaterMl);
   final String label, description;
   final double factor;
+
+  /// Extra water for sweat on training days, averaged over the week.
+  final int extraWaterMl;
 
   static ActivityLevel parse(String? v) =>
       ActivityLevel.values.firstWhere((a) => a.name == v, orElse: () => ActivityLevel.light);
@@ -174,9 +178,10 @@ class BodyStats {
   int? ageAt(DateTime now) => birthYear == null ? null : now.year - birthYear!;
 
   /// Daily goals from Mifflin–St Jeor BMR × activity, with protein 1.6 g/kg,
-  /// fat 25 % of energy, carbs the rest, fiber 14 g per 1,000 kcal and
-  /// water 35 ml/kg. Values are rounded to friendly steps. Null until
-  /// [complete].
+  /// fat 25 % of energy, carbs the rest, fiber 14 g per 1,000 kcal, and
+  /// water: the larger of 35 ml/kg and the EFSA adequate intake (men 2.5 L,
+  /// women 2.0 L), plus extra for activity. Values are rounded to friendly
+  /// steps. Null until [complete].
   Goals? suggestGoals({DateTime? now}) {
     if (!complete) return null;
     final w = weightKg!, h = heightCm!, age = ageAt(now ?? AppClock.now())!;
@@ -187,7 +192,7 @@ class BodyStats {
     final carbs = _round((kcal - protein * 4 - fat * 9) / 4, 5);
     return Goals(
       kcal: kcal,
-      waterMl: _round(35 * w, 250).round(),
+      waterMl: _round(max(35 * w, sex == Sex.male ? 2500.0 : 2000.0) + activity.extraWaterMl, 250).round(),
       protein: protein,
       carbs: carbs,
       fiber: _round(kcal / 1000 * 14, 1),

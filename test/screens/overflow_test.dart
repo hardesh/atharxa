@@ -230,8 +230,18 @@ void main() {
         await step(tester);
         await tester.tap(find.text('Cancel'));
         await step(tester);
+        await tester.tap(find.byTooltip('Share plan'));
+        await step(tester);
+        tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+        await step(tester);
         await tester.pageBack();
         await step(tester);
+        await tester.scrollUntilVisible(find.byTooltip('Import plans'), 300, scrollable: find.byType(Scrollable).first);
+        await tester.tap(find.byTooltip('Import plans'));
+        await step(tester);
+        await tester.tap(find.text('Cancel'));
+        await step(tester);
+        await tester.scrollUntilVisible(find.text('Start workout'), -300, scrollable: find.byType(Scrollable).first);
         // Live session with the rest timer, then the complete screen.
         await tester.tap(find.text('Start workout'));
         await step(tester);

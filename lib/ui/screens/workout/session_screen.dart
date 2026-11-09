@@ -13,6 +13,7 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import '../../widgets/youtube_video.dart';
 
 /// Live workout (WorkoutSession.dc.html): timer, exercise n of m, set k of n,
 /// reps/kg steppers, Complete set (auto rest timer), set chips, form tips,
@@ -139,6 +140,13 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         builder: (_) => CompleteScreen(session: s, plan: widget.plan),
       ),
     );
+  }
+
+  /// The YouTube video shown for [e]: the one picked, else its first link.
+  String? _playing;
+  String? _playingFor(Exercise e) {
+    final ids = e.videos.map(youTubeId).whereType<String>().toList();
+    return ids.contains(_playing) ? _playing : ids.firstOrNull;
   }
 
   Future<void> _openVideo(String url) async {
@@ -299,13 +307,16 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                   padding: const EdgeInsets.only(top: 6),
                   child: Text('No videos yet — add YouTube links in the plan.', style: context.tt.bodySmall),
                 ),
-              for (final v in e.videos)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.play_circle_outline),
-                  title: Text(v, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  onTap: () => _openVideo(v),
-                ),
+              if (_playingFor(e) case final id?) ...[const SizedBox(height: 8), YouTubeVideo(videoId: id)],
+              if (e.videos.length > 1 || (e.videos.isNotEmpty && _playingFor(e) == null))
+                for (final v in e.videos)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(youTubeId(v) == _playingFor(e) ? Icons.play_circle : Icons.play_circle_outline),
+                    title: Text(v, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    // YouTube links play here; anything else opens outside the app.
+                    onTap: () => youTubeId(v) == null ? _openVideo(v) : setState(() => _playing = youTubeId(v)),
+                  ),
             ],
           ),
         ),

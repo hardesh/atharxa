@@ -1,9 +1,11 @@
 import 'package:atharxa/data/models.dart';
 import 'package:atharxa/data/workout_repo.dart';
+import 'package:atharxa/services/workout_share.dart';
 import 'package:atharxa/ui/screens/workout/workout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers.dart';
 import '../workout_test.dart' show seedLowerBodyA;
 import 'render_helpers.dart';
 
@@ -88,5 +90,22 @@ void main() {
     expect((center.dx - body.center.dx).abs(), lessThan(2));
     expect((center.dy - body.center.dy).abs(), lessThan(80));
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/workout_empty_mac.png'));
+  });
+
+  testWidgets('import a shared plan by pasting it', (tester) async {
+    setSize(tester, const Size(412, 915));
+    final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': 1.0})))!;
+    final other = (await tester.runAsync(() async => seedLowerBodyA(await openTestDb())))!;
+    await tester.pumpWidget(t.app);
+    await settle(tester);
+    await goTo(tester, 'Workout');
+    await tester.tap(find.text('Import a plan'));
+    await step(tester);
+    await tester.enterText(find.byType(TextField), WorkoutShare.encodeMessage([other]));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Import'));
+    await step(tester);
+    expect(find.text('Added Lower body A'), findsOneWidget);
+    expect(find.text('Start workout'), findsOneWidget);
   });
 }

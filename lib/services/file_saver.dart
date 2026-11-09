@@ -44,3 +44,20 @@ Future<String?> saveExportedFile(String fileName, Uint8List bytes) async {
   await f.writeAsBytes(bytes);
   return f.path;
 }
+
+/// macOS: pick a file with the system Open panel and return its text, or
+/// null if cancelled / unsupported (other platforms paste text instead).
+Future<String?> openTextFile({List<String> extensions = const ['json', 'txt']}) async {
+  if (!Platform.isMacOS) return null;
+  final dialog = FileDialog.create(FileDialogMode.openFile);
+  if (dialog == null) return null;
+  try {
+    dialog
+      ..setFileTypes(extensions)
+      ..modality = DialogModality.application;
+    if (!dialog.open() || dialog.result != FileDialogResult.accepted || dialog.paths.isEmpty) return null;
+    return await File(dialog.paths.first).readAsString();
+  } finally {
+    dialog.dispose();
+  }
+}

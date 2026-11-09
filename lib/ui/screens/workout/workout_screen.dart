@@ -12,6 +12,7 @@ import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 import '../../widgets/tag.dart';
 import 'plan_editor_screen.dart';
+import 'plan_sharing.dart';
 import 'session_screen.dart';
 
 const _weekdayShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -59,10 +60,22 @@ class WorkoutScreen extends ConsumerWidget {
             title: 'No workout plans yet',
             message:
                 'Create a plan with your exercises and the days it repeats on. Rest timers and set tracking come with it.',
-            action: FilledButton.icon(
-              onPressed: () => PlanEditorScreen.open(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Create a plan'),
+            action: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => PlanEditorScreen.open(context),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create a plan'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => showImportPlans(context),
+                  icon: const Icon(Icons.download_outlined),
+                  label: const Text('Import a plan'),
+                ),
+              ],
             ),
           );
         }
@@ -125,6 +138,17 @@ class WorkoutScreen extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(child: Text('Plans', style: context.tt.titleMedium)),
+                      IconButton(
+                        tooltip: 'Import plans',
+                        onPressed: () => showImportPlans(context),
+                        icon: const Icon(Icons.download_outlined),
+                      ),
+                      if (d.plans.isNotEmpty)
+                        IconButton(
+                          tooltip: 'Share all plans',
+                          onPressed: () => sharePlans(context, d.plans),
+                          icon: const Icon(Icons.ios_share),
+                        ),
                       TextButton.icon(
                         onPressed: () => PlanEditorScreen.open(context),
                         icon: const Icon(Icons.add, size: 18),

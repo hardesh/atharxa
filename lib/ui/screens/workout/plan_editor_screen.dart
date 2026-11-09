@@ -10,6 +10,7 @@ import '../../../state/core_providers.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import 'plan_sharing.dart';
 
 /// Edit plan (Workout.dc.html): name, repeat days, exercises with drag to
 /// reorder, Add exercise, Save, Delete.
@@ -87,8 +88,14 @@ class _PlanEditorScreenState extends ConsumerState<PlanEditorScreen> {
       appBar: AppBar(
         title: Text(widget.plan == null ? 'New plan' : 'Edit plan'),
         actions: [
-          if (widget.plan != null)
+          if (widget.plan != null) ...[
+            IconButton(
+              tooltip: 'Share plan',
+              icon: const Icon(Icons.ios_share),
+              onPressed: () => sharePlans(context, [widget.plan!]),
+            ),
             IconButton(tooltip: 'Delete plan', icon: const Icon(Icons.delete_outline), onPressed: _delete),
+          ],
           TextButton(onPressed: _save, child: const Text('Save')),
           const SizedBox(width: 8),
         ],

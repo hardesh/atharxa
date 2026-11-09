@@ -86,12 +86,23 @@ The app's name may change, so **don't build the product name into code identifie
   - Text size uses the app-level `AppTextScaler`.
   - macOS: `lib/state/desktop_controller.dart` uses `nativeapi_flutter` to hide the title bar, set the minimum window size, hide the window on close while sync is on, add the menu bar item and handle open at login. App Nap is off through `NSAppSleepDisabled` in `Info.plist`. `AppChrome` adds the top inset for the window buttons.
 
+## Commands (`just`, see `justfile`) — use these instead of raw flutter/adb commands
+Output is short on purpose (failures and errors only; build logs go to `build/logs/`).
+- `just check`: format, analyze, full test suite. Run before committing.
+- `just test [files…]`: tests (all, or only the given files/dirs). After a small change, run only the related files.
+- `just test-name "text" [files…]`: tests whose name contains the text.
+- `just goldens [files…]`: refresh screenshot goldens (default `test/screens`); then look at the changed PNGs.
+- `just analyze`, `just fmt`.
+- `just mac` / `just mac-open` (build and reopen the release app) / `just mac-run` (debug) / `just mac-mem` (memory).
+- `just phone` (build, install on the connected phone, open) / `just apk` / `just phone-run` (debug) / `just devices` / `just phone-log [lines]`.
+- `just all`: install on the phone and the Mac. `just clean`.
+
 ## Workflow
 - Branches: `main` (stable) ← `dev/v1` (integration) ← `feat/*`.
 - **Work one feature at a time. Don't push or open PRs until the user asks.** Never merge without being asked.
 - **For now, keep all work on the current branch (`feat/sync`).** Don't create new branches until the user asks.
-- Before committing: `dart format lib test` (page width 120), then `flutter analyze` (must be clean) and `flutter test`.
-- **Time:** use `AppClock.now()` (`lib/app_clock.dart`) for anything the user sees (today, this week, meal times). Only sync/database bookkeeping, signed requests and Strava token expiry use `DateTime.now()`. `test/flutter_test_config.dart` starts every test at Mon 9 Nov 2026, 12:30, so screenshots don't depend on the day the suite runs.
-- Render tests in `test/screens/` produce PNGs in `test/screens/goldens/` at phone size (412 dp, 130 % text) and Mac size (1200 px). Refresh them with `flutter test --update-goldens test/screens` and compare against the boards.
+- Before committing: `just check` (format with page width 120, analyze must be clean, all tests pass).
+- **Time:** use `AppClock.now()` (`lib/app_clock.dart`) for anything the user sees (today, this week, meal times). Only sync/database bookkeeping and signed requests use `DateTime.now()`. `test/flutter_test_config.dart` starts every test at Mon 9 Nov 2026, 12:30, so screenshots don't depend on the day the suite runs.
+- Render tests in `test/screens/` produce PNGs in `test/screens/goldens/` at phone size (412 dp, 130 % text) and Mac size (1200 px). Refresh them with `just goldens` and compare against the boards.
 - Use the latest stable versions of packages and tools.
-- Running the app: `flutter run -d macos`, and on the Pixel `flutter run -d <id>` (`adb` is at `~/Library/Android/sdk/platform-tools`).
+- Running the app: `just mac-run` / `just phone-run` (debug), `just mac-open` / `just phone` (release). `adb` is at `~/Library/Android/sdk/platform-tools`.

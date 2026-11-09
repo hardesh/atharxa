@@ -401,8 +401,7 @@ class _PairedTile extends ConsumerWidget {
     final sem = context.sem;
     final detail = [
       peer.host,
-      if (peer.lastSyncAt != null)
-        'Sent ${peer.lastSent}, received ${peer.lastReceived} · ${fmtWhen(peer.lastSyncAt!)}',
+      if (peer.lastSyncAt != null) '${syncResultText(peer.lastSent, peer.lastReceived)} · ${fmtWhen(peer.lastSyncAt!)}',
     ].join(' · ');
     return ListTile(
       contentPadding: EdgeInsets.zero,

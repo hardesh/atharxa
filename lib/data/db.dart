@@ -352,6 +352,12 @@ class AppDb {
     return (rows: page, next: more ? upTo : await currentRev(), more: more);
   }
 
+  /// Every live row of every synced table (for backups).
+  Future<List<SyncRow>> allRows() async => [
+    for (final t in syncedTables)
+      for (final r in await _db.query(t, where: 'deleted = 0')) SyncRow(t, r),
+  ];
+
   /// Number of rows a [changesPage] walk from [sinceRev] would return.
   Future<int> countChanges(int sinceRev, {String? excludeDevice}) async {
     final (where, args) = _sinceFilter(sinceRev, excludeDevice);

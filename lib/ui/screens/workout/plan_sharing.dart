@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,15 +119,14 @@ class _ImportDialogState extends ConsumerState<_ImportDialog> {
                 icon: const Icon(Icons.content_paste, size: 18),
                 label: const Text('Paste'),
               ),
-              if (Platform.isMacOS)
-                TextButton.icon(
-                  onPressed: () async {
-                    final text = await openTextFile();
-                    if (text != null) setState(() => _text.text = text);
-                  },
-                  icon: const Icon(Icons.folder_open, size: 18),
-                  label: const Text('Open file…'),
-                ),
+              TextButton.icon(
+                onPressed: () async {
+                  final text = await openTextFile();
+                  if (text != null) setState(() => _text.text = text);
+                },
+                icon: const Icon(Icons.folder_open, size: 18),
+                label: const Text('Open file…'),
+              ),
             ],
           ),
         ],

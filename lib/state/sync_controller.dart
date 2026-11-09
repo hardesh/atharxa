@@ -212,7 +212,7 @@ class SyncController extends Notifier<SyncState> {
       sent: s.sent,
       received: s.received,
     );
-    if (ref.mounted) state = state.copyWith(paired: peers, lastResult: 'Sent ${s.sent}, received ${s.received}');
+    if (ref.mounted) state = state.copyWith(paired: peers, lastResult: syncResultText(s.sent, s.received));
   }
 
   static String _newCode() => (math.Random.secure().nextInt(900000) + 100000).toString();
@@ -418,7 +418,7 @@ class SyncController extends Notifier<SyncState> {
       _retryAfter = null;
       _pending = false;
       debugPrint('[sync] ${r.peerName} @ $address: sent ${r.sent}, received ${r.received}${full ? ' (full)' : ''}');
-      state = state.copyWith(paired: peers, lastResult: 'Sent ${r.sent}, received ${r.received}', clearFailure: true);
+      state = state.copyWith(paired: peers, lastResult: syncResultText(r.sent, r.received), clearFailure: true);
     } on SyncException catch (e) {
       if (!ref.mounted) return;
       _failures++;

@@ -111,3 +111,7 @@ class SyncPrefs {
     return list;
   }
 }
+
+/// "Sent 4, received 12", or "Up to date" when a sync had nothing to exchange.
+String syncResultText(int sent, int received) =>
+    sent == 0 && received == 0 ? 'Up to date' : 'Sent $sent, received $received';

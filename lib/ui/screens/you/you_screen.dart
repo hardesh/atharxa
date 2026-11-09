@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app_info.dart';
+import '../../../state/core_providers.dart';
 import '../../../state/reminders_controller.dart';
 import '../../../state/settings_providers.dart';
 import '../../../state/sync_controller.dart';
@@ -11,6 +12,7 @@ import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 import 'appearance_page.dart';
 import 'body_stats_page.dart';
+import 'data_backup_page.dart';
 import 'device_sync_page.dart';
 import 'goals_page.dart';
 import 'reminders_page.dart';
@@ -33,7 +35,7 @@ final youSections = <YouSection>[
   const YouSection('services', 'Connected services', Icons.link, null),
   const YouSection('ai', 'AI models', Icons.auto_awesome_outlined, null),
   YouSection('body', 'Body stats', Icons.monitor_weight_outlined, (_) => const BodyStatsPage()),
-  const YouSection('data', 'Data and backup', Icons.backup_outlined, null),
+  YouSection('data', 'Data and backup', Icons.backup_outlined, (_) => const DataBackupPage()),
   const YouSection('about', 'About', Icons.info_outline, null),
 ];
 
@@ -63,6 +65,9 @@ String? _summary(String id, WidgetRef ref) {
         if (b.weightKg != null) '${fmtGrams(b.weightKg!)} kg',
         b.activity.label,
       ].join(' · ');
+    case 'data':
+      final last = DateTime.tryParse(ref.read(prefsProvider).getString('last_backup_at') ?? '');
+      return last == null ? 'Export or restore everything' : 'Last backup ${fmtWhen(last)}';
     case 'about':
       return AppInfo.name;
     default:

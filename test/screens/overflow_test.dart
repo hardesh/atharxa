@@ -161,7 +161,7 @@ void main() {
         await tester.runAsync(() => seed(t));
         await tester.pumpWidget(t.app);
         await settle(tester);
-        for (final section in ['Goals', 'Appearance', 'Reminders', 'Body stats']) {
+        for (final section in ['Goals', 'Appearance', 'Reminders', 'Body stats', 'Data and backup']) {
           if (find.byType(NavigationRail).evaluate().isNotEmpty) {
             await goTo(tester, 'You');
           } else {

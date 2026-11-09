@@ -135,6 +135,7 @@ class _AiModelsPageState extends ConsumerState<AiModelsPage> {
                           [
                             fmtSize(m.sizeBytes),
                             if (m.family != AiFamily.other) m.family.maker,
+                            m.origin,
                             if (s.loadedId == m.id && s.backend != null) 'running on the ${s.backend!.label}',
                           ].join(' · '),
                         ),
@@ -198,8 +199,9 @@ class _AiModelsPageState extends ConsumerState<AiModelsPage> {
           ],
         ),
         Text(
-          'Models run entirely on ${deviceNoun(caps)} and are not synced: each device downloads the ones it can '
-          'run. Gemma 4 models are by Google, Qwen3.5 by Alibaba; both under the Apache 2.0 licence.',
+          'Models download from huggingface.co (the account and repository are shown on each model), pinned to an '
+          'exact version and checked before use. They run entirely on ${deviceNoun(caps)} and are not synced: each '
+          'device downloads the ones it can run. Gemma 4 is by Google, Qwen3.5 by Alibaba; both Apache 2.0.',
           style: context.tt.bodySmall,
         ),
       ],
@@ -274,6 +276,7 @@ class _AvailableTile extends StatelessWidget {
                   children: [
                     Text(model.name, style: context.tt.bodyLarge),
                     Text('${fmtSize(model.sizeBytes)} · ${model.note}', style: context.tt.bodySmall),
+                    Text(model.origin, style: context.tt.bodySmall?.copyWith(color: context.cs.outline)),
                     const SizedBox(height: 4),
                     Tag(tag, fg: tagFg, bg: tagBg, small: true),
                   ],

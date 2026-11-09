@@ -21,7 +21,7 @@ abstract final class DeviceKeys {
   static const aiWifiOnly = 'ai_wifi_only';
   static const aiScopes = 'ai_scopes';
   static const aiPendingDownload = 'ai_pending_download';
-  static const strava = 'strava';
+  static const activitiesImportedAt = 'activities_imported_at';
 
   /// The ones a backup carries (sync config and first run stay with the device).
   static const backedUp = [reminders, themeMode, textScale, menuBar];

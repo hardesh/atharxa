@@ -87,6 +87,9 @@ class AiModel {
 
   bool get imported => repo == null;
 
+  /// Where the file comes from: "Hugging Face · litert-community/gemma-4-…".
+  String get origin => repo == null ? 'Imported file' : 'Hugging Face · $repo';
+
   String? get url => repo == null
       ? null
       : 'https://huggingface.co/$repo/resolve/$revision/${path!.split('/').map(Uri.encodeComponent).join('/')}';

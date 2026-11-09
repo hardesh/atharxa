@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 /// times). Tests start it at a fixed moment so screens render the same on
 /// any day; it then runs at normal speed, so timers still tick.
 ///
-/// Sync and database bookkeeping (edit clocks, signed requests) and Strava
-/// token expiry keep using the real clock.
+/// Sync and database bookkeeping (edit clocks, signed requests) keep using
+/// the real clock.
 abstract final class AppClock {
   static DateTime Function() _now = DateTime.now;
 

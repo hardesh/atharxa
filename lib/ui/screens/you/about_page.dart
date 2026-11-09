@@ -68,7 +68,7 @@ class AboutPage extends ConsumerWidget {
               ),
               point(
                 Icons.public,
-                'The app goes online only for Open Food Facts search, Strava, workout videos and AI model downloads.',
+                'The app goes online only for Open Food Facts search, workout videos and AI model downloads.',
               ),
             ],
           ),

@@ -5,7 +5,7 @@ import '../../../app_info.dart';
 import '../../../state/ai_controller.dart';
 import '../../../state/reminders_controller.dart';
 import '../../../state/settings_providers.dart';
-import '../../../state/strava_controller.dart';
+import '../../../state/activity_import_controller.dart';
 import '../../../state/sync_controller.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
@@ -73,8 +73,8 @@ String? _summary(String id, WidgetRef ref) {
       final last = ref.watch(deviceSettingsProvider.select((s) => s.lastBackupAt));
       return last == null ? 'Export or restore everything' : 'Last backup ${fmtWhen(last)}';
     case 'services':
-      final strava = ref.watch(stravaProvider);
-      return strava.connected ? 'Strava · ${strava.account!.athlete ?? 'connected'}' : 'Strava, workout tips';
+      final hc = ref.watch(activityImportProvider);
+      return hc.granted ? 'Health Connect · workouts' : 'Health Connect, workout tips';
     case 'ai':
       final m = ref.watch(aiProvider.select((s) => s.active));
       return m == null ? 'Download a model for the assistant' : m.name;

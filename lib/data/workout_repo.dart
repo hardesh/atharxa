@@ -199,23 +199,18 @@ class WorkoutRepo {
 
   Future<void> discardSession(String id) => db.delete('sessions', id);
 
-  /// Links a session to the Strava activity it was uploaded as.
-  Future<void> setStravaId(String sessionId, String stravaId) async {
-    final rows = await db.query('sessions', where: 'id = ?', args: [sessionId]);
-    if (rows.isNotEmpty) await db.save('sessions', {...AppDb.editable(rows.first), 'strava_activity_id': stravaId});
-  }
-
-  /// Imported Strava activities between two days (inclusive), newest first.
-  Future<List<StravaActivity>> stravaBetween(String fromDay, String toDay) async {
+  /// Workouts imported from other apps (Health Connect) between two days
+  /// (inclusive), newest first, with duplicates merged.
+  Future<List<Activity>> activitiesBetween(String fromDay, String toDay) async {
     final from = parseDay(fromDay).millisecondsSinceEpoch;
     final to = parseDay(toDay).add(const Duration(days: 1)).millisecondsSinceEpoch;
     final rows = await db.query(
-      'strava_activities',
+      Activity.table,
       where: 'start >= ? AND start < ?',
       args: [from, to],
       orderBy: 'start DESC',
     );
-    return rows.map(StravaActivity.new).toList();
+    return Activity.merged(rows.map(Activity.new).toList());
   }
 
   /// kcal from today's finished sessions the user chose to add to Today.
@@ -228,17 +223,54 @@ class WorkoutRepo {
   }
 }
 
-/// A run, ride or other activity imported from Strava.
-class StravaActivity {
-  StravaActivity(this.row);
+/// A run, ride or other workout recorded by another app (Strava, Pixel
+/// Watch, Fitbit) and imported from Health Connect.
+class Activity {
+  Activity(this.row);
   final Map<String, Object?> row;
+  static const table = 'activities';
 
+  /// Health Connect exercise type, e.g. RUNNING, BIKING, WALKING.
   String get type => row['type'] as String;
-  String get name => (row['name'] as String?) ?? type;
+  String get name => (row['name'] as String?) ?? typeLabel;
+
+  /// The app that recorded it ("Strava").
+  String? get source => row['source'] as String?;
   DateTime get start => DateTime.fromMillisecondsSinceEpoch((row['start'] as num).toInt());
   double get km => ((row['distance_m'] as num?) ?? 0) / 1000;
+  double? get kcal => (row['kcal'] as num?)?.toDouble();
   Duration get moving => Duration(seconds: ((row['moving_time_s'] as num?) ?? 0).toInt());
+  DateTime get end => start.add(moving);
 
-  bool get isRun => const {'Run', 'TrailRun', 'VirtualRun'}.contains(type);
-  bool get isRide => const {'Ride', 'MountainBikeRide', 'GravelRide', 'EBikeRide', 'VirtualRide'}.contains(type);
+  bool get isRun => type.contains('RUNNING');
+  bool get isRide => type.contains('BIKING');
+
+  /// "Running", "Biking", "Strength training".
+  String get typeLabel {
+    final t = type.replaceAll('_', ' ').toLowerCase();
+    return t.isEmpty ? 'Workout' : '${t[0].toUpperCase()}${t.substring(1)}';
+  }
+
+  /// One entry per real workout: when two apps record the same one (Strava
+  /// writes a run, Google Health copies it), keep the one with more detail.
+  static List<Activity> merged(List<Activity> list) {
+    bool same(Activity a, Activity b) {
+      if (a.isRun != b.isRun || a.isRide != b.isRide) return false;
+      final overlap = (a.end.isBefore(b.end) ? a.end : b.end).difference(a.start.isAfter(b.start) ? a.start : b.start);
+      final shorter = a.moving < b.moving ? a.moving : b.moving;
+      return overlap.inSeconds > 0 && overlap.inSeconds >= shorter.inSeconds / 2;
+    }
+
+    int detail(Activity a) => (a.km > 0 ? 2 : 0) + (a.kcal != null ? 1 : 0);
+    final out = <Activity>[];
+    for (final a in list) {
+      final i = out.indexWhere((b) => same(a, b));
+      if (i < 0) {
+        out.add(a);
+      } else if (detail(a) > detail(out[i])) {
+        out[i] = a;
+      }
+    }
+    return out;
+  }
 }

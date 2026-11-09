@@ -1,5 +1,7 @@
 package com.harshal.atharxa
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+// FlutterFragmentActivity (not FlutterActivity): Health Connect's permission
+// screen needs registerForActivityResult. The one approved native-code change.
+class MainActivity : FlutterFragmentActivity()

@@ -5,7 +5,9 @@ import 'package:atharxa/data/finance_repo.dart';
 import 'package:atharxa/data/food_repo.dart';
 import 'package:atharxa/data/workout_repo.dart';
 import 'package:atharxa/data/models.dart';
-import 'package:atharxa/services/strava.dart';
+import 'package:atharxa/data/db.dart';
+import 'package:atharxa/services/health_import.dart';
+import 'package:atharxa/state/activity_import_controller.dart';
 import 'package:atharxa/state/ai_controller.dart';
 import 'package:atharxa/state/sync_controller.dart';
 import 'package:atharxa/sync/discovery.dart';
@@ -59,13 +61,14 @@ class _FakeSync extends SyncController {
 
 Future<void> seed(TestApp t) async {
   for (var i = 0; i < 3; i++) {
-    await t.db.save('strava_activities', {
-      'id': 'strava-$i',
-      'type': i.isEven ? 'Run' : 'Ride',
-      'name': 'Early morning tempo run along the river with intervals #$i',
-      'start': AppClock.now().subtract(Duration(hours: i)).millisecondsSinceEpoch,
+    await t.db.save('activities', {
+      'id': 'hc-$i',
+      'type': i.isEven ? 'RUNNING' : 'STRENGTH_TRAINING_WITH_EXTRA_LONG_NAME',
+      'source': 'com.example.a.very.long.fitness.app.package.name',
+      'start': AppClock.now().subtract(Duration(hours: i * 3)).millisecondsSinceEpoch,
       'distance_m': 123456.7,
       'moving_time_s': 98765,
+      'kcal': 1234.5,
     });
   }
   final repo = FoodRepo(t.db);
@@ -109,9 +112,17 @@ Future<void> seed(TestApp t) async {
   });
 }
 
-final _stravaConnected = const StravaAccount(clientId: '123456', clientSecret: 'x')
-    .copyWith(accessToken: 'a', refreshToken: 'r', expiresAt: 1, athlete: 'Harshal Deshpande the Long-Distance Runner')
-    .toJson();
+/// Health Connect that is installed and allowed, with nothing new to import.
+class _FakeHealth implements HealthImport {
+  @override
+  Future<bool> available() async => true;
+  @override
+  Future<bool> granted() async => true;
+  @override
+  Future<bool> requestAccess() async => true;
+  @override
+  Future<int> importSince(AppDb db, DateTime since) async => 0;
+}
 
 void main() {
   setUpAll(loadFonts);
@@ -199,9 +210,10 @@ void main() {
         setSize(tester, size);
         final t = (await tester.runAsync(
           () => buildTestApp(
-            prefs: {'text_scale': scale, 'strava': _stravaConnected},
+            prefs: {'text_scale': scale},
             overrides: [
               aiRuntimeProvider.overrideWithValue(FakeAiRuntime(installed: {'Qwen3.5-2B-Q4_K_M.gguf'})),
+              healthImportProvider.overrideWithValue(_FakeHealth()),
             ],
           ),
         ))!;

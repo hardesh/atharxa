@@ -9,7 +9,6 @@ import '../../../data/exercise_tips.dart';
 import '../../../data/workout_repo.dart';
 import '../../../state/core_providers.dart';
 import '../../../state/settings_providers.dart';
-import '../../../state/strava_controller.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
@@ -367,9 +366,6 @@ class CompleteScreen extends ConsumerStatefulWidget {
 class _CompleteScreenState extends ConsumerState<CompleteScreen> {
   String? _feel;
   bool _addKcal = false;
-
-  /// Starts from the Connected services default; only when connected.
-  late bool _upload = ref.read(stravaProvider).account?.uploadByDefault ?? false;
   final _notes = TextEditingController();
   late final DateTime _end = AppClock.now();
 
@@ -450,40 +446,15 @@ class _CompleteScreenState extends ConsumerState<CompleteScreen> {
                   value: _addKcal,
                   onChanged: (v) => setState(() => _addKcal = v),
                 ),
-                if (ref.watch(stravaProvider.select((st) => st.connected)))
-                  SwitchListTile(
-                    title: const Text('Upload to Strava'),
-                    subtitle: const Text('As a Weight Training activity'),
-                    value: _upload,
-                    onChanged: (v) => setState(() => _upload = v),
-                  )
-                else
-                  ListTile(
-                    title: const Text('Upload to Strava'),
-                    subtitle: const Text('Connect Strava in You › Connected services'),
-                    enabled: false,
-                  ),
               ],
             ),
           ),
           FilledButton(
             onPressed: () async {
-              final strava = ref.read(stravaProvider.notifier);
-              final upload = _upload && ref.read(stravaProvider).connected;
-              final messenger = ScaffoldMessenger.of(context);
               await WorkoutRepo(
                 ref.read(dbProvider),
               ).finishSession(s, feel: _feel, notes: _notes.text, kcal: kcal, addKcalToToday: _addKcal);
               if (context.mounted) Navigator.pop(context);
-              if (upload) {
-                final finished = WorkoutSession({
-                  ...s.row,
-                  'ended_at': _end.millisecondsSinceEpoch,
-                  'notes': _notes.text.trim(),
-                }, s.sets);
-                final error = await strava.upload(finished);
-                messenger.showSnackBar(SnackBar(content: Text(error ?? 'Uploaded to Strava')));
-              }
             },
             child: const Text('Save workout'),
           ),

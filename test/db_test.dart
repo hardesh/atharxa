@@ -8,7 +8,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'helpers.dart';
 
 void main() {
-  test('upgrading a version 1 database adds the chats table', () async {
+  test('upgrading a version 1 database adds chats and renames strava_activities to activities', () async {
     sqfliteFfiInit();
     final dir = await Directory.systemTemp.createTemp('atharxa_upgrade');
     final path = p.join(dir.path, 'test.db');
@@ -17,12 +17,28 @@ void main() {
     await v2.close();
     final raw = await databaseFactoryFfi.openDatabase(path);
     await raw.execute('DROP TABLE chats');
+    await raw.execute('ALTER TABLE activities RENAME TO strava_activities');
+    await raw.execute('ALTER TABLE strava_activities DROP COLUMN source');
+    await raw.execute('ALTER TABLE strava_activities DROP COLUMN kcal');
+    await raw.insert('strava_activities', {
+      'id': 'old',
+      'updated_at': 1,
+      'device_id': 'd',
+      'deleted': 0,
+      'rev': 1,
+      'type': 'Run',
+      'start': 1,
+      'distance_m': 5000.0,
+      'moving_time_s': 1500,
+    });
     await raw.setVersion(1);
     await raw.close();
 
     final db = await AppDb.openAt(path, factory: databaseFactoryFfi);
     final id = await db.save('chats', {'title': 'Hi', 'messages': '[]', 'last_at': 1});
     expect((await db.query('chats')).single['id'], id);
+    final kept = (await db.query('activities')).single;
+    expect([kept['id'], kept['distance_m'], kept['source']], ['old', 5000.0, null]);
     await db.close();
   });
 

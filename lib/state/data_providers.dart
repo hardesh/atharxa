@@ -79,14 +79,14 @@ class FinanceMonth extends Notifier<DateTime> {
   void select(DateTime m) => state = DateTime(m.year, m.month);
 }
 
-/// Plans, this week's sessions and Strava activities (Mon–Sun around [day]),
+/// Plans, this week's sessions and imported activities (Mon–Sun around [day]),
 /// and today's unfinished session.
 final workoutProvider = FutureProvider.autoDispose
     .family<
-      ({List<WorkoutPlan> plans, List<WorkoutSession> week, WorkoutSession? active, List<StravaActivity> strava}),
+      ({List<WorkoutPlan> plans, List<WorkoutSession> week, WorkoutSession? active, List<Activity> activities}),
       String
     >((ref, day) async {
-      ref.watchTables([...WorkoutRepo.tables, 'strava_activities']);
+      ref.watchTables([...WorkoutRepo.tables, Activity.table]);
       final repo = WorkoutRepo(ref.watch(dbProvider));
       final d = parseDay(day);
       final monday = d.subtract(Duration(days: d.weekday - 1));
@@ -95,7 +95,7 @@ final workoutProvider = FutureProvider.autoDispose
         plans: await repo.plans(),
         week: week,
         active: week.where((s) => !s.finished && s.day == day).firstOrNull,
-        strava: await repo.stravaBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6)))),
+        activities: await repo.activitiesBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6)))),
       );
     });
 

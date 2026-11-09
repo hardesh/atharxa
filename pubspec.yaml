@@ -58,6 +58,7 @@ dependencies:
   flutter_edge_ai_litertlm: 1.20.0
   flutter_edge_ai_llama: 0.1.0
   llamadart_llama_cpp_flutter: 0.17.3
+  health: 13.3.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

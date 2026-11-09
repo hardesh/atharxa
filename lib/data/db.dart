@@ -31,7 +31,7 @@ class AppDb {
     'exercises',
     'sessions',
     'set_logs',
-    'strava_activities',
+    'activities',
     'prefs',
     'chats',
   ];
@@ -69,7 +69,7 @@ class AppDb {
     final db = await f.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 2,
+        version: 3,
         onCreate: (db, _) async {
           await _createSchema(db);
           await _upgrade(db, 1);
@@ -198,6 +198,14 @@ class AppDb {
       await db.execute(
         'CREATE TABLE chats ($_syncCols, title TEXT NOT NULL, messages TEXT NOT NULL, last_at INTEGER NOT NULL)',
       );
+    }
+    if (from < 3) {
+      // Imported workouts used to be Strava-only; they now come from any app
+      // through Health Connect. source = the app that recorded it.
+      await db.execute('ALTER TABLE strava_activities RENAME TO activities');
+      await db.execute('DROP INDEX IF EXISTS idx_strava_activities_rev');
+      await db.execute('ALTER TABLE activities ADD COLUMN source TEXT');
+      await db.execute('ALTER TABLE activities ADD COLUMN kcal REAL');
     }
     // Every synced table pages changes by rev (tables added above included).
     for (final t in syncedTables) {

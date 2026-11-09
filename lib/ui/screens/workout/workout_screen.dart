@@ -6,7 +6,7 @@ import '../../../data/models.dart';
 import '../../../data/workout_repo.dart';
 import '../../../state/core_providers.dart';
 import '../../../state/data_providers.dart';
-import '../../../state/strava_controller.dart';
+import '../../../state/activity_import_controller.dart';
 import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
@@ -201,7 +201,7 @@ class WorkoutScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-            _StravaCard(activities: d.strava),
+            _ActivitiesCard(activities: d.activities),
           ],
         );
       },
@@ -340,25 +340,32 @@ class _TodayCard extends StatelessWidget {
   }
 }
 
-/// "From Strava": this week's runs and rides (km), imported activities, or
-/// a prompt to connect (You › Connected services).
-class _StravaCard extends ConsumerWidget {
-  const _StravaCard({required this.activities});
-  final List<StravaActivity> activities;
+/// "Runs and rides": this week's workouts recorded by other apps (Strava,
+/// Pixel Watch, Fitbit) via Health Connect, or how to connect it.
+class _ActivitiesCard extends ConsumerWidget {
+  const _ActivitiesCard({required this.activities});
+  final List<Activity> activities;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final strava = ref.watch(stravaProvider);
-    // At most once an hour, quietly.
-    WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(stravaProvider.notifier).importIfStale());
-    if (!strava.connected && activities.isEmpty) {
+    final hc = ref.watch(activityImportProvider);
+    // Phone only, at most once an hour, quietly.
+    WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(activityImportProvider.notifier).importIfStale());
+    if (!hc.granted && activities.isEmpty) {
       return AppCard(
         onTap: () => ConnectedServicesPage.open(context),
         child: Row(
           children: [
             const Icon(Icons.directions_run),
             const SizedBox(width: 12),
-            Expanded(child: Text('Connect Strava to see your runs and rides here.', style: context.tt.bodyMedium)),
+            Expanded(
+              child: Text(
+                hc.supported
+                    ? 'See runs and rides from Strava or your watch here.'
+                    : 'Runs and rides from your phone (Strava, watch) appear here.',
+                style: context.tt.bodyMedium,
+              ),
+            ),
             const Icon(Icons.chevron_right),
           ],
         ),
@@ -372,8 +379,8 @@ class _StravaCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('From Strava', style: context.tt.titleMedium)),
-              if (strava.busy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+              Expanded(child: Text('Runs and rides', style: context.tt.titleMedium)),
+              if (hc.busy) const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
             ],
           ),
           const SizedBox(height: 8),
@@ -399,12 +406,14 @@ class _StravaCard extends ConsumerWidget {
                     ? Icons.directions_bike
                     : Icons.fitness_center,
               ),
-              title: Text(a.name),
+              title: Text(a.typeLabel),
               subtitle: Text(
                 [
                   DateFormat('EEE d MMM').format(a.start),
                   if (a.km > 0) '${a.km.toStringAsFixed(1)} km',
                   fmtDuration(a.moving),
+                  if (a.kcal != null) '${fmtInt(a.kcal!)} kcal',
+                  ?a.source,
                 ].join(' · '),
               ),
             ),

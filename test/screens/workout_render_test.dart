@@ -1,5 +1,6 @@
 import 'package:atharxa/data/models.dart';
 import 'package:atharxa/data/workout_repo.dart';
+import 'package:atharxa/ui/screens/workout/workout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -74,5 +75,18 @@ void main() {
     expect(s.single.finished, isTrue);
     expect(s.single.addKcalToToday, isTrue);
     expect(find.textContaining('min · 2 sets · 345 kg'), findsOneWidget);
+  });
+
+  testWidgets('empty Workout tab is centred (Mac)', (tester) async {
+    setSize(tester, const Size(1200, 860));
+    final t = (await tester.runAsync(() => buildTestApp()))!;
+    await tester.pumpWidget(t.app);
+    await settle(tester);
+    await goTo(tester, 'Workout');
+    final center = tester.getCenter(find.text('No workout plans yet'));
+    final body = tester.getRect(find.byType(WorkoutScreen));
+    expect((center.dx - body.center.dx).abs(), lessThan(2));
+    expect((center.dy - body.center.dy).abs(), lessThan(80));
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/workout_empty_mac.png'));
   });
 }

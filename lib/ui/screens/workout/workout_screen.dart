@@ -54,20 +54,16 @@ class WorkoutScreen extends ConsumerWidget {
         final todayPlan = d.plans.where((p) => p.repeatsOn(today)).firstOrNull;
         final finished = d.week.where((s) => s.finished).toList();
         if (d.plans.isEmpty && d.week.isEmpty) {
-          return PageBody(
-            children: [
-              EmptyState(
-                icon: Icons.fitness_center,
-                title: 'No workout plans yet',
-                message:
-                    'Create a plan with your exercises and the days it repeats on. Rest timers and set tracking come with it.',
-                action: FilledButton.icon(
-                  onPressed: () => PlanEditorScreen.open(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Create a plan'),
-                ),
-              ),
-            ],
+          return EmptyState(
+            icon: Icons.fitness_center,
+            title: 'No workout plans yet',
+            message:
+                'Create a plan with your exercises and the days it repeats on. Rest timers and set tracking come with it.',
+            action: FilledButton.icon(
+              onPressed: () => PlanEditorScreen.open(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Create a plan'),
+            ),
           );
         }
         return PageBody(

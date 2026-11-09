@@ -24,6 +24,10 @@ void showMessage(BuildContext context, String message) {
 }
 
 /// Calm empty state: icon, title, one line of help, optional action.
+///
+/// When it fills a page it centres itself (scrolling if the screen is
+/// short); inside a list it just takes its own height. Text stays at a
+/// readable width.
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key, required this.icon, required this.title, this.message, this.action});
 
@@ -34,30 +38,38 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: context.cs.secondaryContainer,
-            foregroundColor: context.cs.onSecondaryContainer,
-            child: Icon(icon, size: 30),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 32,
+                backgroundColor: context.cs.secondaryContainer,
+                foregroundColor: context.cs.onSecondaryContainer,
+                child: Icon(icon, size: 30),
+              ),
+              const SizedBox(height: 16),
+              Text(title, style: context.tt.titleMedium, textAlign: TextAlign.center),
+              if (message != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  message!,
+                  style: context.tt.bodyMedium?.copyWith(color: context.cs.onSurfaceVariant),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (action != null) ...[const SizedBox(height: 16), action!],
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(title, style: context.tt.titleMedium, textAlign: TextAlign.center),
-          if (message != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              message!,
-              style: context.tt.bodyMedium?.copyWith(color: context.cs.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-          ],
-          if (action != null) ...[const SizedBox(height: 16), action!],
-        ],
+        ),
       ),
+    );
+    return LayoutBuilder(
+      builder: (context, c) => c.hasBoundedHeight ? Center(child: SingleChildScrollView(child: content)) : content,
     );
   }
 }

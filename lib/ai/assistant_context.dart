@@ -190,11 +190,34 @@ Future<AssistantContext> buildAssistantContext(
   return AssistantContext(jsonEncode(data), reads);
 }
 
-/// The system prompt: the assistant's role, its rules, and [ctx].
-String assistantInstructions(String assistantName, AssistantContext ctx) =>
-    'You are $assistantName, the assistant inside the user\'s personal app for food, water, workouts and money. '
-    'Answer briefly and plainly, in a friendly tone. '
-    'DATA below is the user\'s own data, computed by the app. Use its numbers exactly as given; do not recalculate '
-    'totals. If something is not in DATA, say you can\'t see it rather than guessing. '
-    'Amounts are already formatted with their currency. Food values are per entry unless marked per_100g.\n'
-    'DATA: ${ctx.data}';
+/// The system prompt: the assistant's role, its rules, [ctx], and the
+/// [earlier] turns of a chat being continued (fromUser, text), shortened.
+String assistantInstructions(String assistantName, AssistantContext ctx, {List<(bool, String)> earlier = const []}) {
+  String clip(String t) => t.length > 400 ? '${t.substring(0, 400)}…' : t;
+  final recent = earlier.length > 8 ? earlier.sublist(earlier.length - 8) : earlier;
+  return 'You are $assistantName, the assistant inside the user\'s personal app for food, water, workouts and money. '
+      'Answer briefly and plainly, in a friendly tone. '
+      'DATA below is the user\'s own data, computed by the app. Use its numbers exactly as given; do not recalculate '
+      'totals. If something is not in DATA, say you can\'t see it rather than guessing. '
+      'Amounts are already formatted with their currency. Food values are per entry unless marked per_100g. '
+      'When suggesting food, prefer items from my_foods_per_100g and use their exact names.\n'
+      'DATA: ${ctx.data}'
+      '${recent.isEmpty ? '' : '\nEARLIER IN THIS CHAT:\n${recent.map((m) => '${m.$1 ? 'User' : 'You'}: ${clip(m.$2)}').join('\n')}'}';
+}
+
+/// Foods from [mine] that [text] names (whole words; a longer name wins over
+/// one inside it), in the order the text mentions them, at most three, for
+/// "Add to …" buttons under an answer.
+List<FoodItem> foodsMentioned(String text, List<FoodItem> mine) {
+  final lower = text.toLowerCase();
+  final found = <(int, FoodItem)>[];
+  final sorted = [...mine]..sort((a, b) => b.name.length.compareTo(a.name.length));
+  for (final f in sorted) {
+    final name = f.name.toLowerCase().trim();
+    if (name.length < 3 || found.any((x) => x.$2.name.toLowerCase().contains(name))) continue;
+    final at = RegExp('(^|[^a-z0-9])${RegExp.escape(name)}(\$|[^a-z0-9])').firstMatch(lower);
+    if (at != null) found.add((at.start, f));
+  }
+  found.sort((a, b) => a.$1.compareTo(b.$1));
+  return [for (final (_, f) in found.take(3)) f];
+}

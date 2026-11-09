@@ -149,17 +149,21 @@ void main() {
         setSize(tester, size);
         final rt = FakeAiRuntime(
           installed: {'gemma-4-E2B-it_Google_Tensor_G5.litertlm'},
-          reply: List.filled(40, 'protein ').join(),
+          reply: '${List.filled(30, 'protein').join(' ')} Homemade masala oats with roasted vegetables and peanuts.',
         );
         final t = (await tester.runAsync(
           () => buildTestApp(prefs: {'text_scale': scale}, overrides: [aiRuntimeProvider.overrideWithValue(rt)]),
         ))!;
+        await tester.runAsync(() => seed(t));
         await tester.pumpWidget(t.app);
         await settle(tester);
         await tester.tap(find.bySemanticsLabel(RegExp('Ask ')).first);
         await step(tester);
         await tester.enterText(find.byType(TextField), List.filled(30, 'long question').join(' '));
         await tester.testTextInput.receiveAction(TextInputAction.send);
+        await step(tester);
+        expect(find.textContaining('Add Homemade masala oats'), findsOneWidget);
+        await tester.tap(find.byTooltip('Chat history'));
         await step(tester);
       });
 

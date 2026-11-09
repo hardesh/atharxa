@@ -2,12 +2,17 @@ import 'dart:async';
 
 import 'package:atharxa/ai/ai_models.dart';
 import 'package:atharxa/ai/ai_runtime.dart';
+import 'package:atharxa/data/chat_repo.dart';
+import 'package:atharxa/data/food_repo.dart';
+import 'package:atharxa/data/models.dart';
 import 'package:atharxa/state/ai_controller.dart';
+import 'package:atharxa/ui/widgets/meal_card.dart';
 import 'package:atharxa/ui/widgets/model_download_banner.dart';
 import 'package:atharxa/ui/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../nutrition_test.dart' as sample;
 import 'render_helpers.dart';
 
 /// In-memory runtime: instant downloads, canned replies.
@@ -178,5 +183,68 @@ void main() {
     await step(tester);
     expect(rt.installed, contains('Qwen3.5-2B-Q4_K_M.gguf'));
     expect(find.text('Qwen3.5 2B is ready'), findsOneWidget);
+  });
+
+  testWidgets('answers offer My foods they name; chats are saved and reopened', (tester) async {
+    setSize(tester, const Size(412, 900));
+    final rt = FakeAiRuntime(installed: {'gemma-4-E2B-it.litertlm'}, reply: 'Have Paneer bhurji tonight.');
+    final t = await tester.runAsync(
+      () => buildTestApp(prefs: {'ai_wifi_only': false}, overrides: [aiRuntimeProvider.overrideWithValue(rt)]),
+    );
+    await tester.runAsync(() => FoodRepo(t!.db).cache(sample.paneer));
+    await tester.pumpWidget(t!.app);
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Ask Atharxa'));
+    await step(tester);
+    await tester.enterText(find.byType(TextField), 'Dinner idea?');
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await step(tester);
+
+    final meal = mealForNow();
+    final chip = find.textContaining('Add Paneer bhurji to ${meal.label} · 100 g · 220 kcal');
+    expect(chip, findsOneWidget);
+    expect(find.text('Try another'), findsOneWidget);
+    await tester.tap(chip);
+    await step(tester);
+    final logged = await tester.runAsync(() => FoodRepo(t.db).entries(FoodRepo.logs, dayKey(DateTime.now())));
+    expect(logged!.single.name, 'Paneer bhurji');
+    expect(find.text('Added Paneer bhurji to ${meal.label}'), findsOneWidget);
+
+    // Saved: start a new chat, then reopen it from history.
+    await tester.tap(find.byTooltip('New chat'));
+    await step(tester);
+    expect(find.text('Ask anything'), findsOneWidget);
+    await tester.tap(find.byTooltip('Chat history'));
+    await step(tester);
+    await tester.tap(find.text('Dinner idea?'));
+    await step(tester);
+    expect(find.text('Have Paneer bhurji tonight.'), findsOneWidget);
+  });
+
+  testWidgets('assistant · mac: chat history on the left', (tester) async {
+    setSize(tester, const Size(1200, 800));
+    final rt = FakeAiRuntime(
+      installed: {'gemma-4-E4B-it.litertlm'},
+      reply: 'Paneer bhurji with a Roti fits: about 520 kcal and 23 g protein, leaving 380 kcal for the day.',
+    );
+    final t = await tester.runAsync(
+      () => buildTestApp(prefs: {'ai_wifi_only': false}, overrides: [aiRuntimeProvider.overrideWithValue(rt)]),
+    );
+    await tester.runAsync(() async {
+      final food = FoodRepo(t!.db);
+      await food.cache(sample.paneer);
+      await food.cache(sample.roti);
+      await ChatRepo(t.db).save(messages: [(true, 'How much did I spend on food this month?'), (false, '₹5,050.')]);
+    });
+    await tester.pumpWidget(t!.app);
+    await settle(tester);
+    await tester.tap(find.textContaining('Ask Atharxa'));
+    await step(tester);
+    await tester.enterText(find.byType(TextField), 'Suggest a high-protein dinner under 700 kcal from my foods');
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await step(tester);
+    expect(find.text('How much did I spend on food this month?'), findsOneWidget);
+    // Not a golden: the meal, times and month depend on when it runs.
+    expect(find.textContaining('Add Roti to'), findsOneWidget);
   });
 }

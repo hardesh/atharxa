@@ -70,4 +70,20 @@ void main() {
     expect(p, startsWith('You are Atharxa'));
     expect(p, endsWith('DATA: {"x":1}'));
   });
+
+  test('foods named in an answer become actions (whole words, in order, max 3)', () {
+    final mine = [sample.dal, sample.chana, sample.paneer, sample.roti, sample.chai, sample.oats];
+    final found = foodsMentioned('Try paneer bhurji with a roti, then roasted chana. Skip the masala chai.', mine);
+    expect(found.map((f) => f.name), ['Paneer bhurji', 'Roti', 'Roasted chana']);
+    expect(foodsMentioned('A rotisserie chicken', mine), isEmpty); // not "Roti"
+  });
+
+  test('a continued chat carries its earlier turns', () {
+    final p = assistantInstructions(
+      'Atharxa',
+      AssistantContext.empty,
+      earlier: [(true, 'Dinner idea?'), (false, 'Dal tadka.')],
+    );
+    expect(p, contains('EARLIER IN THIS CHAT:\nUser: Dinner idea?\nYou: Dal tadka.'));
+  });
 }

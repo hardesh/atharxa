@@ -33,6 +33,7 @@ class AppDb {
     'set_logs',
     'strava_activities',
     'prefs',
+    'chats',
   ];
 
   final Database _db;
@@ -68,8 +69,12 @@ class AppDb {
     final db = await f.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 1,
-        onCreate: (db, _) => _createSchema(db),
+        version: 2,
+        onCreate: (db, _) async {
+          await _createSchema(db);
+          await _upgrade(db, 1);
+        },
+        onUpgrade: (db, from, _) => _upgrade(db, from),
         singleInstance: !separateConnection,
       ),
     );
@@ -96,73 +101,72 @@ class AppDb {
 
   Future<void> close() => _db.close();
 
+  /// Bookkeeping columns every synced table has.
+  static const _syncCols =
+      'id TEXT PRIMARY KEY, updated_at INTEGER NOT NULL, '
+      'device_id TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, rev INTEGER NOT NULL';
+
   static Future<void> _createSchema(Database db) async {
-    const sync =
-        'id TEXT PRIMARY KEY, updated_at INTEGER NOT NULL, '
-        'device_id TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, rev INTEGER NOT NULL';
     // Per-100 g nutrition. kcal is required; other macros may be NULL (= unknown,
     // e.g. missing in Open Food Facts) and are shown as "—", not 0.
     const per100 = 'kcal REAL NOT NULL DEFAULT 0, protein REAL, carbs REAL, fiber REAL, fat REAL';
     final batch = db.batch()
       ..execute(
-        'CREATE TABLE foods ($sync, name TEXT NOT NULL, brand TEXT, barcode TEXT, '
+        'CREATE TABLE foods ($_syncCols, name TEXT NOT NULL, brand TEXT, barcode TEXT, '
         'serving_g REAL, source TEXT NOT NULL DEFAULT \'custom\', $per100)',
       )
       // Log and plan entries keep a snapshot of the food's per-100 g values, so
       // editing a food later only affects future entries.
       ..execute(
-        'CREATE TABLE food_logs ($sync, day TEXT NOT NULL, meal TEXT NOT NULL, '
+        'CREATE TABLE food_logs ($_syncCols, day TEXT NOT NULL, meal TEXT NOT NULL, '
         'food_id TEXT, name TEXT NOT NULL, brand TEXT, grams REAL NOT NULL, created_at INTEGER NOT NULL, $per100)',
       )
       ..execute(
-        'CREATE TABLE meal_plans ($sync, day TEXT NOT NULL, meal TEXT NOT NULL, '
+        'CREATE TABLE meal_plans ($_syncCols, day TEXT NOT NULL, meal TEXT NOT NULL, '
         'food_id TEXT, name TEXT NOT NULL, brand TEXT, grams REAL NOT NULL, created_at INTEGER NOT NULL, $per100)',
       )
       // source: today | water | notification | mac
       ..execute(
-        'CREATE TABLE water_logs ($sync, day TEXT NOT NULL, ml INTEGER NOT NULL, '
+        'CREATE TABLE water_logs ($_syncCols, day TEXT NOT NULL, ml INTEGER NOT NULL, '
         'logged_at INTEGER NOT NULL, source TEXT NOT NULL DEFAULT \'water\')',
       )
       // amount_minor: integer minor units of [currency] (paise, cents; yen has none).
       ..execute(
-        'CREATE TABLE transactions ($sync, day TEXT NOT NULL, kind TEXT NOT NULL, '
+        'CREATE TABLE transactions ($_syncCols, day TEXT NOT NULL, kind TEXT NOT NULL, '
         'amount_minor INTEGER NOT NULL, currency TEXT NOT NULL, category TEXT NOT NULL, note TEXT)',
       )
       ..execute(
-        'CREATE TABLE categories ($sync, name TEXT NOT NULL, kind TEXT NOT NULL, '
+        'CREATE TABLE categories ($_syncCols, name TEXT NOT NULL, kind TEXT NOT NULL, '
         'is_custom INTEGER NOT NULL DEFAULT 0, sort INTEGER NOT NULL DEFAULT 0)',
       )
       // days: comma-separated ISO weekdays (1 = Monday).
       ..execute(
-        'CREATE TABLE workout_plans ($sync, name TEXT NOT NULL, days TEXT NOT NULL DEFAULT \'\', '
+        'CREATE TABLE workout_plans ($_syncCols, name TEXT NOT NULL, days TEXT NOT NULL DEFAULT \'\', '
         'sort INTEGER NOT NULL DEFAULT 0)',
       )
       // videos: JSON array of YouTube URLs added by the user.
       ..execute(
-        'CREATE TABLE exercises ($sync, plan_id TEXT NOT NULL, name TEXT NOT NULL, '
+        'CREATE TABLE exercises ($_syncCols, plan_id TEXT NOT NULL, name TEXT NOT NULL, '
         'sets INTEGER NOT NULL DEFAULT 3, reps INTEGER NOT NULL DEFAULT 10, kg REAL, '
         'rest_s INTEGER NOT NULL DEFAULT 90, sort INTEGER NOT NULL DEFAULT 0, videos TEXT)',
       )
       ..execute(
-        'CREATE TABLE sessions ($sync, plan_id TEXT, plan_name TEXT NOT NULL, day TEXT NOT NULL, '
+        'CREATE TABLE sessions ($_syncCols, plan_id TEXT, plan_name TEXT NOT NULL, day TEXT NOT NULL, '
         'started_at INTEGER NOT NULL, ended_at INTEGER, feel TEXT, notes TEXT, kcal REAL, '
         'add_kcal_to_today INTEGER NOT NULL DEFAULT 0, strava_activity_id TEXT)',
       )
       ..execute(
-        'CREATE TABLE set_logs ($sync, session_id TEXT NOT NULL, exercise_id TEXT, '
+        'CREATE TABLE set_logs ($_syncCols, session_id TEXT NOT NULL, exercise_id TEXT, '
         'exercise_name TEXT NOT NULL, set_no INTEGER NOT NULL, reps INTEGER NOT NULL, kg REAL, '
         'done_at INTEGER NOT NULL)',
       )
       ..execute(
-        'CREATE TABLE strava_activities ($sync, type TEXT NOT NULL, name TEXT, '
+        'CREATE TABLE strava_activities ($_syncCols, type TEXT NOT NULL, name TEXT, '
         'start INTEGER NOT NULL, distance_m REAL, moving_time_s INTEGER)',
       )
-      ..execute('CREATE TABLE prefs ($sync, value TEXT)')
+      ..execute('CREATE TABLE prefs ($_syncCols, value TEXT)')
       // Local-only: device id, rev counter, per-peer sync cursors.
       ..execute('CREATE TABLE sync_meta (key TEXT PRIMARY KEY, value TEXT)');
-    for (final t in syncedTables) {
-      batch.execute('CREATE INDEX idx_${t}_rev ON $t(rev)');
-    }
     for (final t in ['food_logs', 'meal_plans', 'water_logs', 'transactions', 'sessions']) {
       batch.execute('CREATE INDEX idx_${t}_day ON $t(day)');
     }
@@ -186,6 +190,20 @@ class AppDb {
     ('Salary', 'income'),
     ('Other', 'income'),
   ];
+
+  /// Schema changes after version 1, applied to new and existing databases.
+  static Future<void> _upgrade(Database db, int from) async {
+    if (from < 2) {
+      // Assistant chats: messages is a JSON array of {"u": fromUser, "t": text}.
+      await db.execute(
+        'CREATE TABLE chats ($_syncCols, title TEXT NOT NULL, messages TEXT NOT NULL, last_at INTEGER NOT NULL)',
+      );
+    }
+    // Every synced table pages changes by rev (tables added above included).
+    for (final t in syncedTables) {
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_${t}_rev ON $t(rev)');
+    }
+  }
 
   Future<void> _seed() async {
     if (await getMeta('seeded') != null) return;

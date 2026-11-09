@@ -8,6 +8,24 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'helpers.dart';
 
 void main() {
+  test('upgrading a version 1 database adds the chats table', () async {
+    sqfliteFfiInit();
+    final dir = await Directory.systemTemp.createTemp('atharxa_upgrade');
+    final path = p.join(dir.path, 'test.db');
+    // A version 1 database: today's schema minus chats.
+    final v2 = await AppDb.openAt(path, factory: databaseFactoryFfi);
+    await v2.close();
+    final raw = await databaseFactoryFfi.openDatabase(path);
+    await raw.execute('DROP TABLE chats');
+    await raw.setVersion(1);
+    await raw.close();
+
+    final db = await AppDb.openAt(path, factory: databaseFactoryFfi);
+    final id = await db.save('chats', {'title': 'Hi', 'messages': '[]', 'last_at': 1});
+    expect((await db.query('chats')).single['id'], id);
+    await db.close();
+  });
+
   test('schema opens and seeds default categories once', () async {
     final db = await openTestDb();
     final cats = await db.query('categories');

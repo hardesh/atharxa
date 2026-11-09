@@ -14,12 +14,6 @@ import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 
-String fmtDuration(Duration d) {
-  final h = d.inHours, m = d.inMinutes % 60, s = d.inSeconds % 60;
-  String two(int v) => v.toString().padLeft(2, '0');
-  return h > 0 ? '$h:${two(m)}:${two(s)}' : '${two(m)}:${two(s)}';
-}
-
 /// Live workout (WorkoutSession.dc.html): timer, exercise n of m, set k of n,
 /// reps/kg steppers, Complete set (auto rest timer), set chips, form tips,
 /// videos, up next. Sets are saved as they're completed, so a session can be

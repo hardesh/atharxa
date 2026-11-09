@@ -32,6 +32,5 @@ class WaterRepo {
 
   Future<void> restore(Map<String, Object?> row) => db.save(table, _fields(row));
 
-  static Map<String, Object?> _fields(Map<String, Object?> r) =>
-      Map.of(r)..removeWhere((k, _) => const {'updated_at', 'device_id', 'deleted', 'rev'}.contains(k));
+  static Map<String, Object?> _fields(Map<String, Object?> r) => AppDb.editable(r);
 }

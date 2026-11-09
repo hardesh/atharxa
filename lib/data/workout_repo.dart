@@ -188,7 +188,7 @@ class WorkoutRepo {
     required double kcal,
     required bool addKcalToToday,
   }) => db.save('sessions', {
-    ...Map.of(s.row)..removeWhere((k, _) => const {'updated_at', 'device_id', 'deleted', 'rev'}.contains(k)),
+    ...AppDb.editable(s.row),
     'ended_at': DateTime.now().millisecondsSinceEpoch,
     'feel': feel,
     'notes': (notes ?? '').trim().isEmpty ? null : notes!.trim(),

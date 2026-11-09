@@ -50,3 +50,5 @@ app.*.map.json
 
 # Golden test failure diffs
 test/**/failures/
+# Widget Preview related
+.widget_preview/

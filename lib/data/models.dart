@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import 'db.dart';
+
 String dayKey(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 DateTime parseDay(String key) => DateTime.parse(key);
 
@@ -106,8 +108,7 @@ class FoodEntry {
   Nutrients get totals => per100.forGrams(grams);
 
   /// Fields to copy when duplicating into another table/day.
-  Map<String, Object?> copyFields() =>
-      Map.of(row)..removeWhere((k, _) => const {'id', 'updated_at', 'device_id', 'deleted', 'rev'}.contains(k));
+  Map<String, Object?> copyFields() => AppDb.editable(row, keepId: false);
 }
 
 enum Meal {

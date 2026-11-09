@@ -26,8 +26,7 @@ class Tx {
   /// +income / −expense, in minor units.
   int get signed => kind == TxKind.income ? amountMinor : -amountMinor;
 
-  Map<String, Object?> fields() =>
-      Map.of(row)..removeWhere((k, _) => const {'updated_at', 'device_id', 'deleted', 'rev'}.contains(k));
+  Map<String, Object?> fields() => AppDb.editable(row);
 }
 
 /// Totals for one currency.

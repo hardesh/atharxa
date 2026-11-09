@@ -59,3 +59,10 @@ String fmtWhen(DateTime t) {
 
 /// "November 2026".
 String fmtMonth(DateTime d) => DateFormat('MMMM yyyy').format(d);
+
+/// "46:12", or "1:02:05" past an hour.
+String fmtDuration(Duration d) {
+  final h = d.inHours, m = d.inMinutes % 60, s = d.inSeconds % 60;
+  String two(int v) => v.toString().padLeft(2, '0');
+  return h > 0 ? '$h:${two(m)}:${two(s)}' : '${two(m)}:${two(s)}';
+}

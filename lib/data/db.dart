@@ -242,6 +242,14 @@ class AppDb {
     _emit(table, local: true);
   }
 
+  /// Sync bookkeeping columns, managed by [save]/[delete]/[merge].
+  static const bookkeeping = {'updated_at', 'device_id', 'deleted', 'rev'};
+
+  /// A copy of [row] without bookkeeping (and without `id` unless [keepId]),
+  /// ready to pass back to [save] — to update it, restore it, or duplicate it.
+  static Map<String, Object?> editable(Map<String, Object?> row, {bool keepId = true}) =>
+      Map.of(row)..removeWhere((k, _) => bookkeeping.contains(k) || (!keepId && k == 'id'));
+
   /// True once anything was logged or a goal was set (used to skip first run).
   Future<bool> hasUserData() async {
     final r = await _db.rawQuery(

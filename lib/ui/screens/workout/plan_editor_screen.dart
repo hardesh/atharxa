@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/db.dart';
 import '../../../data/workout_repo.dart';
 import '../../../state/core_providers.dart';
 import '../../theme/semantic.dart';
@@ -30,8 +31,9 @@ class _PlanEditorScreenState extends ConsumerState<PlanEditorScreen> {
   /// Exercise rows being edited (existing ones keep their id).
   late final List<Map<String, Object?>> _exercises = [
     for (final e in widget.plan?.exercises ?? const <Exercise>[])
-      Map.of(e.row)
-        ..removeWhere((k, _) => const {'updated_at', 'device_id', 'deleted', 'rev', 'plan_id', 'sort'}.contains(k)),
+      AppDb.editable(e.row)
+        ..remove('plan_id')
+        ..remove('sort'),
   ];
 
   @override

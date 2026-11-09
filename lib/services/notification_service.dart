@@ -272,7 +272,7 @@ Future<void> handleReminderAction(
   }
 
   final ownDb = db == null;
-  final d = db ?? await AppDb.open();
+  final d = db ?? await AppDb.open(separateConnection: true);
   try {
     final goals = (await SyncedSettings.load(d)).goals;
     final today = DateTime.now();

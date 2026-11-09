@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:atharxa/data/db.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'helpers.dart';
 
@@ -48,5 +53,18 @@ void main() {
     expect(await db.hasUserData(), isFalse);
     await db.save('water_logs', {'day': '2026-11-09', 'ml': 250, 'logged_at': 1, 'source': 'water'});
     expect(await db.hasUserData(), isTrue);
+  });
+
+  test('a background open/close does not close the app\'s connection', () async {
+    sqfliteFfiInit();
+    final dir = await Directory.systemTemp.createTemp('atharxa_bg');
+    final path = p.join(dir.path, 'app.db');
+    final app = await AppDb.openAt(path, factory: databaseFactoryFfi);
+    // What the Android background sync job / notification action does:
+    final background = await AppDb.openAt(path, factory: databaseFactoryFfi, separateConnection: true);
+    await background.save('water_logs', {'day': '2026-11-09', 'ml': 250, 'logged_at': 1, 'source': 'notification'});
+    await background.close();
+    // The app keeps working and sees the background write.
+    expect((await app.query('water_logs')).single['ml'], 250);
   });
 }

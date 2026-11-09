@@ -43,7 +43,7 @@ void backgroundSyncDispatcher() {
     WidgetsFlutterBinding.ensureInitialized();
     final prefs = SyncPrefs(await SharedPreferences.getInstance());
     if (!prefs.enabled || !prefs.autoSync || !SyncAuth.isValidCode(prefs.code) || prefs.peers.isEmpty) return true;
-    final db = await AppDb.open();
+    final db = await AppDb.open(separateConnection: true);
     final client = SyncClient(db: db, auth: SyncAuth(prefs.code), deviceName: prefs.deviceName);
     try {
       for (final p in prefs.peers) {

@@ -50,18 +50,28 @@ class AppDb {
   Stream<String> get localChanges => _localChanges.stream;
 
   /// Opens the app database in the platform's application-support directory.
-  static Future<AppDb> open() async {
+  ///
+  /// Background work (Android sync job, notification actions) must pass
+  /// [separateConnection]: they can run inside the app's process, and
+  /// sqflite otherwise hands every open of the same file the *same*
+  /// connection — closing it would close the app's database too
+  /// ("database_closed").
+  static Future<AppDb> open({bool separateConnection = false}) async {
     final dir = await getApplicationSupportDirectory();
-    return openAt(p.join(dir.path, 'atharxa.db'));
+    return openAt(p.join(dir.path, 'atharxa.db'), separateConnection: separateConnection);
   }
 
   /// Opens (or creates) a database at [path]. Tests pass `inMemoryDatabasePath`
   /// together with an ffi [factory].
-  static Future<AppDb> openAt(String path, {DatabaseFactory? factory}) async {
+  static Future<AppDb> openAt(String path, {DatabaseFactory? factory, bool separateConnection = false}) async {
     final f = factory ?? databaseFactory;
     final db = await f.openDatabase(
       path,
-      options: OpenDatabaseOptions(version: 1, onCreate: (db, _) => _createSchema(db)),
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: (db, _) => _createSchema(db),
+        singleInstance: !separateConnection,
+      ),
     );
     final meta = await db.query('sync_meta', where: 'key = ?', whereArgs: ['device_id']);
     String deviceId;

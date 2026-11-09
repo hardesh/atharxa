@@ -5,13 +5,23 @@ import '../data/finance_repo.dart';
 import '../data/food_repo.dart';
 import '../data/models.dart';
 import '../data/water_repo.dart';
+import '../data/workout_repo.dart';
 import 'core_providers.dart';
 
 /// Food log entries + water total for a day (Overview).
-final overviewProvider = FutureProvider.family<({List<FoodEntry> entries, int waterMl}), String>((ref, day) async {
-  ref.watchTables(const [FoodRepo.logs, WaterRepo.table]);
+/// [workoutKcal]: calories from that day's workouts the user chose to add to
+/// the day's budget ("Add kcal to Today").
+final overviewProvider = FutureProvider.family<({List<FoodEntry> entries, int waterMl, double workoutKcal}), String>((
+  ref,
+  day,
+) async {
+  ref.watchTables(const [FoodRepo.logs, WaterRepo.table, 'sessions']);
   final db = ref.watch(dbProvider);
-  return (entries: await FoodRepo(db).entries(FoodRepo.logs, day), waterMl: await WaterRepo(db).total(day));
+  return (
+    entries: await FoodRepo(db).entries(FoodRepo.logs, day),
+    waterMl: await WaterRepo(db).total(day),
+    workoutKcal: await WorkoutRepo(db).kcalAddedOn(day),
+  );
 });
 
 /// Planned items + what's already logged that day (Meal plan).
@@ -66,6 +76,24 @@ class FinanceMonth extends Notifier<DateTime> {
 
   void select(DateTime m) => state = DateTime(m.year, m.month);
 }
+
+/// Plans, this week's sessions (Mon–Sun around [day]) and today's unfinished session.
+final workoutProvider =
+    FutureProvider.family<({List<WorkoutPlan> plans, List<WorkoutSession> week, WorkoutSession? active}), String>((
+      ref,
+      day,
+    ) async {
+      ref.watchTables(WorkoutRepo.tables);
+      final repo = WorkoutRepo(ref.watch(dbProvider));
+      final d = parseDay(day);
+      final monday = d.subtract(Duration(days: d.weekday - 1));
+      final week = await repo.sessionsBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6))));
+      return (
+        plans: await repo.plans(),
+        week: week,
+        active: week.where((s) => !s.finished && s.day == day).firstOrNull,
+      );
+    });
 
 /// Renders an [AsyncValue]: previous data stays on screen while reloading;
 /// a spinner shows only on first load.

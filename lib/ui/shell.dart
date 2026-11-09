@@ -10,8 +10,8 @@ import 'screens/food/food_picker_screen.dart';
 import 'screens/meal_plan_screen.dart';
 import 'screens/overview_screen.dart';
 import 'screens/water_screen.dart';
+import 'screens/workout/workout_screen.dart';
 import 'screens/you/you_screen.dart';
-import 'widgets/feedback.dart';
 import 'widgets/layout.dart';
 import 'widgets/top_bar.dart';
 
@@ -83,7 +83,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       label: 'Workout',
       icon: Icons.fitness_center_outlined,
       selectedIcon: Icons.fitness_center,
-      build: (_) => const PlaceholderPage('Workout'),
+      build: (_) => const WorkoutScreen(),
     ),
     Destination(
       label: 'Finance',
@@ -190,18 +190,4 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
     );
   }
-}
-
-class PlaceholderPage extends StatelessWidget {
-  const PlaceholderPage(this.name, {super.key});
-  final String name;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: EmptyState(
-      icon: Icons.construction_outlined,
-      title: name,
-      message: 'This screen arrives in an upcoming update.',
-    ),
-  );
 }

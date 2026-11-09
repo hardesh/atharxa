@@ -51,7 +51,13 @@ The app's name may change, so **don't build the product name into code identifie
   - Every synced table has `id` (a UUID), `updated_at` (a hybrid logical clock), `device_id`, `deleted` (a tombstone) and `rev` (a local change counter).
   - Always write through `AppDb.save` and `AppDb.delete`, never with raw SQL writes, so that sync sees the change.
   - Food logs and plans store a **per-100 g snapshot** plus grams. Macros may be `null`, meaning unknown; show them as "—", never as 0.
-  - Repositories: `FoodRepo`, `WaterRepo`.
+  - Repositories: `FoodRepo`, `WaterRepo`, `FinanceRepo` (with `MonthSummary` totals per currency; there's no FX conversion) and `WorkoutRepo` (plans, sessions, set logs).
+  - Money is stored as integer minor units plus an ISO currency (`lib/data/currency.dart`).
+  - Export (`lib/services/transactions_export.dart`):
+    - CSV with a BOM.
+    - Excel built by hand as zipped XML with `archive`. Don't add a spreadsheet package.
+  - Files are saved through `lib/services/file_saver.dart`: the nativeapi save panel on macOS, the Downloads folder on Android.
+  - Workout form tips live in `assets/data/exercise_tips.json`. Exercise videos are user-added YouTube links, opened through nativeapi `UrlOpener`; the fallback copies the link.
 - **Wi-Fi sync** (`lib/sync/`), peer to peer with no cloud:
   - `sync_auth.dart`: a key derived from the 6-digit pairing code (PBKDF2), and HMAC-signed requests and responses.
   - `sync_protocol.dart`: an HTTP server with hello, pull and push, and a client that sends paged changes with cursors per peer. Errors are typed (code mismatch, unreachable, interrupted).

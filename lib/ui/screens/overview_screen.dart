@@ -52,7 +52,11 @@ class OverviewScreen extends ConsumerWidget {
       child: AsyncBody(
         value: ref.watch(overviewProvider(dayKey(date))),
         builder: (context, d) {
-          final summary = SummaryCard(totals: Nutrients.sum(d.entries.map((e) => e.totals)), goals: goals);
+          final summary = SummaryCard(
+            totals: Nutrients.sum(d.entries.map((e) => e.totals)),
+            // Workouts added to Today raise the day's calorie budget.
+            goals: d.workoutKcal > 0 ? goals.copyWith(kcal: goals.kcal + d.workoutKcal) : goals,
+          );
           final water = _WaterCard(
             ml: d.waterMl,
             goal: goals.waterMl,

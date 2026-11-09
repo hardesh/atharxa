@@ -135,6 +135,9 @@ class Goals {
 
   final double kcal, protein, carbs, fiber, fat;
   final int waterMl;
+
+  Goals copyWith({double? kcal}) =>
+      Goals(kcal: kcal ?? this.kcal, waterMl: waterMl, protein: protein, carbs: carbs, fiber: fiber, fat: fat);
 }
 
 enum Sex { female, male }

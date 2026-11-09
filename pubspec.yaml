@@ -75,6 +75,7 @@ flutter:
   assets:
     - assets/icon/
     - assets/tray/
+    - assets/data/
   fonts:
     - family: Roboto
       fonts:

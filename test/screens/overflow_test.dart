@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:atharxa/data/finance_repo.dart';
 import 'package:atharxa/data/food_repo.dart';
+import 'package:atharxa/data/workout_repo.dart';
 import 'package:atharxa/data/models.dart';
 import 'package:atharxa/state/sync_controller.dart';
 import 'package:atharxa/sync/discovery.dart';
 import 'package:atharxa/sync/peers.dart';
 import 'package:atharxa/ui/screens/finance/finance_screen.dart';
 import 'package:atharxa/ui/screens/finance/transaction_sheet.dart';
+import 'package:atharxa/ui/screens/workout/plan_editor_screen.dart';
+import 'package:atharxa/ui/screens/workout/workout_screen.dart';
 import 'package:atharxa/ui/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +18,7 @@ import 'package:intl/intl.dart';
 
 import '../finance_test.dart' show seedNovember;
 import '../nutrition_test.dart' as sample;
+import '../workout_test.dart' show seedLowerBodyA;
 import 'render_helpers.dart';
 
 /// Opens every screen and dialog at phone widths × text sizes. Any RenderFlex
@@ -79,6 +83,7 @@ Future<void> seed(TestApp t) async {
   }
   await t.db.setPref('profile_name', 'Harshal Deshpande with a rather long display name');
   await seedNovember(t.db);
+  await seedLowerBodyA(t.db);
   // A month with long names and a big amount in the current month too.
   await t.db.save('transactions', {
     'day': dayKey(today),
@@ -207,6 +212,37 @@ void main() {
         }
         await step(tester);
         await tester.drag(find.byType(SingleChildScrollView).last, const Offset(0, -600), warnIfMissed: false);
+        await step(tester);
+      });
+
+      testWidgets('workout: plan editor, session, complete · $label', (tester) async {
+        setSize(tester, size);
+        final t = (await tester.runAsync(() => buildTestApp(prefs: {'text_scale': scale})))!;
+        await tester.runAsync(() => seed(t));
+        await tester.pumpWidget(t.app);
+        await settle(tester);
+        await goTo(tester, 'Workout');
+        // Plan editor + exercise dialog.
+        final plan = (await tester.runAsync(() => WorkoutRepo(t.db).plans()))!.single;
+        unawaited(PlanEditorScreen.open(tester.element(find.byType(WorkoutScreen)), plan: plan));
+        await step(tester);
+        await tester.tap(find.text('Goblet squat'));
+        await step(tester);
+        await tester.tap(find.text('Cancel'));
+        await step(tester);
+        await tester.pageBack();
+        await step(tester);
+        // Live session with the rest timer, then the complete screen.
+        await tester.tap(find.text('Start workout'));
+        await step(tester);
+        await step(tester);
+        await tester.tap(find.text('Complete set'));
+        await step(tester);
+        await tester.drag(find.byType(Scrollable).last, const Offset(0, -600), warnIfMissed: false);
+        await step(tester);
+        await tester.tap(find.text('End workout'));
+        await step(tester);
+        await tester.drag(find.byType(Scrollable).last, const Offset(0, -600), warnIfMissed: false);
         await step(tester);
       });
 

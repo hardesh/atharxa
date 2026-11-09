@@ -1,0 +1,22 @@
+{
+  "goblet squat": {"tips": ["Hold the weight against your chest", "Sit between your hips, chest up", "Push the floor away through mid-foot"], "mistake": "Knees caving in on the way up."},
+  "squat": {"tips": ["Brace before each rep", "Hips and knees bend together", "Drive up through the whole foot"], "mistake": "Heels lifting off the floor."},
+  "romanian deadlift": {"tips": ["Soft knees, push hips back", "Keep the weight close to your legs", "Stop when you feel the hamstrings stretch"], "mistake": "Rounding the lower back to reach lower."},
+  "deadlift": {"tips": ["Bar over mid-foot", "Pull the slack out before lifting", "Stand tall, squeeze glutes at the top"], "mistake": "Jerking the bar off the floor."},
+  "lunge": {"tips": ["Long enough step for a 90° front knee", "Torso upright", "Push back up through the front heel"], "mistake": "Front knee drifting inward."},
+  "glute bridge": {"tips": ["Feet flat, close to your hips", "Squeeze glutes to lift", "Pause at the top"], "mistake": "Arching the lower back instead of using the glutes."},
+  "hip thrust": {"tips": ["Upper back on the bench edge", "Chin tucked", "Lock out with glutes, not lower back"], "mistake": "Over-arching at the top."},
+  "calf raise": {"tips": ["Full range: heels low to high", "Pause at the top", "Lower slowly"], "mistake": "Bouncing through short reps."},
+  "plank": {"tips": ["Elbows under shoulders", "Squeeze glutes and brace", "Straight line head to heels"], "mistake": "Hips sagging toward the floor."},
+  "push-up": {"tips": ["Hands just wider than shoulders", "Body in one line", "Chest to a fist's height off the floor"], "mistake": "Elbows flaring straight out."},
+  "bench press": {"tips": ["Shoulder blades pulled back and down", "Bar to lower chest", "Feet planted, press up and slightly back"], "mistake": "Bouncing the bar off the chest."},
+  "overhead press": {"tips": ["Brace and squeeze glutes", "Bar path close to your face", "Head through at the top"], "mistake": "Leaning back to push the weight up."},
+  "row": {"tips": ["Flat back, hinge from the hips", "Pull elbows toward your hips", "Squeeze shoulder blades at the top"], "mistake": "Using momentum to swing the weight."},
+  "pull-up": {"tips": ["Start from a dead hang", "Pull elbows down to your ribs", "Chin over the bar, control the descent"], "mistake": "Kipping or half reps."},
+  "lat pulldown": {"tips": ["Lean back slightly", "Pull the bar to your upper chest", "Control the bar back up"], "mistake": "Pulling the bar behind the neck."},
+  "bicep curl": {"tips": ["Elbows pinned to your sides", "Full extension at the bottom", "Slow on the way down"], "mistake": "Swinging the weight with your back."},
+  "tricep": {"tips": ["Keep upper arms still", "Fully straighten the elbow", "Control the return"], "mistake": "Elbows flaring out."},
+  "shoulder press": {"tips": ["Wrists over elbows", "Press straight up", "Don't shrug"], "mistake": "Arching the lower back."},
+  "lateral raise": {"tips": ["Slight bend in the elbows", "Lead with the elbows", "Stop at shoulder height"], "mistake": "Using momentum and shrugging."},
+  "crunch": {"tips": ["Lift shoulder blades, not your neck", "Exhale as you curl up", "Slow on the way down"], "mistake": "Pulling on your head."}
+}

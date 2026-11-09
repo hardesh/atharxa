@@ -38,7 +38,11 @@ The app's name may change, so **don't build the product name into code identifie
     - `syncedSettingsProvider`: goals, palette, currency and name, stored in the `prefs` table and synced.
     - `deviceSettingsProvider`: mode, text size and first run, stored in SharedPreferences and never synced.
     - `selectedDayProvider`: shared by Overview and Water.
-  - `lib/state/data_providers.dart`: per-screen `FutureProvider.family`s keyed by day key, plus `AsyncBody`.
+  - `lib/state/data_providers.dart`: per-screen `FutureProvider.autoDispose.family`s keyed by day or month, plus `AsyncBody`.
+- **Memory and battery**:
+  - Keep screen data providers **auto-dispose**, and have the shell build **only the selected tab**.
+  - Measure memory with a release build (`footprint <pid>` on macOS). Debug builds are about 3× larger.
+  - Background sync runs every 30 minutes; flush pending edits on hide. Don't add always-on work.
   - Callbacks without a `ref` can use `context.db` / `context.readProvider(...)` for imperative reads only.
   - `lib/state/sync_controller.dart` (`syncControllerProvider`): Wi-Fi sync state and actions.
   - `lib/state/reminders_controller.dart` (`remindersProvider`): reminder settings stored per device. It re-plans notifications about 1 s after any food, water, plan or goal change, and on app resume.

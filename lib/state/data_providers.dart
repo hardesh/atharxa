@@ -8,24 +8,25 @@ import '../data/water_repo.dart';
 import '../data/workout_repo.dart';
 import 'core_providers.dart';
 
+/// Screen data providers auto-dispose: a day/month's data is dropped once no
+/// screen shows it, so browsing history doesn't grow memory.
+
 /// Food log entries + water total for a day (Overview).
 /// [workoutKcal]: calories from that day's workouts the user chose to add to
 /// the day's budget ("Add kcal to Today").
-final overviewProvider = FutureProvider.family<({List<FoodEntry> entries, int waterMl, double workoutKcal}), String>((
-  ref,
-  day,
-) async {
-  ref.watchTables(const [FoodRepo.logs, WaterRepo.table, 'sessions']);
-  final db = ref.watch(dbProvider);
-  return (
-    entries: await FoodRepo(db).entries(FoodRepo.logs, day),
-    waterMl: await WaterRepo(db).total(day),
-    workoutKcal: await WorkoutRepo(db).kcalAddedOn(day),
-  );
-});
+final overviewProvider = FutureProvider.autoDispose
+    .family<({List<FoodEntry> entries, int waterMl, double workoutKcal}), String>((ref, day) async {
+      ref.watchTables(const [FoodRepo.logs, WaterRepo.table, 'sessions']);
+      final db = ref.watch(dbProvider);
+      return (
+        entries: await FoodRepo(db).entries(FoodRepo.logs, day),
+        waterMl: await WaterRepo(db).total(day),
+        workoutKcal: await WorkoutRepo(db).kcalAddedOn(day),
+      );
+    });
 
 /// Planned items + what's already logged that day (Meal plan).
-final mealPlanProvider = FutureProvider.family<({List<FoodEntry> plan, List<FoodEntry> logged}), String>((
+final mealPlanProvider = FutureProvider.autoDispose.family<({List<FoodEntry> plan, List<FoodEntry> logged}), String>((
   ref,
   day,
 ) async {
@@ -35,13 +36,13 @@ final mealPlanProvider = FutureProvider.family<({List<FoodEntry> plan, List<Food
 });
 
 /// A day's water entries, newest first.
-final waterEntriesProvider = FutureProvider.family<List<Map<String, Object?>>, String>((ref, day) {
+final waterEntriesProvider = FutureProvider.autoDispose.family<List<Map<String, Object?>>, String>((ref, day) {
   ref.watchTables(const [WaterRepo.table]);
   return WaterRepo(ref.watch(dbProvider)).entries(day);
 });
 
 /// ml per day for the 7 days ending on [day] (day key → ml).
-final waterWeekProvider = FutureProvider.family<Map<String, int>, String>((ref, day) async {
+final waterWeekProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, day) async {
   ref.watchTables(const [WaterRepo.table]);
   final db = ref.watch(dbProvider);
   final from = dayKey(parseDay(day).subtract(const Duration(days: 6)));
@@ -53,13 +54,13 @@ final waterWeekProvider = FutureProvider.family<Map<String, int>, String>((ref, 
 });
 
 /// Transactions of a month ("2026-11").
-final financeMonthProvider = FutureProvider.family<List<Tx>, String>((ref, yyyyMm) {
+final financeMonthProvider = FutureProvider.autoDispose.family<List<Tx>, String>((ref, yyyyMm) {
   ref.watchTables(const [FinanceRepo.table]);
   return FinanceRepo(ref.watch(dbProvider)).month(yyyyMm);
 });
 
 /// Category names for income or expenses (defaults, then custom).
-final categoriesProvider = FutureProvider.family<List<String>, TxKind>((ref, kind) {
+final categoriesProvider = FutureProvider.autoDispose.family<List<String>, TxKind>((ref, kind) {
   ref.watchTables(const ['categories']);
   return FinanceRepo(ref.watch(dbProvider)).categories(kind);
 });
@@ -78,11 +79,8 @@ class FinanceMonth extends Notifier<DateTime> {
 }
 
 /// Plans, this week's sessions (Mon–Sun around [day]) and today's unfinished session.
-final workoutProvider =
-    FutureProvider.family<({List<WorkoutPlan> plans, List<WorkoutSession> week, WorkoutSession? active}), String>((
-      ref,
-      day,
-    ) async {
+final workoutProvider = FutureProvider.autoDispose
+    .family<({List<WorkoutPlan> plans, List<WorkoutSession> week, WorkoutSession? active}), String>((ref, day) async {
       ref.watchTables(WorkoutRepo.tables);
       final repo = WorkoutRepo(ref.watch(dbProvider));
       final d = parseDay(day);

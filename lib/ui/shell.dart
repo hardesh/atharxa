@@ -134,9 +134,12 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
       // Wide layouts put primary actions in the header instead of a FAB.
       floatingActionButton: wide ? null : d.fab?.call(context),
-      body: IndexedStack(
-        index: index,
-        children: [for (final x in dests) Builder(builder: x.build)],
+      // Only the selected tab is built (not all of them kept alive), which
+      // keeps memory and background work down; its data reloads quickly from
+      // the local database when you come back.
+      body: KeyedSubtree(
+        key: ValueKey(d.label),
+        child: Builder(builder: d.build),
       ),
     );
 

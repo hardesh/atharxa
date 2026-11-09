@@ -50,6 +50,15 @@ mac-open: mac
     @pkill -f "Atharxa.app/Contents/MacOS/Atharxa" || true
     @open build/macos/Build/Products/Release/Atharxa.app
 
+# Build and install into /Applications (free, this Mac only; data is kept), then open it
+mac-install: mac
+    @pkill -f "Atharxa.app/Contents/MacOS/Atharxa" || true
+    @sleep 1
+    @rm -rf /Applications/Atharxa.app
+    @ditto build/macos/Build/Products/Release/Atharxa.app /Applications/Atharxa.app
+    @open /Applications/Atharxa.app
+    @echo "installed /Applications/Atharxa.app"
+
 # Run on macOS in debug (hot reload)
 mac-run:
     flutter run -d macos

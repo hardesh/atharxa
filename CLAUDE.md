@@ -93,7 +93,7 @@ Output is short on purpose (failures and errors only; build logs go to `build/lo
 - `just test-name "text" [files…]`: tests whose name contains the text.
 - `just goldens [files…]`: refresh screenshot goldens (default `test/screens`); then look at the changed PNGs.
 - `just analyze`, `just fmt`.
-- `just mac` / `just mac-open` (build and reopen the release app) / `just mac-run` (debug) / `just mac-mem` (memory).
+- `just mac` / `just mac-install` (build, copy to /Applications, open; the free personal install) / `just mac-open` (build and reopen from build/) / `just mac-run` (debug) / `just mac-mem` (memory).
 - `just phone` (build, install on the connected phone, open) / `just apk` / `just phone-run` (debug) / `just devices` / `just phone-log [lines]`.
 - `just all`: install on the phone and the Mac. `just clean`.
 

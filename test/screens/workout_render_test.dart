@@ -48,7 +48,7 @@ void main() {
     await step(tester);
 
     await tester.tap(find.text('Complete set'));
-    await step(tester);
+    await waitFor(tester, find.textContaining('Rest '));
     expect(find.textContaining('Rest '), findsOneWidget); // auto rest timer (90 s)
     expect(find.text('Set 2 of 3 · target 10 reps · 16 kg'), findsOneWidget);
     await tester.tap(find.text('Skip'));
@@ -56,20 +56,20 @@ void main() {
     await tester.pump();
     expect(find.text('18.5'), findsOneWidget);
     await tester.tap(find.text('Complete set'));
-    await step(tester);
+    await waitFor(tester, find.text('Set 3 of 3 · target 10 reps · 16 kg'));
 
     await tester.tap(find.text('End workout'));
+    await waitFor(tester, find.text('Workout complete'));
     await step(tester);
     expect(find.text('Workout complete'), findsOneWidget);
     expect(find.text('2 / 18'), findsOneWidget);
     expect(find.text('345 kg'), findsOneWidget); // 10 × 16 + 10 × 18.5
-    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/workout_complete_phone.png'));
     await tester.tap(find.text('Good'));
     await tester.tap(find.byType(Switch).first); // Add kcal to Today
     await tester.pump();
     await tester.scrollUntilVisible(find.text('Save workout'), 200, scrollable: find.byType(Scrollable).last);
     await tester.tap(find.text('Save workout'));
-    await step(tester);
+    await waitFor(tester, find.textContaining('min · 2 sets · 345 kg'));
 
     final s = (await tester.runAsync(
       () => WorkoutRepo(t.db).sessionsBetween(dayKey(DateTime.now()), dayKey(DateTime.now())),

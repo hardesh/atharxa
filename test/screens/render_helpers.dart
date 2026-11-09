@@ -73,3 +73,14 @@ Future<void> step(WidgetTester tester) async {
   await settle(tester);
   await tester.pump(const Duration(milliseconds: 400));
 }
+
+/// Pumps until [finder] matches something (real DB work can be slow when
+/// the whole suite runs in parallel), up to [timeout]. Use after actions
+/// that write to the database instead of a fixed wait.
+Future<void> waitFor(WidgetTester tester, Finder finder, {Duration timeout = const Duration(seconds: 5)}) async {
+  final end = DateTime.now().add(timeout);
+  while (finder.evaluate().isEmpty && DateTime.now().isBefore(end)) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}

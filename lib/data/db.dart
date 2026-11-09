@@ -358,6 +358,14 @@ class AppDb {
       for (final r in await _db.query(t, where: 'deleted = 0')) SyncRow(t, r),
   ];
 
+  /// Live (not deleted) rows per table, in one query.
+  Future<Map<String, int>> countLive(Iterable<String> tables) async {
+    final r = await _db.rawQuery(
+      tables.map((t) => "SELECT '$t' AS t, COUNT(*) AS n FROM $t WHERE deleted = 0").join(' UNION ALL '),
+    );
+    return {for (final row in r) row['t'] as String: (row['n'] as num).toInt()};
+  }
+
   /// Number of rows a [changesPage] walk from [sinceRev] would return.
   Future<int> countChanges(int sinceRev, {String? excludeDevice}) async {
     final (where, args) = _sinceFilter(sinceRev, excludeDevice);

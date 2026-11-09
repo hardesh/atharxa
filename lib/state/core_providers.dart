@@ -8,6 +8,20 @@ import '../services/notification_service.dart';
 
 /// Opened in `main` (async) and injected with `overrideWithValue`.
 final dbProvider = Provider<AppDb>((ref) => throw UnimplementedError('dbProvider must be overridden'));
+
+/// SharedPreferences keys of this device's own (never synced) settings.
+abstract final class DeviceKeys {
+  static const themeMode = 'theme_mode';
+  static const textScale = 'text_scale';
+  static const firstRunDone = 'first_run_done';
+  static const reminders = 'reminders';
+  static const menuBar = 'desktop_menu_bar';
+  static const lastBackupAt = 'last_backup_at';
+
+  /// The ones a backup carries (sync config and first run stay with the device).
+  static const backedUp = [reminders, themeMode, textScale, menuBar];
+}
+
 final prefsProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('prefsProvider must be overridden'),
 );

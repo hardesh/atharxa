@@ -25,7 +25,6 @@ class PendingMeal extends Notifier<Meal?> {
 }
 
 class RemindersController extends Notifier<ReminderSettings> {
-  static const _key = 'reminders';
   Timer? _debounce;
 
   @override
@@ -48,12 +47,12 @@ class RemindersController extends Notifier<ReminderSettings> {
       _debounce?.cancel();
     });
     _scheduleSoon();
-    return ReminderSettings.fromJson(ref.watch(prefsProvider).getString(_key));
+    return ReminderSettings.fromJson(ref.watch(prefsProvider).getString(DeviceKeys.reminders));
   }
 
   Future<void> update(ReminderSettings s) async {
     final turnedOn = s.anyOn && !state.anyOn;
-    await ref.read(prefsProvider).setString(_key, s.toJson());
+    await ref.read(prefsProvider).setString(DeviceKeys.reminders, s.toJson());
     state = s;
     if (turnedOn) await ref.read(notificationServiceProvider).requestPermission();
     await reschedule();

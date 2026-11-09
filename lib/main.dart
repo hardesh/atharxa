@@ -23,8 +23,8 @@ Future<void> main() async {
   final db = await AppDb.open();
   final notifications = NotificationService();
   // Existing installs (data already there) skip the welcome screen.
-  if (!(prefs.getBool('first_run_done') ?? false) && await db.hasUserData()) {
-    await prefs.setBool('first_run_done', true);
+  if (!(prefs.getBool(DeviceKeys.firstRunDone) ?? false) && await db.hasUserData()) {
+    await prefs.setBool(DeviceKeys.firstRunDone, true);
   }
   final container = ProviderContainer(
     overrides: await appOverrides(db: db, prefs: prefs, notifications: notifications),

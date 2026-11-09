@@ -5,6 +5,7 @@ import '../../../services/backup.dart';
 import '../../../services/file_saver.dart';
 import '../../../state/core_providers.dart';
 import '../../../state/data_providers.dart';
+import '../../../state/desktop_controller.dart';
 import '../../../state/reminders_controller.dart';
 import '../../../state/settings_providers.dart';
 import '../../../state/sync_controller.dart';
@@ -23,25 +24,22 @@ const _labels = {
   'workout_plans': 'Workout plans',
   'sessions': 'Workouts',
 };
+final _tables = _labels.keys.join(',');
 
 /// You › Data and backup: export everything to one file; restore (merge) from
 /// a backup with a preview first.
 class DataBackupPage extends ConsumerWidget {
   const DataBackupPage({super.key});
 
-  static const _lastKey = 'last_backup_at';
-
   Future<void> _export(BuildContext context, WidgetRef ref) async {
-    final prefs = ref.read(prefsProvider);
     final bytes = await Backup.create(
       ref.read(dbProvider),
-      prefs,
+      ref.read(prefsProvider),
       deviceName: ref.read(syncControllerProvider).deviceName,
     );
     final where = await saveExportedFile(Backup.fileName(DateTime.now()), bytes);
     if (where == null) return;
-    await prefs.setString(_lastKey, DateTime.now().toIso8601String());
-    ref.invalidate(dataCountsProvider); // refresh "last backup" line
+    await ref.read(deviceSettingsProvider.notifier).setBackedUp(DateTime.now());
     if (context.mounted) showMessage(context, 'Backup saved to $where');
   }
 
@@ -57,7 +55,7 @@ class DataBackupPage extends ConsumerWidget {
     }
     final summary = [
       for (final e in _labels.entries)
-        if (contents.count(e.key) > 0) '${e.value}: ${fmtInt(contents.count(e.key))}',
+        if (contents.counts[e.key] case final n? when n > 0) '${e.value}: ${fmtInt(n)}',
     ].join('\n');
     final ok = await confirm(
       context,
@@ -70,18 +68,22 @@ class DataBackupPage extends ConsumerWidget {
       confirmLabel: 'Restore',
     );
     if (!ok || !context.mounted) return;
-    final applied = await Backup.restore(ref.read(dbProvider), ref.read(prefsProvider), contents);
-    // Device settings were rewritten underneath these providers.
+    final prefs = ref.read(prefsProvider);
+    final applied = await Backup.restore(ref.read(dbProvider), prefs, contents);
+    // Device settings were rewritten underneath their owners: reload them.
     ref
       ..invalidate(deviceSettingsProvider)
       ..invalidate(remindersProvider);
+    if (ref.read(desktopControllerProvider).supported) {
+      await ref.read(desktopControllerProvider.notifier).setMenuBar(prefs.getBool(DeviceKeys.menuBar) ?? true);
+    }
     if (context.mounted) showMessage(context, 'Restored $applied ${applied == 1 ? 'entry' : 'entries'}');
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final counts = ref.watch(dataCountsProvider).value ?? const {};
-    final last = DateTime.tryParse(ref.read(prefsProvider).getString(_lastKey) ?? '');
+    final counts = ref.watch(dataCountsProvider(_tables)).value ?? const {};
+    final last = ref.watch(deviceSettingsProvider.select((s) => s.lastBackupAt));
     return PageBody(
       children: [
         AppCard(

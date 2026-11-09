@@ -26,8 +26,8 @@ void main() {
     final fresh = await openTestDb();
     final contents = Backup.read(utf8.decode(bytes));
     expect(contents.device, 'Android phone');
-    expect(contents.count('transactions'), 12);
-    expect(contents.count('exercises'), 6);
+    expect(contents.counts['transactions'], 12);
+    expect(contents.counts['exercises'], 6);
     await Backup.restore(fresh, freshPrefs, contents);
 
     expect((await fresh.query('transactions')).length, 12);

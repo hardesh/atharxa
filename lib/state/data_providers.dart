@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/db.dart';
 import '../data/finance_repo.dart';
 import '../data/food_repo.dart';
 import '../data/models.dart';
@@ -94,15 +93,12 @@ final workoutProvider = FutureProvider.autoDispose
       );
     });
 
-/// Live row counts per synced table (Data and backup).
-final dataCountsProvider = FutureProvider.autoDispose<Map<String, int>>((ref) async {
-  ref.watchTables(AppDb.syncedTables);
-  final rows = await ref.watch(dbProvider).allRows();
-  final counts = <String, int>{};
-  for (final r in rows) {
-    counts[r.table] = (counts[r.table] ?? 0) + 1;
-  }
-  return counts;
+/// Live row counts for [tables] (Data and backup), keyed by the tables'
+/// names joined with commas so the family key is a plain value.
+final dataCountsProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, tables) {
+  final list = tables.split(',');
+  ref.watchTables(list);
+  return ref.watch(dbProvider).countLive(list);
 });
 
 /// Renders an [AsyncValue]: previous data stays on screen while reloading;

@@ -113,14 +113,21 @@ final goalsProvider = Provider<Goals>((ref) => ref.watch(syncedSettingsProvider.
 
 // ------------------------------------------------------------- per device
 
-/// Settings that never sync: light/dark mode, text size, first-run flag.
+/// Settings that never sync: light/dark mode, text size, first-run flag,
+/// when this device last made a backup.
 @immutable
 class DeviceSettings {
-  const DeviceSettings({required this.themeMode, required this.textScale, required this.firstRunDone});
+  const DeviceSettings({
+    required this.themeMode,
+    required this.textScale,
+    required this.firstRunDone,
+    this.lastBackupAt,
+  });
 
   final ThemeMode themeMode;
   final double textScale;
   final bool firstRunDone;
+  final DateTime? lastBackupAt;
 
   static const textSizes = [1.0, 1.15, 1.3, 1.5];
 }
@@ -132,29 +139,35 @@ class DeviceSettingsNotifier extends Notifier<DeviceSettings> {
   DeviceSettings build() {
     final p = ref.watch(prefsProvider);
     return DeviceSettings(
-      themeMode: switch (p.getString('theme_mode')) {
+      themeMode: switch (p.getString(DeviceKeys.themeMode)) {
         'light' => ThemeMode.light,
         'dark' => ThemeMode.dark,
         _ => ThemeMode.system,
       },
       // 130 % default on phones, 100 % on the Mac (DESIGN.md §2).
-      textScale: p.getDouble('text_scale') ?? (Platform.isAndroid ? 1.3 : 1.0),
-      firstRunDone: p.getBool('first_run_done') ?? false,
+      textScale: p.getDouble(DeviceKeys.textScale) ?? (Platform.isAndroid ? 1.3 : 1.0),
+      firstRunDone: p.getBool(DeviceKeys.firstRunDone) ?? false,
+      lastBackupAt: DateTime.tryParse(p.getString(DeviceKeys.lastBackupAt) ?? ''),
     );
   }
 
   Future<void> setThemeMode(ThemeMode m) async {
-    await ref.read(prefsProvider).setString('theme_mode', m.name);
+    await ref.read(prefsProvider).setString(DeviceKeys.themeMode, m.name);
     ref.invalidateSelf();
   }
 
   Future<void> setTextScale(double v) async {
-    await ref.read(prefsProvider).setDouble('text_scale', v);
+    await ref.read(prefsProvider).setDouble(DeviceKeys.textScale, v);
+    ref.invalidateSelf();
+  }
+
+  Future<void> setBackedUp(DateTime at) async {
+    await ref.read(prefsProvider).setString(DeviceKeys.lastBackupAt, at.toIso8601String());
     ref.invalidateSelf();
   }
 
   Future<void> setFirstRunDone() async {
-    await ref.read(prefsProvider).setBool('first_run_done', true);
+    await ref.read(prefsProvider).setBool(DeviceKeys.firstRunDone, true);
     ref.invalidateSelf();
   }
 }

@@ -44,7 +44,6 @@ final desktopControllerProvider = NotifierProvider<DesktopController, DesktopSta
 ///
 /// App Nap is disabled in Info.plist (`NSAppSleepDisabled`).
 class DesktopController extends Notifier<DesktopState> {
-  static const _menuBarKey = 'desktop_menu_bar';
   static const _trayIcon = 'assets/tray/sync_template.png';
 
   Window? _window;
@@ -65,7 +64,7 @@ class DesktopController extends Notifier<DesktopState> {
       supported: true,
       launchAtLoginSupported: _login != null,
       launchAtLogin: _login?.isEnabled ?? false,
-      menuBar: prefs.getBool(_menuBarKey) ?? true,
+      menuBar: prefs.getBool(DeviceKeys.menuBar) ?? true,
     );
     Future.microtask(() => _updateTray(ref.read(syncControllerProvider)));
     return initial;
@@ -102,7 +101,7 @@ class DesktopController extends Notifier<DesktopState> {
   }
 
   Future<void> setMenuBar(bool on) async {
-    await ref.read(prefsProvider).setBool(_menuBarKey, on);
+    await ref.read(prefsProvider).setBool(DeviceKeys.menuBar, on);
     state = state.copyWith(menuBar: on);
     _updateTray(ref.read(syncControllerProvider));
   }

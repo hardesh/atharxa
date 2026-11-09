@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app_info.dart';
 import '../data/db.dart';
+import '../data/models.dart';
+import '../state/core_providers.dart';
 
 /// Full backup of this device's data (You › Data and backup).
 ///
@@ -17,12 +19,7 @@ abstract final class Backup {
   static const format = 'app-backup';
   static const version = 1;
 
-  /// Per-device settings carried in a backup (sync config is not: pairing
-  /// codes and paired devices belong to the device).
-  static const deviceKeys = ['reminders', 'theme_mode', 'text_scale', 'desktop_menu_bar'];
-
-  static String fileName(DateTime now) =>
-      '${AppInfo.name.toLowerCase()}-backup-${now.toIso8601String().substring(0, 10)}.json';
+  static String fileName(DateTime now) => '${AppInfo.name.toLowerCase()}-backup-${dayKey(now)}.json';
 
   static Future<Uint8List> create(AppDb db, SharedPreferences prefs, {required String deviceName}) async {
     final rows = await db.allRows();
@@ -30,22 +27,16 @@ abstract final class Backup {
     for (final r in rows) {
       (tables[r.table] ??= []).add(Map.of(r.row)..remove('rev'));
     }
-    return Uint8List.fromList(
-      utf8.encode(
-        jsonEncode({
+    return JsonUtf8Encoder().convert({
           'format': format,
           'version': version,
           'app': AppInfo.name,
           'createdAt': DateTime.now().toIso8601String(),
           'device': deviceName,
           'tables': tables,
-          'deviceSettings': {
-            for (final k in deviceKeys)
-              if (prefs.get(k) != null) k: prefs.get(k),
-          },
-        }),
-      ),
-    );
+          'deviceSettings': {for (final k in DeviceKeys.backedUp) k: ?prefs.get(k)},
+        })
+        as Uint8List;
   }
 
   /// Reads a backup file; throws [FormatException] with a user-facing message.
@@ -62,15 +53,20 @@ abstract final class Backup {
     if ((j['version'] as num? ?? 0) > version) {
       throw const FormatException('This backup is from a newer version of the app — update the app first.');
     }
-    final rows = <SyncRow>[
-      for (final e in (j['tables'] as Map).entries)
-        for (final r in (e.value as List? ?? const []).whereType<Map>())
-          SyncRow(e.key as String, r.cast<String, Object?>()),
-    ];
+    final rows = <SyncRow>[];
+    final counts = <String, int>{};
+    for (final e in (j['tables'] as Map).entries) {
+      final table = e.key as String;
+      for (final r in (e.value as List? ?? const []).whereType<Map>()) {
+        rows.add(SyncRow(table, r.cast<String, Object?>()));
+        counts[table] = (counts[table] ?? 0) + 1;
+      }
+    }
     return BackupContents(
       createdAt: DateTime.tryParse(j['createdAt'] as String? ?? ''),
       device: j['device'] as String?,
       rows: rows,
+      counts: counts,
       deviceSettings: (j['deviceSettings'] as Map?)?.cast<String, Object?>() ?? const {},
     );
   }
@@ -100,12 +96,14 @@ class BackupContents {
     required this.createdAt,
     required this.device,
     required this.rows,
+    required this.counts,
     required this.deviceSettings,
   });
   final DateTime? createdAt;
   final String? device;
   final List<SyncRow> rows;
-  final Map<String, Object?> deviceSettings;
 
-  int count(String table) => rows.where((r) => r.table == table).length;
+  /// Rows per table.
+  final Map<String, int> counts;
+  final Map<String, Object?> deviceSettings;
 }

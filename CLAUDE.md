@@ -60,7 +60,8 @@ The app's name may change, so **don't build the product name into code identifie
   - Export (`lib/services/transactions_export.dart`):
     - CSV with a BOM.
     - Excel built by hand as zipped XML with `archive`. Don't add a spreadsheet package.
-  - Files are saved through `lib/services/file_saver.dart`: the nativeapi save panel on macOS, the Downloads folder on Android.
+  - Files are saved and opened through `lib/services/file_saver.dart` (official `file_selector`): the Save panel on macOS, the Downloads folder on Android, the system picker for opening.
+  - Per-device pref keys live in `DeviceKeys` (`core_providers.dart`); `DeviceKeys.backedUp` is what a backup carries.
   - Workout form tips live in `assets/data/exercise_tips.json`. Exercise videos are user-added YouTube links, opened through nativeapi `UrlOpener`; the fallback copies the link.
 - **Wi-Fi sync** (`lib/sync/`), peer to peer with no cloud:
   - `sync_auth.dart`: a key derived from the 6-digit pairing code (PBKDF2), and HMAC-signed requests and responses.

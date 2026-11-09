@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ai/ai_models.dart';
+import '../ai/assistant_context.dart';
 import '../ai/ai_runtime.dart';
 import 'core_providers.dart';
 
@@ -27,8 +28,11 @@ class AiState {
     this.downloads = const {},
     this.errors = const {},
     this.wifiOnly = true,
+    this.scopes = const {},
     this.loadedId,
     this.backend,
+    this.readyId,
+    this.interruptedId,
   });
 
   /// Device facts and installed files have been read.
@@ -43,14 +47,26 @@ class AiState {
   final Map<String, String> errors;
   final bool wifiOnly;
 
+  /// What the assistant may read (per device).
+  final Set<AiScope> scopes;
+
   /// The model in memory and where it runs.
   final String? loadedId;
   final AiBackend? backend;
 
-  /// Catalog models that make sense here (not another chip's NPU build).
+  /// A model that just finished downloading ("… is ready"), until dismissed.
+  final String? readyId;
+
+  /// A download the app was closed during, offered for resuming.
+  final String? interruptedId;
+
+  /// A catalog or imported model by id.
+  AiModel? model(String? id) => id == null ? null : [...aiCatalog, ...imported].where((m) => m.id == id).firstOrNull;
+
+  /// Catalog models offered here (not another chip's NPU build, not retired).
   List<AiModel> get catalog => [
     for (final m in aiCatalog)
-      if (caps == null || fitFor(m, caps!) != AiFit.otherChip) m,
+      if (!m.retired && (caps == null || fitFor(m, caps!) != AiFit.otherChip)) m,
   ];
 
   List<AiModel> get installedModels => [
@@ -78,9 +94,14 @@ class AiState {
     Map<String, double>? downloads,
     Map<String, String>? errors,
     bool? wifiOnly,
+    Set<AiScope>? scopes,
     String? loadedId,
     AiBackend? backend,
     bool unloaded = false,
+    String? readyId,
+    bool clearReady = false,
+    String? interruptedId,
+    bool clearInterrupted = false,
   }) => AiState(
     ready: ready ?? this.ready,
     caps: caps ?? this.caps,
@@ -90,8 +111,11 @@ class AiState {
     downloads: downloads ?? this.downloads,
     errors: errors ?? this.errors,
     wifiOnly: wifiOnly ?? this.wifiOnly,
+    scopes: scopes ?? this.scopes,
     loadedId: unloaded ? null : loadedId ?? this.loadedId,
     backend: unloaded ? null : backend ?? this.backend,
+    readyId: clearReady ? null : readyId ?? this.readyId,
+    interruptedId: clearInterrupted ? null : interruptedId ?? this.interruptedId,
   );
 }
 
@@ -108,6 +132,8 @@ class AiController extends Notifier<AiState> {
     return AiState(
       chosenId: prefs.getString(DeviceKeys.aiModel),
       wifiOnly: prefs.getBool(DeviceKeys.aiWifiOnly) ?? true,
+      scopes: AiScope.parse(prefs.getStringList(DeviceKeys.aiScopes)),
+      interruptedId: prefs.getString(DeviceKeys.aiPendingDownload),
     );
   }
 
@@ -122,6 +148,13 @@ class AiController extends Notifier<AiState> {
     state = state.copyWith(wifiOnly: on);
   }
 
+  Future<void> setScope(AiScope scope, bool on) async {
+    final scopes = {...state.scopes};
+    on ? scopes.add(scope) : scopes.remove(scope);
+    await ref.read(prefsProvider).setStringList(DeviceKeys.aiScopes, [for (final s in scopes) s.name]);
+    state = state.copyWith(scopes: scopes);
+  }
+
   Future<void> choose(AiModel m) async {
     await ref.read(prefsProvider).setString(DeviceKeys.aiModel, m.id);
     state = state.copyWith(chosenId: m.id);
@@ -134,7 +167,16 @@ class AiController extends Notifier<AiState> {
     final free = state.caps?.freeBytes;
     if (free != null && free < m.sizeBytes * 1.1) return 'Not enough free space for ${m.name}';
     final cancel = _cancels[m.id] = AiCancel();
-    state = state.copyWith(downloads: {...state.downloads, m.id: 0}, errors: {...state.errors}..remove(m.id));
+    final prefs = ref.read(prefsProvider);
+    // Remembered until it ends, so a download cut off by closing the app can
+    // be offered again on the next start.
+    await prefs.setString(DeviceKeys.aiPendingDownload, m.id);
+    state = state.copyWith(
+      downloads: {...state.downloads, m.id: 0},
+      errors: {...state.errors}..remove(m.id),
+      clearInterrupted: true,
+      clearReady: true,
+    );
     try {
       await _rt.download(
         m,
@@ -144,18 +186,26 @@ class AiController extends Notifier<AiState> {
         },
       );
       if (!ref.mounted) return null;
-      state = state.copyWith(installed: {...state.installed, m.fileName});
+      state = state.copyWith(installed: {...state.installed, m.fileName}, readyId: m.id);
       if (state.installedModels.length == 1) await choose(m);
-    } on AiException catch (e) {
-      if (ref.mounted && !cancel.cancelled) state = state.copyWith(errors: {...state.errors, m.id: e.message});
+    } on Object catch (e) {
+      final msg = e is AiException ? e.message : 'Download failed: $e';
+      if (ref.mounted && !cancel.cancelled) state = state.copyWith(errors: {...state.errors, m.id: msg});
     } finally {
       _cancels.remove(m.id);
+      await prefs.remove(DeviceKeys.aiPendingDownload);
       if (ref.mounted) state = state.copyWith(downloads: {...state.downloads}..remove(m.id));
     }
     return null;
   }
 
   void cancelDownload(AiModel m) => _cancels[m.id]?.cancel();
+
+  /// Hides the "ready", "failed" and "stopped" notices.
+  Future<void> dismissNotices() async {
+    await ref.read(prefsProvider).remove(DeviceKeys.aiPendingDownload);
+    state = state.copyWith(errors: const {}, clearReady: true, clearInterrupted: true);
+  }
 
   Future<AiModel> import(String path) async {
     final m = await _rt.importFile(path);

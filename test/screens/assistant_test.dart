@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:atharxa/ai/ai_models.dart';
 import 'package:atharxa/ai/ai_runtime.dart';
 import 'package:atharxa/state/ai_controller.dart';
+import 'package:atharxa/ui/widgets/model_download_banner.dart';
 import 'package:atharxa/ui/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,10 @@ import 'render_helpers.dart';
 
 /// In-memory runtime: instant downloads, canned replies.
 class FakeAiRuntime implements AiRuntime {
-  FakeAiRuntime({Set<String>? installed, this.reply = 'Try paneer tikka.'}) : installed = installed ?? {};
+  FakeAiRuntime({Set<String>? installed, this.reply = 'Try paneer tikka.', this.gate}) : installed = installed ?? {};
+
+  /// When set, downloads stop at 40 % until it completes.
+  final Completer<void>? gate;
   final Set<String> installed;
   final String reply;
   String? loaded;
@@ -31,7 +35,8 @@ class FakeAiRuntime implements AiRuntime {
   Future<List<AiModel>> importedModels() async => const [];
   @override
   Future<void> download(AiModel m, {required void Function(double) onProgress, required AiCancel cancel}) async {
-    onProgress(0.5);
+    onProgress(gate == null ? 0.5 : 0.4);
+    await gate?.future;
     installed.add(m.fileName);
   }
 
@@ -46,7 +51,13 @@ class FakeAiRuntime implements AiRuntime {
   }
 
   @override
-  Future<AiConversation> open({String? system}) async => _FakeConversation(reply);
+  Future<AiConversation> open({String? system}) async {
+    this.system = system;
+    return _FakeConversation(reply);
+  }
+
+  /// The instructions the last conversation was opened with.
+  String? system;
   @override
   Future<void> unload() async => loaded = null;
 }
@@ -90,6 +101,8 @@ void main() {
     await step(tester);
     expect(find.text('Dinner idea?'), findsOneWidget);
     expect(find.text('Try paneer tikka.'), findsOneWidget);
+    expect(find.textContaining('Read Today’s log'), findsOneWidget);
+    expect(rt.system, contains('DATA: {'));
     expect(rt.loaded, 'gemma-4-e2b-npu-g5');
   });
 
@@ -118,4 +131,52 @@ void main() {
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/ai_models_$name.png'));
     });
   }
+
+  testWidgets('download banner: progress on every screen, then ready', (tester) async {
+    setSize(tester, const Size(412, 900));
+    final gate = Completer<void>();
+    final rt = FakeAiRuntime(gate: gate);
+    final t = await tester.runAsync(
+      () => buildTestApp(prefs: {'ai_wifi_only': false}, overrides: [aiRuntimeProvider.overrideWithValue(rt)]),
+    );
+    await tester.pumpWidget(t!.app);
+    await settle(tester);
+    await tester.tap(find.bySemanticsLabel('Ask Atharxa'));
+    await step(tester);
+    await tester.tap(find.textContaining('Download Gemma 4 E2B · NPU'));
+    await step(tester);
+    await tester.pageBack();
+    await step(tester);
+    expect(find.text('Downloading Gemma 4 E2B · NPU'), findsOneWidget);
+    expect(find.textContaining('40 % · 1.2 GB of 3.1 GB'), findsOneWidget);
+    await expectLater(find.byType(ModelDownloadBanner), matchesGoldenFile('goldens/download_banner_phone.png'));
+
+    gate.complete();
+    await step(tester);
+    expect(find.text('Gemma 4 E2B · NPU is ready'), findsOneWidget);
+    await tester.tap(find.text('Open assistant'));
+    await step(tester);
+    expect(find.text('Ask anything'), findsOneWidget);
+    await tester.pageBack();
+    await step(tester);
+    expect(find.textContaining('is ready'), findsNothing);
+  });
+
+  testWidgets('a download cut off by closing the app is offered again', (tester) async {
+    setSize(tester, const Size(412, 900));
+    final rt = FakeAiRuntime();
+    final t = await tester.runAsync(
+      () => buildTestApp(
+        prefs: {'ai_wifi_only': false, 'ai_pending_download': 'qwen3.5-2b'},
+        overrides: [aiRuntimeProvider.overrideWithValue(rt)],
+      ),
+    );
+    await tester.pumpWidget(t!.app);
+    await settle(tester);
+    expect(find.text('Download of Qwen3.5 2B stopped'), findsOneWidget);
+    await tester.tap(find.text('Resume'));
+    await step(tester);
+    expect(rt.installed, contains('Qwen3.5-2B-Q4_K_M.gguf'));
+    expect(find.text('Qwen3.5 2B is ready'), findsOneWidget);
+  });
 }

@@ -52,6 +52,7 @@ class AiModel {
     this.desktopOnly = false,
     this.note = '',
     this.contextTokens = 4096,
+    this.retired = false,
   });
 
   /// Stable id (stored as this device's chosen model).
@@ -80,6 +81,9 @@ class AiModel {
 
   /// Context window (prompt + history + reply), in tokens.
   final int contextTokens;
+
+  /// No longer offered; still listed where installed so it can be removed.
+  final bool retired;
 
   bool get imported => repo == null;
 
@@ -181,7 +185,8 @@ const aiCatalog = <AiModel>[
     fileName: 'Qwen3.5-0.8B-Q4_K_M.gguf',
     sha256: 'bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517',
     sizeBytes: 532517120,
-    note: 'Tiny and quick; simple answers',
+    note: 'Retired: too small to be reliable (got basic food facts wrong)',
+    retired: true,
   ),
   AiModel(
     id: 'qwen3.5-2b',
@@ -253,10 +258,14 @@ enum AiFit {
 
   /// An NPU build for another chip: not shown.
   otherChip,
+
+  /// Withdrawn from the catalog: not offered.
+  retired,
 }
 
 /// Whether [m] suits device [d].
 AiFit fitFor(AiModel m, DeviceCapabilities d) {
+  if (m.retired) return AiFit.retired;
   if (m.npuChip != null && m.npuChip!.toLowerCase() != d.chip?.toLowerCase()) return AiFit.otherChip;
   if (m.desktopOnly && !d.desktop) return AiFit.desktopOnly;
   final budget = d.modelBudget;
@@ -270,7 +279,7 @@ AiFit fitFor(AiModel m, DeviceCapabilities d) {
 /// The catalog model to suggest first on [d]: the NPU build on its chip, else
 /// the best model that fits.
 AiModel? recommendedFor(DeviceCapabilities d) {
-  const order = ['gemma-4-e2b-npu-g5', 'gemma-4-e4b', 'gemma-4-e2b', 'qwen3.5-2b', 'qwen3.5-0.8b'];
+  const order = ['gemma-4-e2b-npu-g5', 'gemma-4-e4b', 'gemma-4-e2b', 'qwen3.5-2b'];
   final phoneOrder = order.where((id) => id != 'gemma-4-e4b');
   for (final id in d.desktop ? order : phoneOrder) {
     final m = aiCatalog.firstWhere((m) => m.id == id);

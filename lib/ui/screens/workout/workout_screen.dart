@@ -11,6 +11,7 @@ import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 import '../../widgets/tag.dart';
+import '../assistant/assistant_screen.dart';
 import 'plan_editor_screen.dart';
 import 'plan_sharing.dart';
 import 'session_screen.dart';
@@ -131,6 +132,15 @@ class WorkoutScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            if (finished.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => openAssistant(context, ask: 'Summarize my workouts this week.'),
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: const Text('Summarize week'),
+                ),
+              ),
             AppCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

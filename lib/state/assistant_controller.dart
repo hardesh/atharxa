@@ -2,22 +2,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ai/ai_runtime.dart';
+import '../ai/assistant_context.dart';
 import '../app_info.dart';
 import 'ai_controller.dart';
+import 'core_providers.dart';
+import 'settings_providers.dart';
 
 /// One message in the assistant chat.
 @immutable
 class ChatEntry {
-  const ChatEntry({required this.fromUser, required this.text, this.done = true, this.error});
+  const ChatEntry({required this.fromUser, required this.text, this.done = true, this.error, this.reads = const []});
   final bool fromUser;
   final String text;
+
+  /// The data the answer could draw on ("Today’s log", "My foods").
+  final List<String> reads;
 
   /// False while the reply is still being written.
   final bool done;
   final String? error;
 
-  ChatEntry copyWith({String? text, bool? done, String? error}) =>
-      ChatEntry(fromUser: fromUser, text: text ?? this.text, done: done ?? this.done, error: error ?? this.error);
+  ChatEntry copyWith({String? text, bool? done, String? error}) => ChatEntry(
+    fromUser: fromUser,
+    text: text ?? this.text,
+    done: done ?? this.done,
+    error: error ?? this.error,
+    reads: reads,
+  );
 }
 
 enum AssistantStatus { idle, loading, replying }
@@ -51,9 +62,23 @@ class AssistantController extends Notifier<AssistantState> {
   AiConversation? _conversation;
   String? _conversationModel;
 
-  static const _system =
-      'You are ${AppInfo.assistantName}, the assistant in a personal app for food, water, workouts and money. '
-      'Answer briefly and plainly. You cannot see the user\'s logged data yet, so never make up their numbers.';
+  List<String> _reads = const [];
+
+  /// The user's data (in the scopes they allow) for a new conversation.
+  Future<String> _instructions() async {
+    final ai = ref.read(aiProvider);
+    final settings = ref.read(syncedSettingsProvider);
+    final ctx = ai.scopes.isEmpty
+        ? AssistantContext.empty
+        : await buildAssistantContext(
+            ref.read(dbProvider),
+            scopes: ai.scopes,
+            goals: settings.goals,
+            currency: settings.currency,
+          );
+    _reads = ctx.reads;
+    return assistantInstructions(AppInfo.assistantName, ctx);
+  }
 
   @override
   AssistantState build() {
@@ -86,7 +111,7 @@ class AssistantController extends Notifier<AssistantState> {
       messages: [
         ...state.messages,
         ChatEntry(fromUser: true, text: q),
-        const ChatEntry(fromUser: false, text: '', done: false),
+        ChatEntry(fromUser: false, text: '', done: false, reads: _reads),
       ],
     );
     final reply = StringBuffer();
@@ -94,8 +119,9 @@ class AssistantController extends Notifier<AssistantState> {
       final model = await ref.read(aiProvider.notifier).ensureLoaded();
       if (_conversationModel != model.id) {
         await _conversation?.close();
-        _conversation = await ref.read(aiRuntimeProvider).open(system: _system);
+        _conversation = await ref.read(aiRuntimeProvider).open(system: await _instructions());
         _conversationModel = model.id;
+        _updateLast((e) => ChatEntry(fromUser: false, text: e.text, done: false, reads: _reads));
       }
       await for (final token in _conversation!.send(q)) {
         if (!ref.mounted) return;

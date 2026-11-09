@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ai/ai_models.dart';
 import '../../../ai/ai_runtime.dart';
+import '../../../ai/assistant_context.dart';
 import '../../../services/file_saver.dart';
 import '../../../state/ai_controller.dart';
 import '../../format.dart';
@@ -168,7 +169,7 @@ class _AiModelsPageState extends ConsumerState<AiModelsPage> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Download on Wi-Fi only'),
-              subtitle: const Text('Models are large (0.5–7 GB)'),
+              subtitle: const Text('Models are large (1–7 GB)'),
               value: s.wifiOnly,
               onChanged: (v) => ref.read(aiProvider.notifier).setWifiOnly(v),
             ),
@@ -180,6 +181,20 @@ class _AiModelsPageState extends ConsumerState<AiModelsPage> {
                 label: const Text('Import a model file…'),
               ),
             ),
+          ],
+        ),
+        _Section(
+          title: 'What the assistant can read',
+          subtitle: 'It reads on ${deviceNoun(caps)} only; nothing leaves it',
+          children: [
+            for (final scope in AiScope.values)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(scope.label),
+                subtitle: Text(scope.detail),
+                value: s.scopes.contains(scope),
+                onChanged: (v) => ref.read(aiProvider.notifier).setScope(scope, v),
+              ),
           ],
         ),
         Text(
@@ -242,7 +257,7 @@ class _AvailableTile extends StatelessWidget {
       AiFit.tight => ('May be slow here', null, null),
       AiFit.tooLarge => ('Too large for $device', cs.outline, null),
       AiFit.desktopOnly => ('Mac only', cs.outline, null),
-      AiFit.otherChip => ('', null, null),
+      AiFit.otherChip || AiFit.retired => ('', null, null),
     };
     final canRun = fit == AiFit.fits || fit == AiFit.tight;
     final p = progress;

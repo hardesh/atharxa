@@ -14,6 +14,7 @@ import 'screens/water_screen.dart';
 import 'screens/workout/workout_screen.dart';
 import 'screens/you/you_screen.dart';
 import 'widgets/layout.dart';
+import 'widgets/model_download_banner.dart';
 import 'widgets/top_bar.dart';
 
 /// One main destination. [build] returns the page body (below the top bar).
@@ -138,9 +139,16 @@ class _AppShellState extends ConsumerState<AppShell> {
       // Only the selected tab is built (not all of them kept alive), which
       // keeps memory and background work down; its data reloads quickly from
       // the local database when you come back.
-      body: KeyedSubtree(
-        key: ValueKey(d.label),
-        child: Builder(builder: d.build),
+      body: Column(
+        children: [
+          const ModelDownloadBanner(),
+          Expanded(
+            child: KeyedSubtree(
+              key: ValueKey(d.label),
+              child: Builder(builder: d.build),
+            ),
+          ),
+        ],
       ),
     );
 

@@ -12,14 +12,18 @@ import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 import '../you/ai_models_page.dart';
 
-/// Opens the assistant (AI button in every top bar, ⌘K on the Mac).
-Future<void> openAssistant(BuildContext context) =>
-    Navigator.push(context, MaterialPageRoute<void>(builder: (_) => const AssistantScreen()));
+/// Opens the assistant (AI button in every top bar, ⌘K on the Mac); [ask]
+/// is sent as soon as the model is ready ("Summarize month").
+Future<void> openAssistant(BuildContext context, {String? ask}) =>
+    Navigator.push(context, MaterialPageRoute<void>(builder: (_) => AssistantScreen(ask: ask)));
 
 /// Assistant chat (DESIGN.md §5, Assistant.dc.html): runs on this device with
 /// the model chosen in AI models; picker in the header.
 class AssistantScreen extends ConsumerStatefulWidget {
-  const AssistantScreen({super.key});
+  const AssistantScreen({super.key, this.ask});
+
+  /// A question to send on opening.
+  final String? ask;
 
   @override
   ConsumerState<AssistantScreen> createState() => _AssistantScreenState();
@@ -30,10 +34,10 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   final _scroll = ScrollController();
 
   static const _suggestions = [
-    'Suggest a high-protein vegetarian dinner',
-    'How much water should I drink in a day?',
-    'Give me a 20-minute home workout',
-    'Tips to stick to a monthly budget',
+    'Suggest a high-protein dinner from my foods',
+    'How am I doing today?',
+    'Summarize my week',
+    'Where did my money go this month?',
   ];
 
   @override
@@ -42,6 +46,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     Future.microtask(() async {
       await ref.read(aiProvider.notifier).refresh();
       await ref.read(assistantProvider.notifier).prepare();
+      final ask = widget.ask;
+      if (ask != null && mounted && ref.read(aiProvider).active != null) _send(ask);
     });
   }
 
@@ -248,6 +254,22 @@ class _Bubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (!user && entry.reads.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Icon(Icons.visibility_outlined, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Read ${entry.reads.join(' · ')}',
+                          style: context.tt.labelMedium?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (text.isEmpty && !entry.done)
                 const SizedBox(width: 32, height: 16, child: LinearProgressIndicator())
               else

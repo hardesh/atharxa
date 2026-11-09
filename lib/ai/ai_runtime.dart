@@ -146,8 +146,12 @@ class EdgeAiRuntime implements AiRuntime {
     } on DownloadException catch (e) {
       throw AiException('Download failed: ${e.error}');
     }
+    // The engine already checked the exact size. A full SHA-256 pass is
+    // cheap on a desktop (≈18 s for 2.6 GB) but takes minutes on a phone, and
+    // Android freezes it once the app is in the background, so phones rely
+    // on the size check (and HTTPS from a pinned revision).
     final want = m.sha256;
-    if (want == null) return;
+    if (want == null || Platform.isAndroid || Platform.isIOS) return;
     final path = await modelFilePath(m);
     final got = await Isolate.run(() => sha256OfFile(path));
     if (got != want) {

@@ -56,6 +56,11 @@ void main() {
     }
   });
 
+  test('retired models are not offered or recommended', () {
+    expect(fitFor(_m('qwen3.5-0.8b'), pixel10), AiFit.retired);
+    expect(recommendedFor(const DeviceCapabilities(desktop: false, ramBytes: 3 << 30)), isNull);
+  });
+
   test('imported files', () {
     final q = AiModel.imported('Qwen3.5-4B-Q8_0.gguf', 4 << 30);
     expect(q.family, AiFamily.qwen);

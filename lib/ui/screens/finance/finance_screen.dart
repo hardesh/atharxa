@@ -10,6 +10,7 @@ import '../../../data/models.dart';
 import '../../../state/data_providers.dart';
 import '../../../state/settings_providers.dart';
 import '../../theme/semantic.dart';
+import '../assistant/assistant_screen.dart';
 import '../../widgets/bars.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
@@ -98,6 +99,16 @@ class FinanceScreen extends ConsumerWidget {
               ),
             ),
             _SummaryCard(summary: s),
+            // The assistant reads the current month.
+            if (txs.isNotEmpty && yyyyMm == DateFormat('yyyy-MM').format(DateTime.now()))
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => openAssistant(context, ask: 'Summarize my spending this month.'),
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: const Text('Summarize month'),
+                ),
+              ),
             if (txs.isEmpty)
               EmptyState(
                 icon: Icons.account_balance_wallet_outlined,

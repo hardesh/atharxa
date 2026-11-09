@@ -5,9 +5,15 @@
 # A failing command fails the recipe even when piped (e.g. into tail).
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
-adb := env("HOME") / "Library/Android/sdk/platform-tools/adb"
+# The product name and app id (on the rename checklist in CLAUDE.md).
+app_name := "Atharxa"
 app_id := "com.harshal.atharxa"
+
+adb := env("HOME") / "Library/Android/sdk/platform-tools/adb"
 logs := "build/logs"
+mac_app := "build/macos/Build/Products/Release/" + app_name + ".app"
+mac_proc := app_name + ".app/Contents/MacOS/" + app_name
+installed := "/Applications/" + app_name + ".app"
 
 # List the commands
 default:
@@ -41,23 +47,14 @@ check: fmt analyze test
 # ---------------------------------------------------------------- macOS
 
 # Build the macOS release app
-mac:
-    @mkdir -p {{logs}}
-    @flutter build macos --release > {{logs}}/mac.log 2>&1 && echo "built build/macos/Build/Products/Release/Atharxa.app" || (tail -30 {{logs}}/mac.log; exit 1)
+mac: (_build "mac" "macos")
 
-# Build and (re)open the macOS release app
-mac-open: mac
-    @pkill -f "Atharxa.app/Contents/MacOS/Atharxa" || true
-    @open build/macos/Build/Products/Release/Atharxa.app
-
-# Build and install into /Applications (free, this Mac only; data is kept), then open it
-mac-install: mac
-    @pkill -f "Atharxa.app/Contents/MacOS/Atharxa" || true
-    @sleep 1
-    @rm -rf /Applications/Atharxa.app
-    @ditto build/macos/Build/Products/Release/Atharxa.app /Applications/Atharxa.app
-    @open /Applications/Atharxa.app
-    @echo "installed /Applications/Atharxa.app"
+# Build, install into /Applications (free, this Mac only; data is kept) and open it
+mac-install: mac _mac-quit
+    @rm -rf {{installed}}
+    @ditto {{mac_app}} {{installed}}
+    @open {{installed}}
+    @echo "installed {{installed}}"
 
 # Run on macOS in debug (hot reload)
 mac-run:
@@ -65,14 +62,17 @@ mac-run:
 
 # Memory of the running macOS app (release builds only are meaningful)
 mac-mem:
-    @footprint $(pgrep -f "Atharxa.app/Contents/MacOS/Atharxa" | head -1) | grep phys_footprint: | head -1
+    @footprint $(pgrep -f "{{mac_proc}}" | head -1) | grep phys_footprint: | head -1
+
+# Quit the running app the normal way (it saves and syncs) and wait until it has exited
+_mac-quit:
+    @osascript -e 'quit app id "{{app_id}}"' > /dev/null 2>&1 || true
+    @for _ in $(seq 50); do pgrep -f "{{mac_proc}}" > /dev/null || exit 0; sleep 0.1; done; pkill -f "{{mac_proc}}" || true
 
 # ---------------------------------------------------------------- Android
 
 # Build the Android release APK (arm64)
-apk:
-    @mkdir -p {{logs}}
-    @flutter build apk --release > {{logs}}/apk.log 2>&1 && grep "Built" {{logs}}/apk.log || (tail -30 {{logs}}/apk.log; exit 1)
+apk: (_build "apk" "apk")
 
 # Build, install on the connected phone and open the app
 phone: apk
@@ -95,8 +95,13 @@ phone-log lines="60":
 # ---------------------------------------------------------------- both
 
 # Build and install on the phone and the Mac
-all: phone mac-open
+all: phone mac-install
 
 # Remove build output (keeps the AI engine download cache)
 clean:
     @flutter clean > /dev/null && echo cleaned
+
+# `flutter build <target> --release`, logged to build/logs/<name>.log; prints the tail on failure
+_build name target:
+    @mkdir -p {{logs}}
+    @flutter build {{target}} --release > {{logs}}/{{name}}.log 2>&1 && (grep -h "✓ Built" {{logs}}/{{name}}.log || echo "built {{name}}") || (tail -30 {{logs}}/{{name}}.log; exit 1)

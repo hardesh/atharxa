@@ -19,13 +19,32 @@ class Chat {
   ];
 }
 
+/// A chat in the history list.
+class ChatSummary {
+  const ChatSummary(this.id, this.title, this.lastAt);
+  final String id, title;
+  final DateTime lastAt;
+}
+
 class ChatRepo {
   ChatRepo(this.db);
   final AppDb db;
   static const table = 'chats';
 
-  /// Newest first.
-  Future<List<Chat>> all() async => (await db.query(table, orderBy: 'last_at DESC')).map(Chat.new).toList();
+  /// Newest first, without their messages (the history list needs titles).
+  Future<List<ChatSummary>> all() async => [
+    for (final r in await db.raw('SELECT id, title, last_at FROM $table WHERE deleted = 0 ORDER BY last_at DESC'))
+      ChatSummary(
+        r['id'] as String,
+        r['title'] as String,
+        DateTime.fromMillisecondsSinceEpoch((r['last_at'] as num).toInt()),
+      ),
+  ];
+
+  Future<Chat?> get(String id) async {
+    final rows = await db.query(table, where: 'id = ?', args: [id]);
+    return rows.isEmpty ? null : Chat(rows.first);
+  }
 
   /// Creates (no [id]) or updates a chat; returns its id. The title is the
   /// first question, shortened.

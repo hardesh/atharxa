@@ -12,15 +12,8 @@ class ConnectedServicesPage extends ConsumerStatefulWidget {
   const ConnectedServicesPage({super.key});
 
   /// Pushed from Workout's "Runs and rides" card.
-  static Future<void> open(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute<void>(
-      builder: (_) => Scaffold(
-        appBar: AppBar(title: const Text('Connected services')),
-        body: const ConnectedServicesPage(),
-      ),
-    ),
-  );
+  static Future<void> open(BuildContext context) =>
+      pushTitledPage(context, 'Connected services', const ConnectedServicesPage());
 
   @override
   ConsumerState<ConnectedServicesPage> createState() => _ConnectedServicesPageState();
@@ -64,30 +57,31 @@ class _ConnectedServicesPageState extends ConsumerState<ConnectedServicesPage> {
                   child: Text(s.error!, style: context.tt.bodyMedium?.copyWith(color: context.cs.error)),
                 ),
               const SizedBox(height: 8),
-              if (!s.supported)
-                Text(
+              switch (s.status) {
+                HealthStatus.unsupported => Text(
                   'Health Connect is on Android: turn it on in the app on your phone, and activities arrive here '
                   'with Wi-Fi sync.',
                   style: context.tt.bodyMedium,
-                )
-              else if (s.available == false)
-                Text('Health Connect isn’t available on this phone.', style: context.tt.bodyMedium)
-              else if (!s.granted)
-                Align(
+                ),
+                HealthStatus.unavailable => Text(
+                  'Health Connect isn’t available on this phone.',
+                  style: context.tt.bodyMedium,
+                ),
+                HealthStatus.checking || HealthStatus.needsPermission => Align(
                   alignment: Alignment.centerLeft,
                   child: FilledButton.icon(
-                    onPressed: s.available == null ? null : ctl.connect,
+                    onPressed: s.status == HealthStatus.checking ? null : ctl.connect,
                     icon: const Icon(Icons.favorite_border),
                     label: const Text('Allow access to workouts'),
                   ),
-                )
-              else
-                ListTile(
+                ),
+                HealthStatus.connected => ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(s.lastImport == null ? 'Not imported yet' : 'Last import ${fmtWhen(s.lastImport!)}'),
                   subtitle: s.message == null ? null : Text(s.message!),
                   trailing: TextButton(onPressed: s.busy ? null : ctl.importNow, child: const Text('Import now')),
                 ),
+              },
               if (s.supported) ...[
                 const Divider(height: 24),
                 Text('Strava', style: context.tt.titleSmall),

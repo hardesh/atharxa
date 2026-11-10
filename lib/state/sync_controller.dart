@@ -344,6 +344,13 @@ class SyncController extends Notifier<SyncState> {
     }
   }
 
+  /// Sends pending edits now (before quitting); gives up after [timeout].
+  Future<void> flushBeforeExit({Duration timeout = const Duration(seconds: 3)}) async {
+    if (!_pending) return;
+    _debounce?.cancel();
+    await _syncAll().timeout(timeout, onTimeout: () {});
+  }
+
   void _flush() {
     if (!_pending) return;
     _debounce?.cancel();

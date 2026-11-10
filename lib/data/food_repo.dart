@@ -9,6 +9,15 @@ class FoodRepo {
   final AppDb db;
 
   static const logs = 'food_logs';
+
+  /// kcal eaten per day between two days (inclusive); days without entries are absent.
+  Future<Map<String, double>> kcalByDay(String from, String to) async => {
+    for (final r in await db.raw(
+      'SELECT day, SUM(kcal * grams / 100.0) AS kcal FROM $logs WHERE deleted = 0 AND day BETWEEN ? AND ? GROUP BY day',
+      [from, to],
+    ))
+      r['day'] as String: (r['kcal'] as num).toDouble(),
+  };
   static const plans = 'meal_plans';
 
   Future<List<FoodEntry>> entries(String table, String day) async {

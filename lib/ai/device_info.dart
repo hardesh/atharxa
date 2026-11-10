@@ -22,9 +22,12 @@ Future<DeviceCapabilities> readDeviceCapabilities(String modelDir) async {
     desktop: desktop,
     ramBytes: ram,
     chip: chip == null || chip.isEmpty ? null : chip,
-    freeBytes: parseDfAvailable(await _run('df', ['-k', modelDir])),
+    freeBytes: await readFreeBytes(modelDir),
   );
 }
+
+/// Bytes free on the volume holding [dir].
+Future<int?> readFreeBytes(String dir) async => parseDfAvailable(await _run('df', ['-k', dir]));
 
 /// Bytes from `/proc/meminfo`'s "MemTotal: 11840768 kB".
 int? parseMemTotal(String? meminfo) {

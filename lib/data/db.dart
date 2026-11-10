@@ -264,14 +264,27 @@ class AppDb {
     return id;
   }
 
-  /// [save]s [row] (which must have an id) unless a live row with the same
-  /// values is already there; true if it wrote. Re-imports (Strava) then
-  /// don't re-sync unchanged rows.
-  Future<bool> saveIfChanged(String table, Map<String, Object?> row) async {
-    final existing = await query(table, where: 'id = ?', args: [row['id']]);
-    if (existing.isNotEmpty && row.entries.every((e) => existing.first[e.key] == e.value)) return false;
-    await save(table, row);
-    return true;
+  /// Saves [rows] (each with an id) in one transaction, skipping rows whose
+  /// live copy already has the same values, so re-imports don't re-sync
+  /// them. Notifies listeners once. Returns how many were written.
+  Future<int> saveAllIfChanged(String table, List<Map<String, Object?>> rows) async {
+    var written = 0;
+    await _db.transaction((tx) async {
+      for (final row in rows) {
+        final existing = await tx.query(table, where: 'id = ? AND deleted = 0', whereArgs: [row['id']]);
+        if (existing.isNotEmpty && row.entries.every((e) => existing.first[e.key] == e.value)) continue;
+        await tx.insert(table, {
+          ...row,
+          'updated_at': _tick(),
+          'device_id': deviceId,
+          'deleted': 0,
+          'rev': await _nextRev(tx),
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+        written++;
+      }
+    });
+    if (written > 0) _emit(table, local: true);
+    return written;
   }
 
   /// Soft delete (tombstone) so the deletion propagates to the other device.

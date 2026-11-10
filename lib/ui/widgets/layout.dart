@@ -6,6 +6,18 @@ const wideBreakpoint = 600.0;
 /// Content column max width (DESIGN.md §2), excluding side padding.
 const contentMaxWidth = 760.0;
 
+/// Pushes [child] as a page with a back arrow and [title] (You sections and
+/// pages opened from elsewhere, e.g. AI models from the assistant).
+Future<void> pushTitledPage(BuildContext context, String title, Widget child) => Navigator.push(
+  context,
+  MaterialPageRoute<void>(
+    builder: (_) => Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: child,
+    ),
+  ),
+);
+
 extension LayoutContext on BuildContext {
   bool get isWide => MediaQuery.sizeOf(this).width >= wideBreakpoint;
 

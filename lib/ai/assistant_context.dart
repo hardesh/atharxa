@@ -68,9 +68,18 @@ Future<AssistantContext> buildAssistantContext(
 
   if (scopes.contains(AiScope.food)) {
     final food = FoodRepo(db), water = WaterRepo(db);
-    final entries = await food.entries(FoodRepo.logs, today);
+    final weekStart = dayKey(t.subtract(const Duration(days: 6)));
+    // Independent queries, run together.
+    final (entries, workoutKcal, waterToday, kcalWeek, waterWeek, tomorrow, allMine) = await (
+      food.entries(FoodRepo.logs, today),
+      WorkoutRepo(db).kcalAddedOn(today),
+      water.total(today),
+      food.kcalByDay(weekStart, today),
+      water.dayTotals(weekStart, today),
+      food.entries(FoodRepo.plans, dayKey(t.add(const Duration(days: 1)))),
+      food.myFoods(),
+    ).wait;
     final eaten = Nutrients.sum(entries.map((e) => e.totals));
-    final workoutKcal = await WorkoutRepo(db).kcalAddedOn(today);
     data['goals'] = {
       'kcal': _r(goals.kcal),
       'protein_g': _r(goals.protein),
@@ -87,7 +96,7 @@ Future<AssistantContext> buildAssistantContext(
       'carbs_g': ?_g(eaten.carbs),
       'fiber_g': ?_g(eaten.fiber),
       'fat_g': ?_g(eaten.fat),
-      'water_ml': await water.total(today),
+      'water_ml': waterToday,
       'meals': {
         for (final m in Meal.values)
           m.label: [
@@ -96,30 +105,19 @@ Future<AssistantContext> buildAssistantContext(
           ],
       },
     };
-    final week = await db.raw(
-      'SELECT day, SUM(kcal * grams / 100.0) AS kcal FROM food_logs WHERE deleted = 0 AND day BETWEEN ? AND ? GROUP BY day',
-      [dayKey(t.subtract(const Duration(days: 6))), today],
-    );
-    final waterWeek = await db.raw(
-      'SELECT day, SUM(ml) AS ml FROM water_logs WHERE deleted = 0 AND day BETWEEN ? AND ? GROUP BY day',
-      [dayKey(t.subtract(const Duration(days: 6))), today],
-    );
     data['last_7_days'] = [
       for (var i = 6; i >= 0; i--)
         () {
           final d = dayKey(t.subtract(Duration(days: i)));
-          final k = week.where((r) => r['day'] == d).firstOrNull?['kcal'] as num?;
-          final w = waterWeek.where((r) => r['day'] == d).firstOrNull?['ml'] as num?;
-          return {'day': d, 'kcal': k?.round() ?? 0, 'water_ml': w?.toInt() ?? 0};
+          return {'day': d, 'kcal': kcalWeek[d]?.round() ?? 0, 'water_ml': waterWeek[d] ?? 0};
         }(),
     ];
-    final tomorrow = await food.entries(FoodRepo.plans, dayKey(t.add(const Duration(days: 1))));
     if (tomorrow.isNotEmpty) {
       data['plan_tomorrow'] = [
         for (final e in tomorrow) {'meal': e.meal.label, 'food': e.name, 'g': _r(e.grams), 'kcal': _r(e.totals.kcal)},
       ];
     }
-    final mine = (await food.myFoods()).take(25);
+    final mine = allMine.take(25);
     if (mine.isNotEmpty) {
       data['my_foods_per_100g'] = [
         for (final f in mine)
@@ -136,10 +134,12 @@ Future<AssistantContext> buildAssistantContext(
 
   if (scopes.contains(AiScope.workouts)) {
     final repo = WorkoutRepo(db);
-    final monday = t.subtract(Duration(days: t.weekday - 1));
-    final sessions = await repo.sessionsBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6))));
-    final plans = await repo.plans();
-    final activities = await repo.activitiesBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6))));
+    final (from, to) = weekOf(t);
+    final (sessions, plans, activities) = await (
+      repo.sessionsBetween(from, to),
+      repo.plans(),
+      repo.activitiesBetween(from, to),
+    ).wait;
     data['workouts'] = {
       'plans': [
         for (final p in plans)

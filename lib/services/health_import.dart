@@ -61,22 +61,19 @@ class HealthImport {
       startTime: since,
       endTime: AppClock.now(),
     );
-    var n = 0;
-    for (final p in points) {
-      final v = p.value;
-      if (v is! WorkoutHealthValue) continue;
-      final row = activityRow(
-        uuid: p.uuid,
-        type: v.workoutActivityType.name,
-        from: p.dateFrom,
-        to: p.dateTo,
-        distanceM: v.totalDistance?.toDouble(),
-        kcal: v.totalEnergyBurned?.toDouble(),
-        sourcePackage: p.sourceName,
-      );
-      if (await db.saveIfChanged(Activity.table, row)) n++;
-    }
-    return n;
+    return db.saveAllIfChanged(Activity.table, [
+      for (final p in points)
+        if (p.value case final WorkoutHealthValue v)
+          activityRow(
+            uuid: p.uuid,
+            type: v.workoutActivityType.name,
+            from: p.dateFrom,
+            to: p.dateTo,
+            distanceM: v.totalDistance?.toDouble(),
+            kcal: v.totalEnergyBurned?.toDouble(),
+            sourcePackage: p.sourceName,
+          ),
+    ]);
   }
 
   /// An `activities` row. The id comes from Health Connect's record id, so
@@ -94,7 +91,6 @@ class HealthImport {
     return {
       'id': 'hc-$uuid',
       'type': type,
-      'name': null,
       'source': source,
       'start': from.millisecondsSinceEpoch,
       'distance_m': distanceM,

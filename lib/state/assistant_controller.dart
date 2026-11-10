@@ -81,7 +81,7 @@ class AssistantState {
 final assistantProvider = NotifierProvider.autoDispose<AssistantController, AssistantState>(AssistantController.new);
 
 /// Saved chats, newest first (history list).
-final chatsProvider = FutureProvider.autoDispose<List<Chat>>((ref) {
+final chatsProvider = FutureProvider.autoDispose<List<ChatSummary>>((ref) {
   ref.watchTables(const [ChatRepo.table]);
   return ChatRepo(ref.watch(dbProvider)).all();
 });
@@ -90,6 +90,9 @@ class AssistantController extends Notifier<AssistantState> {
   AiConversation? _conversation;
   String? _conversationModel;
   List<String> _reads = const [];
+
+  /// My foods, read once per conversation to spot foods an answer names.
+  List<FoodItem> _mine = const [];
 
   @override
   AssistantState build() {
@@ -156,6 +159,9 @@ class AssistantController extends Notifier<AssistantState> {
       if (_conversationModel != model.id) {
         await _conversation?.close();
         _conversation = await ref.read(aiRuntimeProvider).open(system: await _instructions(earlier));
+        _mine = ref.read(aiProvider).scopes.contains(AiScope.food)
+            ? await FoodRepo(ref.read(dbProvider)).myFoods()
+            : const [];
         _conversationModel = model.id;
         _updateLast((e) => e.copyWith(reads: _reads));
       }
@@ -165,10 +171,7 @@ class AssistantController extends Notifier<AssistantState> {
         _updateLast((e) => e.copyWith(text: reply.toString()));
       }
       if (!ref.mounted) return;
-      final mine = ref.read(aiProvider).scopes.contains(AiScope.food)
-          ? await FoodRepo(ref.read(dbProvider)).myFoods()
-          : const <FoodItem>[];
-      _updateLast((e) => e.copyWith(done: true, foods: foodsMentioned(reply.toString(), mine)));
+      _updateLast((e) => e.copyWith(done: true, foods: foodsMentioned(reply.toString(), _mine)));
       await _save();
     } on Object catch (e) {
       if (ref.mounted) _updateLast((m) => m.copyWith(done: true, error: _message(e)));
@@ -197,8 +200,10 @@ class AssistantController extends Notifier<AssistantState> {
   }
 
   /// Shows a saved chat; the next question continues it.
-  Future<void> openChat(Chat c) async {
+  Future<void> openChat(String id) async {
     await _endConversation();
+    final c = await ChatRepo(ref.read(dbProvider)).get(id);
+    if (c == null || !ref.mounted) return;
     state = AssistantState(
       chatId: c.id,
       messages: [for (final (u, t) in c.messages) ChatEntry(fromUser: u, text: t)],

@@ -342,15 +342,26 @@ class _TodayCard extends StatelessWidget {
 
 /// "Runs and rides": this week's workouts recorded by other apps (Strava,
 /// Pixel Watch, Fitbit) via Health Connect, or how to connect it.
-class _ActivitiesCard extends ConsumerWidget {
+class _ActivitiesCard extends ConsumerStatefulWidget {
   const _ActivitiesCard({required this.activities});
   final List<Activity> activities;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ActivitiesCard> createState() => _ActivitiesCardState();
+}
+
+class _ActivitiesCardState extends ConsumerState<_ActivitiesCard> {
+  @override
+  void initState() {
+    super.initState();
+    // Once per visit to Workout; the controller imports at most hourly.
+    Future.microtask(() => ref.read(activityImportProvider.notifier).importIfStale());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activities = widget.activities;
     final hc = ref.watch(activityImportProvider);
-    // Phone only, at most once an hour, quietly.
-    WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(activityImportProvider.notifier).importIfStale());
     if (!hc.granted && activities.isEmpty) {
       return AppCard(
         onTap: () => ConnectedServicesPage.open(context),

@@ -9,6 +9,15 @@ class WaterRepo {
 
   static const table = 'water_logs';
 
+  /// ml per day between two days (inclusive); days without water are absent.
+  Future<Map<String, int>> dayTotals(String from, String to) async => {
+    for (final r in await db.raw(
+      'SELECT day, SUM(ml) AS ml FROM $table WHERE deleted = 0 AND day BETWEEN ? AND ? GROUP BY day',
+      [from, to],
+    ))
+      r['day'] as String: (r['ml'] as num).toInt(),
+  };
+
   Future<List<Map<String, Object?>>> entries(String day) =>
       db.query(table, where: 'day = ?', args: [day], orderBy: 'logged_at DESC');
 

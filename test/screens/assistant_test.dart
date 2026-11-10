@@ -246,6 +246,17 @@ void main() {
     await step(tester);
     expect(find.text('How much did I spend on food this month?'), findsOneWidget);
     expect(find.textContaining('Add Roti to Lunch'), findsOneWidget); // 12:30 on the test clock
+    // The answered chat is saved and joins the history list.
+    for (var i = 0; i < 50 && find.byTooltip('Delete chat').evaluate().length < 2; i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump();
+    }
+    expect(find.byTooltip('Delete chat'), findsNWidgets(2));
+    await tester.pump();
+    final tiles = tester.widgetList<ListTile>(
+      find.ancestor(of: find.byTooltip('Delete chat'), matching: find.byType(ListTile)),
+    );
+    expect(tiles.where((t) => t.selected).length, 1, reason: 'the open chat is highlighted');
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/assistant_mac.png'));
   });
 }

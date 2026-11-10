@@ -16,47 +16,49 @@ final activityImportProvider = NotifierProvider<ActivityImportController, Activi
   ActivityImportController.new,
 );
 
+/// Where reading workouts from Health Connect stands on this device.
+enum HealthStatus {
+  /// Not Android: activities arrive from the phone by sync.
+  unsupported,
+  checking,
+  unavailable,
+  needsPermission,
+  connected,
+}
+
 @immutable
 class ActivityImportState {
   const ActivityImportState({
-    this.supported = false,
-    this.available,
-    this.granted = false,
+    this.status = HealthStatus.checking,
     this.busy = false,
     this.lastImport,
     this.message,
     this.error,
   });
 
-  /// This platform can read Health Connect (Android).
-  final bool supported;
-
-  /// Health Connect is installed (null until checked).
-  final bool? available;
-  final bool granted;
+  final HealthStatus status;
   final bool busy;
   final DateTime? lastImport;
 
-  /// "3 new" after an import.
-  final String? message;
-  final String? error;
+  /// The result of the last import ("3 new"), or why it failed. Each update
+  /// replaces both, so an old message never sits next to a new error.
+  final String? message, error;
+
+  bool get supported => status != HealthStatus.unsupported;
+  bool get granted => status == HealthStatus.connected;
 
   ActivityImportState copyWith({
-    bool? available,
-    bool? granted,
+    HealthStatus? status,
     bool? busy,
     DateTime? lastImport,
     String? message,
     String? error,
-    bool clearError = false,
   }) => ActivityImportState(
-    supported: supported,
-    available: available ?? this.available,
-    granted: granted ?? this.granted,
+    status: status ?? this.status,
     busy: busy ?? this.busy,
     lastImport: lastImport ?? this.lastImport,
-    message: message ?? this.message,
-    error: clearError ? null : error ?? this.error,
+    message: message,
+    error: error,
   );
 }
 
@@ -65,19 +67,28 @@ class ActivityImportController extends Notifier<ActivityImportState> {
 
   @override
   ActivityImportState build() => ActivityImportState(
-    supported: Platform.isAndroid,
+    status: Platform.isAndroid ? HealthStatus.checking : HealthStatus.unsupported,
     lastImport: DateTime.tryParse(ref.read(prefsProvider).getString(DeviceKeys.activitiesImportedAt) ?? ''),
   );
 
-  /// Reads whether Health Connect is there and allowed (cheap).
+  /// Reads whether Health Connect is there and allowed (cheap). Updates the
+  /// state only when that changed.
   Future<void> check() async {
     if (!state.supported) return;
+    HealthStatus status;
+    String? error;
     try {
-      final available = await _hc.available();
-      final granted = available && await _hc.granted();
-      if (ref.mounted) state = state.copyWith(available: available, granted: granted);
+      status = !await _hc.available()
+          ? HealthStatus.unavailable
+          : await _hc.granted()
+          ? HealthStatus.connected
+          : HealthStatus.needsPermission;
     } on Exception catch (e) {
-      if (ref.mounted) state = state.copyWith(available: false, error: 'Health Connect: $e');
+      status = HealthStatus.unavailable;
+      error = 'Health Connect: $e';
+    }
+    if (ref.mounted && (status != state.status || error != state.error)) {
+      state = state.copyWith(status: status, message: state.message, error: error);
     }
   }
 
@@ -85,13 +96,13 @@ class ActivityImportController extends Notifier<ActivityImportState> {
   Future<void> connect() async {
     final ok = await _hc.requestAccess();
     if (!ref.mounted) return;
-    state = state.copyWith(granted: ok);
+    state = state.copyWith(status: ok ? HealthStatus.connected : HealthStatus.needsPermission);
     if (ok) await importNow();
   }
 
   Future<void> importNow() async {
     if (state.busy) return;
-    state = state.copyWith(busy: true, clearError: true);
+    state = state.copyWith(busy: true);
     try {
       final started = AppClock.now();
       final since = state.lastImport?.subtract(const Duration(days: 2)) ?? started.subtract(const Duration(days: 90));
@@ -105,7 +116,7 @@ class ActivityImportController extends Notifier<ActivityImportState> {
     }
   }
 
-  /// Imports at most once an hour, when Workout opens.
+  /// Imports at most once an hour; Workout calls it once when it opens.
   Future<void> importIfStale() async {
     if (!state.supported || state.busy) return;
     final last = state.lastImport;

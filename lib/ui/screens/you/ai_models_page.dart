@@ -12,6 +12,7 @@ import '../../format.dart';
 import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
+import '../../widgets/model_download_banner.dart';
 import '../../widgets/tag.dart';
 
 /// "this phone" / "This Mac", for the device [caps] describes (this
@@ -29,15 +30,7 @@ class AiModelsPage extends ConsumerStatefulWidget {
   const AiModelsPage({super.key});
 
   /// Pushed from the assistant's model picker.
-  static Future<void> open(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute<void>(
-      builder: (_) => Scaffold(
-        appBar: AppBar(title: const Text('AI models')),
-        body: const AiModelsPage(),
-      ),
-    ),
-  );
+  static Future<void> open(BuildContext context) => pushTitledPage(context, 'AI models', const AiModelsPage());
 
   @override
   ConsumerState<AiModelsPage> createState() => _AiModelsPageState();
@@ -163,7 +156,7 @@ class _AiModelsPageState extends ConsumerState<AiModelsPage> {
                 recommended: m.id == recommended?.id,
                 device: deviceNoun(caps),
                 progress: s.downloads[m.id],
-                error: s.errors[m.id],
+                error: s.errorFor(m),
                 onDownload: () => _download(m),
                 onCancel: () => ref.read(aiProvider.notifier).cancelDownload(m),
               ),
@@ -297,10 +290,7 @@ class _AvailableTile extends StatelessWidget {
             const SizedBox(height: 8),
             LinearProgressIndicator(value: p == 0 ? null : p),
             const SizedBox(height: 2),
-            Text(
-              p >= 0.995 ? 'Checking the file…' : 'Downloading · ${(p * 100).floor()} %',
-              style: context.tt.bodySmall,
-            ),
+            Text(downloadStatus(model, p), style: context.tt.bodySmall),
           ],
           if (error != null) Text(error!, style: context.tt.bodySmall?.copyWith(color: cs.error)),
         ],

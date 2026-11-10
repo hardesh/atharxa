@@ -107,14 +107,7 @@ class _YouScreenState extends ConsumerState<YouScreen> {
       setState(() => _selected = s.id);
       return;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => Scaffold(
-          appBar: AppBar(title: Text(s.title)),
-          body: s.page?.call(context) ?? _ComingSoon(section: s),
-        ),
-      ),
-    );
+    pushTitledPage(context, s.title, s.page?.call(context) ?? _ComingSoon(section: s));
   }
 
   @override

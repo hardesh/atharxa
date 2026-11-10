@@ -7,6 +7,13 @@ import '../app_clock.dart';
 String dayKey(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 DateTime parseDay(String key) => DateTime.parse(key);
 
+/// Monday and Sunday (day keys) of the week containing [d]. Calendar
+/// arithmetic, so a daylight-saving change can't shift the days.
+(String, String) weekOf(DateTime d) {
+  final monday = DateTime(d.year, d.month, d.day - (d.weekday - 1));
+  return (dayKey(monday), dayKey(DateTime(monday.year, monday.month, monday.day + 6)));
+}
+
 double? _n(Object? v) => (v as num?)?.toDouble();
 
 /// kcal + macros. Macros are nullable: `null` means unknown (e.g. missing in

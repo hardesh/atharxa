@@ -98,8 +98,21 @@ class EdgeAiRuntime implements AiRuntime {
   String? _importDir;
   String _importPath(String fileName) => p.join(_importDir!, fileName);
 
+  DeviceCapabilities? _caps;
+
   @override
-  Future<DeviceCapabilities> deviceCapabilities() async => readDeviceCapabilities(await modelDir());
+  Future<DeviceCapabilities> deviceCapabilities() async {
+    final dir = await modelDir();
+    final cached = _caps;
+    if (cached == null) return _caps = await readDeviceCapabilities(dir);
+    // RAM and chip don't change while the app runs; free space does.
+    return DeviceCapabilities(
+      desktop: cached.desktop,
+      ramBytes: cached.ramBytes,
+      chip: cached.chip,
+      freeBytes: await readFreeBytes(dir),
+    );
+  }
 
   /// Where [m]'s file is stored.
   Future<String> modelFilePath(AiModel m) async {
@@ -190,12 +203,8 @@ class EdgeAiRuntime implements AiRuntime {
     final desktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
     final model = await FlutterEdgeAi.getActiveModel(
       maxTokens: m.contextTokens,
-      preferredBackend: switch (m.backend) {
-        AiBackend.npu => PreferredBackend.npu,
-        AiBackend.gpu => PreferredBackend.gpu,
-        AiBackend.cpu => PreferredBackend.cpu,
-        null => null,
-      },
+      // AiBackend mirrors PreferredBackend's names.
+      preferredBackend: m.backend == null ? null : PreferredBackend.values.byName(m.backend!.name),
       // Half precision on the GPU can mangle copied numbers (dates, amounts);
       // the Mac has the memory for full precision.
       activationDataType: desktop && m.engine == AiEngine.litert ? ActivationDataType.float32 : null,
@@ -205,12 +214,8 @@ class EdgeAiRuntime implements AiRuntime {
     return _backend(model);
   }
 
-  static AiBackend? _backend(InferenceModel m) => switch (m.activeBackend) {
-    PreferredBackend.npu => AiBackend.npu,
-    PreferredBackend.gpu => AiBackend.gpu,
-    PreferredBackend.cpu => AiBackend.cpu,
-    _ => null,
-  };
+  static AiBackend? _backend(InferenceModel m) =>
+      AiBackend.values.where((b) => b.name == m.activeBackend?.name).firstOrNull;
 
   @override
   Future<AiConversation> open({String? system}) async {

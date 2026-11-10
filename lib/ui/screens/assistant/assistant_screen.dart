@@ -14,6 +14,7 @@ import '../../theme/semantic.dart';
 import '../../widgets/feedback.dart';
 import '../../widgets/layout.dart';
 import '../../widgets/meal_card.dart';
+import '../../widgets/model_download_banner.dart';
 import '../you/ai_models_page.dart';
 
 /// Opens the assistant (AI button in every top bar, ⌘K on the Mac); [ask]
@@ -81,7 +82,10 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final ai = ref.watch(aiProvider);
     final chat = ref.watch(assistantProvider);
     // Keep the newest text in view while a reply streams in.
+    // Follow a streaming reply only while the newest text is in view, so
+    // scrolling up to read stays put.
     ref.listen(assistantProvider.select((s) => s.messages), (_, _) {
+      if (!_scroll.hasClients || _scroll.position.extentAfter > 80) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
       });
@@ -277,13 +281,13 @@ class _ModelPicker extends StatelessWidget {
   }
 }
 
-class _Bubble extends ConsumerWidget {
+class _Bubble extends StatelessWidget {
   const _Bubble({required this.entry, required this.onTryAnother});
   final ChatEntry entry;
   final VoidCallback onTryAnother;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cs = context.cs;
     final user = entry.fromUser;
     final text = entry.text;
@@ -418,7 +422,7 @@ class _ChatHistory extends ConsumerWidget {
                           },
                         ),
                         onTap: () {
-                          ctl.openChat(c);
+                          ctl.openChat(c.id);
                           onOpened();
                         },
                       ),
@@ -460,15 +464,12 @@ class _SetUp extends ConsumerWidget {
           if (p != null) ...[
             SizedBox(width: 280, child: LinearProgressIndicator(value: p == 0 ? null : p)),
             const SizedBox(height: 6),
-            Text(
-              p >= 0.995 ? 'Checking the file…' : 'Downloading ${m!.name} · ${(p * 100).floor()} %',
-              style: context.tt.bodySmall,
-            ),
+            Text(downloadStatus(m!, p), style: context.tt.bodySmall),
           ],
-          if (m != null && state.errors[m.id] != null)
+          if (m != null && state.errorFor(m) != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(state.errors[m.id]!, style: context.tt.bodySmall?.copyWith(color: context.cs.error)),
+              child: Text(state.errorFor(m)!, style: context.tt.bodySmall?.copyWith(color: context.cs.error)),
             ),
           const SizedBox(height: 8),
           TextButton(onPressed: () => AiModelsPage.open(context), child: const Text('Choose another model')),

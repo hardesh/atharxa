@@ -86,9 +86,15 @@ class DesktopController extends Notifier<DesktopState> {
     Application.instance.addListener((e) {
       // ⌘Q, Dock › Quit: nativeapi holds the quit until the app answers, so
       // quit here, as the menu bar item does.
-      if (e is ApplicationQuitRequestedEvent) exit(0);
+      if (e is ApplicationQuitRequestedEvent) quitApp();
       if (e is ApplicationActivatedEvent && !w.isVisible) showWindow();
     });
+  }
+
+  /// Quits after sending edits not yet synced (at most a few seconds).
+  Future<void> quitApp() async {
+    await ref.read(syncControllerProvider.notifier).flushBeforeExit();
+    exit(0);
   }
 
   void showWindow() {
@@ -147,7 +153,7 @@ class DesktopController extends Notifier<DesktopState> {
     item('Sync now', () => ref.read(syncControllerProvider.notifier).syncNow());
     item('Open ${AppInfo.name}', showWindow);
     menu.addSeparator();
-    item('Quit ${AppInfo.name}', () => exit(0));
+    item('Quit ${AppInfo.name}', quitApp);
 
     tray.setContextMenu(menu);
     tray.setContextMenuTrigger(ContextMenuTrigger.clicked);

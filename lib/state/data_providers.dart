@@ -43,15 +43,9 @@ final waterEntriesProvider = FutureProvider.autoDispose.family<List<Map<String, 
 });
 
 /// ml per day for the 7 days ending on [day] (day key → ml).
-final waterWeekProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, day) async {
+final waterWeekProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, day) {
   ref.watchTables(const [WaterRepo.table]);
-  final db = ref.watch(dbProvider);
-  final from = dayKey(parseDay(day).subtract(const Duration(days: 6)));
-  final rows = await db.raw(
-    'SELECT day, SUM(ml) AS ml FROM water_logs WHERE deleted = 0 AND day BETWEEN ? AND ? GROUP BY day',
-    [from, day],
-  );
-  return {for (final r in rows) r['day'] as String: (r['ml'] as num).toInt()};
+  return WaterRepo(ref.watch(dbProvider)).dayTotals(dayKey(parseDay(day).subtract(const Duration(days: 6))), day);
 });
 
 /// Transactions of a month ("2026-11").
@@ -89,13 +83,13 @@ final workoutProvider = FutureProvider.autoDispose
       ref.watchTables([...WorkoutRepo.tables, Activity.table]);
       final repo = WorkoutRepo(ref.watch(dbProvider));
       final d = parseDay(day);
-      final monday = d.subtract(Duration(days: d.weekday - 1));
-      final week = await repo.sessionsBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6))));
+      final (from, to) = weekOf(d);
+      final week = await repo.sessionsBetween(from, to);
       return (
         plans: await repo.plans(),
         week: week,
         active: week.where((s) => !s.finished && s.day == day).firstOrNull,
-        activities: await repo.activitiesBetween(dayKey(monday), dayKey(monday.add(const Duration(days: 6)))),
+        activities: await repo.activitiesBetween(from, to),
       );
     });
 

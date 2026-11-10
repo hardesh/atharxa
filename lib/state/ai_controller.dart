@@ -26,13 +26,11 @@ class AiState {
     this.imported = const [],
     this.chosenId,
     this.downloads = const {},
-    this.errors = const {},
     this.wifiOnly = true,
     this.scopes = const {},
     this.loadedId,
     this.backend,
-    this.readyId,
-    this.interruptedId,
+    this.notice,
   });
 
   /// Device facts and installed files have been read.
@@ -44,7 +42,6 @@ class AiState {
 
   /// Download progress (0–1) by model id.
   final Map<String, double> downloads;
-  final Map<String, String> errors;
   final bool wifiOnly;
 
   /// What the assistant may read (per device).
@@ -54,11 +51,14 @@ class AiState {
   final String? loadedId;
   final AiBackend? backend;
 
-  /// A model that just finished downloading ("… is ready"), until dismissed.
-  final String? readyId;
+  /// What the download banner says once a download has ended (until dismissed).
+  final AiNotice? notice;
 
-  /// A download the app was closed during, offered for resuming.
-  final String? interruptedId;
+  /// Why [m]'s last download failed, if it did.
+  String? errorFor(AiModel m) => switch (notice) {
+    DownloadFailed(:final modelId, :final message) when modelId == m.id => message,
+    _ => null,
+  };
 
   /// A catalog or imported model by id.
   AiModel? model(String? id) => id == null ? null : [...aiCatalog, ...imported].where((m) => m.id == id).firstOrNull;
@@ -92,16 +92,13 @@ class AiState {
     List<AiModel>? imported,
     String? chosenId,
     Map<String, double>? downloads,
-    Map<String, String>? errors,
     bool? wifiOnly,
     Set<AiScope>? scopes,
     String? loadedId,
     AiBackend? backend,
     bool unloaded = false,
-    String? readyId,
-    bool clearReady = false,
-    String? interruptedId,
-    bool clearInterrupted = false,
+    AiNotice? notice,
+    bool clearNotice = false,
   }) => AiState(
     ready: ready ?? this.ready,
     caps: caps ?? this.caps,
@@ -109,13 +106,11 @@ class AiState {
     imported: imported ?? this.imported,
     chosenId: chosenId ?? this.chosenId,
     downloads: downloads ?? this.downloads,
-    errors: errors ?? this.errors,
     wifiOnly: wifiOnly ?? this.wifiOnly,
     scopes: scopes ?? this.scopes,
     loadedId: unloaded ? null : loadedId ?? this.loadedId,
     backend: unloaded ? null : backend ?? this.backend,
-    readyId: clearReady ? null : readyId ?? this.readyId,
-    interruptedId: clearInterrupted ? null : interruptedId ?? this.interruptedId,
+    notice: clearNotice ? null : notice ?? this.notice,
   );
 }
 
@@ -133,7 +128,10 @@ class AiController extends Notifier<AiState> {
       chosenId: prefs.getString(DeviceKeys.aiModel),
       wifiOnly: prefs.getBool(DeviceKeys.aiWifiOnly) ?? true,
       scopes: AiScope.parse(prefs.getStringList(DeviceKeys.aiScopes)),
-      interruptedId: prefs.getString(DeviceKeys.aiPendingDownload),
+      notice: switch (prefs.getString(DeviceKeys.aiPendingDownload)) {
+        final String id => DownloadStopped(id),
+        null => null,
+      },
     );
   }
 
@@ -171,26 +169,26 @@ class AiController extends Notifier<AiState> {
     // Remembered until it ends, so a download cut off by closing the app can
     // be offered again on the next start.
     await prefs.setString(DeviceKeys.aiPendingDownload, m.id);
-    state = state.copyWith(
-      downloads: {...state.downloads, m.id: 0},
-      errors: {...state.errors}..remove(m.id),
-      clearInterrupted: true,
-      clearReady: true,
-    );
+    state = state.copyWith(downloads: {...state.downloads, m.id: 0}, clearNotice: true);
     try {
       await _rt.download(
         m,
         cancel: cancel,
         onProgress: (p) {
-          if (ref.mounted) state = state.copyWith(downloads: {...state.downloads, m.id: p});
+          // Whole percents only: a multi-GB download would otherwise rebuild
+          // the banner thousands of times.
+          final pct = (p * 100).floor() / 100;
+          if (ref.mounted && pct != state.downloads[m.id]) {
+            state = state.copyWith(downloads: {...state.downloads, m.id: pct});
+          }
         },
       );
       if (!ref.mounted) return null;
-      state = state.copyWith(installed: {...state.installed, m.fileName}, readyId: m.id);
+      state = state.copyWith(installed: {...state.installed, m.fileName}, notice: ModelReady(m.id));
       if (state.installedModels.length == 1) await choose(m);
     } on Object catch (e) {
       final msg = e is AiException ? e.message : 'Download failed: $e';
-      if (ref.mounted && !cancel.cancelled) state = state.copyWith(errors: {...state.errors, m.id: msg});
+      if (ref.mounted && !cancel.cancelled) state = state.copyWith(notice: DownloadFailed(m.id, msg));
     } finally {
       _cancels.remove(m.id);
       await prefs.remove(DeviceKeys.aiPendingDownload);
@@ -204,7 +202,7 @@ class AiController extends Notifier<AiState> {
   /// Hides the "ready", "failed" and "stopped" notices.
   Future<void> dismissNotices() async {
     await ref.read(prefsProvider).remove(DeviceKeys.aiPendingDownload);
-    state = state.copyWith(errors: const {}, clearReady: true, clearInterrupted: true);
+    state = state.copyWith(clearNotice: true);
   }
 
   Future<AiModel> import(String path) async {
@@ -251,4 +249,24 @@ class AiController extends Notifier<AiState> {
     final r = await Connectivity().checkConnectivity();
     return r.contains(ConnectivityResult.wifi) || r.contains(ConnectivityResult.ethernet);
   }
+}
+
+/// How a model download ended, for the banner.
+sealed class AiNotice {
+  const AiNotice(this.modelId);
+  final String modelId;
+}
+
+class ModelReady extends AiNotice {
+  const ModelReady(super.modelId);
+}
+
+class DownloadFailed extends AiNotice {
+  const DownloadFailed(super.modelId, this.message);
+  final String message;
+}
+
+/// The app was closed before the download finished.
+class DownloadStopped extends AiNotice {
+  const DownloadStopped(super.modelId);
 }

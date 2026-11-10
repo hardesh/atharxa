@@ -9,6 +9,7 @@ import '../../state/data_providers.dart';
 import '../../state/settings_providers.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
+import '../widgets/day_lock_bar.dart';
 import '../widgets/water_entries.dart';
 import '../widgets/feedback.dart';
 import '../widgets/layout.dart';
@@ -37,6 +38,7 @@ class WaterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final date = ref.watch(selectedDayProvider);
     final day = dayKey(date);
+    final canEdit = ref.watch(dayAccessProvider).canEdit;
     final goal = ref.watch(goalsProvider).waterMl;
     final wide = context.isWide;
     final entries = ref.watch(waterEntriesProvider(day));
@@ -48,13 +50,14 @@ class WaterScreen extends ConsumerWidget {
         final ring = _RingCard(
           total: total,
           goal: goal,
-          onAdd: (ml) => addWaterWithUndo(context, date, ml, 'water'),
-          onCustom: () => _custom(context, date),
+          onAdd: canEdit ? (ml) => addWaterWithUndo(context, date, ml, 'water') : null,
+          onCustom: canEdit ? () => _custom(context, date) : null,
         );
         final chart = _WeekCard(date: date, week: week.value ?? const {}, goal: goal, wide: wide);
         return PageBody(
           children: [
             DateSwitcher(date: date, onChanged: ref.read(selectedDayProvider.notifier).select),
+            if (ref.watch(dayAccessProvider) != DayAccess.today) const DayLockBar(),
             if (wide)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +71,7 @@ class WaterScreen extends ConsumerWidget {
               ring,
               chart,
             ],
-            _EntriesCard(entries: rows, date: date, wide: wide),
+            _EntriesCard(entries: rows, date: date, wide: wide, readOnly: !canEdit),
           ],
         );
       },
@@ -80,8 +83,10 @@ class _RingCard extends StatelessWidget {
   const _RingCard({required this.total, required this.goal, required this.onAdd, required this.onCustom});
 
   final int total, goal;
-  final ValueChanged<int> onAdd;
-  final VoidCallback onCustom;
+
+  /// Null on a locked or future day: no add buttons.
+  final ValueChanged<int>? onAdd;
+  final VoidCallback? onCustom;
 
   @override
   Widget build(BuildContext context) {
@@ -109,17 +114,19 @@ class _RingCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                for (final ml in const [250, 500, 750])
-                  FilledButton.tonal(onPressed: () => onAdd(ml), child: Text('+$ml ml')),
-                OutlinedButton(onPressed: onCustom, child: const Text('Custom…')),
-              ],
-            ),
+            if (onAdd != null) ...[
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final ml in const [250, 500, 750])
+                    FilledButton.tonal(onPressed: () => onAdd!(ml), child: Text('+$ml ml')),
+                  OutlinedButton(onPressed: onCustom, child: const Text('Custom…')),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -261,11 +268,11 @@ class _GoalLinePainter extends CustomPainter {
 }
 
 class _EntriesCard extends StatelessWidget {
-  const _EntriesCard({required this.entries, required this.date, required this.wide});
+  const _EntriesCard({required this.entries, required this.date, required this.wide, required this.readOnly});
 
   final List<Map<String, Object?>> entries;
   final DateTime date;
-  final bool wide;
+  final bool wide, readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -277,12 +284,12 @@ class _EntriesCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(isToday ? 'Today’s entries' : 'Entries', style: wide ? context.tt.titleMedium : context.tt.titleSmall),
-            if (entries.isNotEmpty)
+            if (entries.isNotEmpty && !readOnly)
               Padding(
                 padding: const EdgeInsets.only(top: 2, bottom: 4),
                 child: Text('Tap an entry to change the amount or time.', style: context.tt.bodySmall),
               ),
-            WaterEntryList(rows: entries),
+            WaterEntryList(rows: entries, readOnly: readOnly),
           ],
         ),
       ),

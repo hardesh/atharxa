@@ -69,6 +69,9 @@ void main() {
     await tester.pump();
     await settle(tester);
     expect(find.textContaining('Yesterday'), findsOneWidget);
+    // Past days are locked until unlocked.
+    await tester.tap(find.text('Unlock to edit'));
+    await tester.pump();
     await tester.tap(find.text('500 ml'));
     await tester.pump();
     await settle(tester);

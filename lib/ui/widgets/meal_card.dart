@@ -7,23 +7,24 @@ import '../../app_clock.dart';
 
 /// Meal card (DESIGN.md §4): name + kcal subtotal + tonal "+"; rows
 /// "Rolled oats · 60 g" with the nutrient line; tap = edit grams; ✕ = remove.
+/// Null callbacks make the card read-only (a locked or future day).
 class MealCard extends StatelessWidget {
   const MealCard({
     super.key,
     required this.meal,
     required this.entries,
-    required this.onAdd,
-    required this.onEdit,
-    required this.onRemove,
+    this.onAdd,
+    this.onEdit,
+    this.onRemove,
     this.headerAction,
     this.emptyText = 'Nothing logged yet',
   });
 
   final Meal meal;
   final List<FoodEntry> entries;
-  final VoidCallback onAdd;
-  final ValueChanged<FoodEntry> onEdit;
-  final ValueChanged<FoodEntry> onRemove;
+  final VoidCallback? onAdd;
+  final ValueChanged<FoodEntry>? onEdit;
+  final ValueChanged<FoodEntry>? onRemove;
   final Widget? headerAction;
   final String emptyText;
 
@@ -47,11 +48,14 @@ class MealCard extends StatelessWidget {
                   ),
                 ),
                 ?headerAction,
-                IconButton.filledTonal(
-                  tooltip: 'Add food to ${meal.label}',
-                  onPressed: onAdd,
-                  icon: const Icon(Icons.add),
-                ),
+                if (onAdd != null)
+                  IconButton.filledTonal(
+                    tooltip: 'Add food to ${meal.label}',
+                    onPressed: onAdd,
+                    icon: const Icon(Icons.add),
+                  )
+                else
+                  const SizedBox(height: 48),
               ],
             ),
             if (entries.isEmpty)
@@ -59,7 +63,12 @@ class MealCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
                 child: Text(emptyText, style: context.tt.bodySmall),
               ),
-            for (final e in entries) EntryRow(entry: e, onTap: () => onEdit(e), onRemove: () => onRemove(e)),
+            for (final e in entries)
+              EntryRow(
+                entry: e,
+                onTap: onEdit == null ? null : () => onEdit!(e),
+                onRemove: onRemove == null ? null : () => onRemove!(e),
+              ),
           ],
         ),
       ),
@@ -69,10 +78,10 @@ class MealCard extends StatelessWidget {
 
 /// One food entry: "Name · 60 g" + nutrient line (wraps to two lines if needed).
 class EntryRow extends StatelessWidget {
-  const EntryRow({super.key, required this.entry, required this.onTap, required this.onRemove});
+  const EntryRow({super.key, required this.entry, this.onTap, this.onRemove});
 
   final FoodEntry entry;
-  final VoidCallback onTap, onRemove;
+  final VoidCallback? onTap, onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +112,8 @@ class EntryRow extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(tooltip: 'Remove ${entry.name}', onPressed: onRemove, icon: const Icon(Icons.close)),
+          if (onRemove != null)
+            IconButton(tooltip: 'Remove ${entry.name}', onPressed: onRemove, icon: const Icon(Icons.close)),
         ],
       ),
     );

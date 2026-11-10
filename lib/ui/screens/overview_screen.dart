@@ -11,6 +11,7 @@ import '../../state/settings_providers.dart';
 import '../format.dart';
 import '../theme/semantic.dart';
 import '../widgets/bars.dart';
+import '../widgets/day_lock_bar.dart';
 import '../widgets/feedback.dart';
 import '../widgets/layout.dart';
 import '../widgets/meal_card.dart';
@@ -27,6 +28,8 @@ class OverviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final date = ref.watch(selectedDayProvider);
     final goals = ref.watch(goalsProvider);
+    // Today only, or a past day the user unlocked; never a future day.
+    final canEdit = ref.watch(dayAccessProvider).canEdit;
     final wide = context.isWide;
 
     Future<void> add(Meal meal) => FoodPickerScreen.open(context, table: FoodRepo.logs, date: date, meal: meal);
@@ -46,8 +49,8 @@ class OverviewScreen extends ConsumerWidget {
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyN, meta: true): () => add(mealForNow()),
-        const SingleActivator(LogicalKeyboardKey.keyW, meta: true): () => addWater(250),
+        if (canEdit) const SingleActivator(LogicalKeyboardKey.keyN, meta: true): () => add(mealForNow()),
+        if (canEdit) const SingleActivator(LogicalKeyboardKey.keyW, meta: true): () => addWater(250),
       },
       child: AsyncBody(
         value: ref.watch(overviewProvider(dayKey(date))),
@@ -60,22 +63,23 @@ class OverviewScreen extends ConsumerWidget {
           final water = _WaterCard(
             ml: d.waterMl,
             goal: goals.waterMl,
-            onAdd: addWater,
-            onOpen: () => showWaterEntriesSheet(context, date),
+            onAdd: canEdit ? addWater : null,
+            onOpen: () => showWaterEntriesSheet(context, date, readOnly: !canEdit),
           );
           final cards = [
             for (final m in Meal.values)
               MealCard(
                 meal: m,
                 entries: d.entries.where((e) => e.meal == m).toList(),
-                onAdd: () => add(m),
-                onEdit: edit,
-                onRemove: remove,
+                onAdd: canEdit ? () => add(m) : null,
+                onEdit: canEdit ? edit : null,
+                onRemove: canEdit ? remove : null,
               ),
           ];
           return PageBody(
             children: [
               DateSwitcher(date: date, onChanged: ref.read(selectedDayProvider.notifier).select),
+              if (ref.watch(dayAccessProvider) != DayAccess.today) const DayLockBar(),
               if (wide)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +106,9 @@ class _WaterCard extends StatelessWidget {
   const _WaterCard({required this.ml, required this.goal, required this.onAdd, required this.onOpen});
 
   final int ml, goal;
-  final ValueChanged<int> onAdd;
+
+  /// Null on a locked or future day: no quick-add buttons.
+  final ValueChanged<int>? onAdd;
   final VoidCallback onOpen;
 
   @override
@@ -146,22 +152,24 @@ class _WaterCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final v in const [250, 500])
-                      ActionChip(
-                        avatar: Icon(Icons.add, size: 18, color: context.cs.onSurfaceVariant),
-                        label: Text('$v ml'),
-                        onPressed: () => onAdd(v),
-                      ),
-                  ],
+              if (onAdd != null) ...[
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final v in const [250, 500])
+                        ActionChip(
+                          avatar: Icon(Icons.add, size: 18, color: context.cs.onSurfaceVariant),
+                          label: Text('$v ml'),
+                          onPressed: () => onAdd!(v),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

@@ -145,8 +145,9 @@ class _EditWaterDialogState extends State<_EditWaterDialog> {
 
 /// A day's entries with dividers between rows, or an empty message.
 class WaterEntryList extends StatelessWidget {
-  const WaterEntryList({super.key, required this.rows});
+  const WaterEntryList({super.key, required this.rows, this.readOnly = false});
   final List<Map<String, Object?>> rows;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +159,7 @@ class WaterEntryList extends StatelessWidget {
     }
     return Column(
       children: [
-        for (final (i, r) in rows.indexed) ...[if (i > 0) const Divider(), WaterEntryTile(row: r)],
+        for (final (i, r) in rows.indexed) ...[if (i > 0) const Divider(), WaterEntryTile(row: r, readOnly: readOnly)],
       ],
     );
   }
@@ -182,8 +183,11 @@ class WaterBadge extends StatelessWidget {
 /// One entry: water badge · "250 ml" over "19:29 · from Overview" · ✕.
 /// Tap the row to edit amount/time.
 class WaterEntryTile extends StatelessWidget {
-  const WaterEntryTile({super.key, required this.row});
+  const WaterEntryTile({super.key, required this.row, this.readOnly = false});
   final Map<String, Object?> row;
+
+  /// A locked or future day: shown, not editable.
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -195,26 +199,30 @@ class WaterEntryTile extends StatelessWidget {
       leading: WaterBadge(icon: source?.icon ?? Icons.water_drop_outlined, radius: 18, iconSize: 18),
       title: Text('$ml ml', style: context.tt.titleSmall),
       subtitle: Text([time, ?source?.label].join(' · ')),
-      trailing: IconButton(
-        tooltip: 'Remove $ml ml at $time',
-        icon: const Icon(Icons.close, size: 20),
-        onPressed: () => removeWaterWithUndo(context, row),
-      ),
-      onTap: () => editWaterEntry(context, row),
+      trailing: readOnly
+          ? null
+          : IconButton(
+              tooltip: 'Remove $ml ml at $time',
+              icon: const Icon(Icons.close, size: 20),
+              onPressed: () => removeWaterWithUndo(context, row),
+            ),
+      onTap: readOnly ? null : () => editWaterEntry(context, row),
     );
   }
 }
 
 /// Bottom sheet with a day's entries (opened from the Today water card).
-Future<void> showWaterEntriesSheet(BuildContext context, DateTime date) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  builder: (ctx) => _WaterSheet(date: date),
-);
+Future<void> showWaterEntriesSheet(BuildContext context, DateTime date, {bool readOnly = false}) =>
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _WaterSheet(date: date, readOnly: readOnly),
+    );
 
 class _WaterSheet extends ConsumerWidget {
-  const _WaterSheet({required this.date});
+  const _WaterSheet({required this.date, required this.readOnly});
   final DateTime date;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -231,11 +239,12 @@ class _WaterSheet extends ConsumerWidget {
                 padding: const EdgeInsets.only(left: 4, bottom: 8),
                 child: Text('Water · ${relativeDay(date)}', style: context.tt.titleMedium),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 4, bottom: 8),
-                child: Text('Tap an entry to change it.', style: context.tt.bodySmall),
-              ),
-              WaterEntryList(rows: rows),
+              if (!readOnly)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text('Tap an entry to change it.', style: context.tt.bodySmall),
+                ),
+              WaterEntryList(rows: rows, readOnly: readOnly),
             ],
           ),
         ),

@@ -206,3 +206,34 @@ class SelectedDayNotifier extends Notifier<DateTime> {
     if (_followToday && state != today()) state = today();
   }
 }
+
+/// Whether the selected day's food and water can be changed: today yes;
+/// past days are locked until unlocked; future days never (that is what
+/// Meal plan is for).
+enum DayAccess {
+  today,
+  lockedPast,
+  unlockedPast,
+  future;
+
+  bool get canEdit => this == today || this == unlockedPast;
+}
+
+/// The past day the user unlocked for editing (in memory: it locks again
+/// when the app restarts).
+final unlockedDayProvider = NotifierProvider<UnlockedDay, String?>(UnlockedDay.new);
+
+class UnlockedDay extends Notifier<String?> {
+  @override
+  String? build() => null;
+  void unlock(String day) => state = day;
+  void lock() => state = null;
+}
+
+final dayAccessProvider = Provider<DayAccess>((ref) {
+  final day = dayKey(ref.watch(selectedDayProvider));
+  final today = dayKey(SelectedDayNotifier.today());
+  if (day == today) return DayAccess.today;
+  if (day.compareTo(today) > 0) return DayAccess.future;
+  return ref.watch(unlockedDayProvider) == day ? DayAccess.unlockedPast : DayAccess.lockedPast;
+});

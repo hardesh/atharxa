@@ -14,6 +14,7 @@ logs := "build/logs"
 mac_app := "build/macos/Build/Products/Release/" + app_name + ".app"
 mac_proc := app_name + ".app/Contents/MacOS/" + app_name
 installed := "/Applications/" + app_name + ".app"
+version := `grep "^version:" pubspec.yaml | sed "s/version: *//; s/+.*//"`
 
 # List the commands
 default:
@@ -73,6 +74,12 @@ _mac-quit:
 
 # Build the Android release APK (arm64)
 apk: (_build "apk" "apk")
+
+# Build the APK and copy it to dist/<app>-<version>.apk, ready to share or install
+apk-file: apk
+    @mkdir -p dist
+    @cp build/app/outputs/flutter-apk/app-release.apk dist/{{app_name}}-{{version}}.apk
+    @echo "dist/{{app_name}}-{{version}}.apk ($(du -h dist/{{app_name}}-{{version}}.apk | cut -f1))"
 
 # Build, install on the connected phone and open the app
 phone: apk

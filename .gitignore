@@ -52,3 +52,6 @@ app.*.map.json
 test/**/failures/
 # Widget Preview related
 .widget_preview/
+
+# Shareable builds (just apk-file)
+/dist/
